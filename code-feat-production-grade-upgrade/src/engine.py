@@ -64,32 +64,39 @@ class ArbitrageEngine:
                     continue # No potential for profit
 
                 # --- Fee Calculation ---
-                # Get fee info for the two providers, using defaults if not found
+                # This model assumes the following steps for an arbitrage trade:
+                # 1. Buy 1 unit of the base asset (e.g., 1 BTC) on the buy_exchange.
+                # 2. Pay the taker fee for this purchase.
+                # 3. Withdraw the 1 unit of base asset, incurring a withdrawal fee (denominated in the base asset).
+                # 4. Deposit the asset on the sell_exchange (assuming deposit is free).
+                # 5. Sell the 1 unit of base asset on the sell_exchange.
+                # 6. Pay the taker fee for this sale.
+                # The net profit is the final revenue minus all costs.
+
+                # Get fee info for the two providers, using defaults if not found.
                 default_fees = self.fees_config.get('default', {})
                 buy_fees = self.fees_config.get(buy_provider_name.lower(), default_fees)
                 sell_fees = self.fees_config.get(sell_provider_name.lower(), default_fees)
 
-                # 1. Cost of buying 1 unit of the base asset
+                # Step 1 & 2: Calculate the total cost to acquire 1 unit of the base asset.
                 initial_cost_usd = buy_price
-                buy_fee_usd = initial_cost_usd * buy_fees.get('taker', 0.002)
+                buy_fee_usd = initial_cost_usd * buy_fees.get('taker', 0.002) # Taker fee on purchase
                 total_cost_usd = initial_cost_usd + buy_fee_usd
 
-                # 2. Revenue from selling 1 unit of the base asset
+                # Step 5 & 6: Calculate the net revenue from selling 1 unit of the base asset.
                 revenue_usd = sell_price
-                sell_fee_usd = revenue_usd * sell_fees.get('taker', 0.002)
+                sell_fee_usd = revenue_usd * sell_fees.get('taker', 0.002) # Taker fee on sale
                 net_revenue_usd = revenue_usd - sell_fee_usd
 
-                # 3. Withdrawal fee calculation (more accurate model)
+                # Step 3: Calculate the withdrawal fee from the buying exchange.
+                # This fee is typically a flat amount of the asset being withdrawn (e.g., 0.0001 BTC).
                 base_asset = symbol.split('/')[0]
                 withdrawal_fees_map = buy_fees.get('withdrawal_fees', {})
-
-                # Get the fee for the specific asset, or a default if not specified
                 withdrawal_fee_asset_amount = withdrawal_fees_map.get(base_asset, 0.0)
-
-                # Convert the asset withdrawal fee to its USD equivalent using the buy price
+                # Convert the withdrawal fee to its USD equivalent at the time of purchase.
                 withdrawal_fee_usd = withdrawal_fee_asset_amount * buy_price
 
-                # 4. Calculate Net Profit
+                # Step 7: Calculate final net profit in USD.
                 net_profit_usd = net_revenue_usd - total_cost_usd - withdrawal_fee_usd
 
                 if net_profit_usd <= 0:

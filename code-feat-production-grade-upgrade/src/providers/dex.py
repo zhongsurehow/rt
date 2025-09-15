@@ -150,6 +150,15 @@ class DEXProvider(BaseProvider):
         """
         return {'bids': [], 'asks': []}
 
+    async def get_historical_data(self, symbol: str, timeframe: str, limit: int) -> List[Dict[str, Any]]:
+        """
+        Fetching historical OHLCV for DEXs is complex and provider-specific
+        (e.g., requires querying historical logs or using a data service like TheGraph).
+        This is a placeholder for future implementation.
+        """
+        logger.info(f"Historical data not implemented for DEX provider '{self.name}'.")
+        return []
+
     async def close(self):
         # web3.py with AsyncHTTPProvider may have an underlying session
         # that's good practice to close if the provider exposes it.

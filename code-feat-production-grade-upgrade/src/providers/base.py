@@ -36,6 +36,21 @@ class BaseProvider(ABC):
         """
         pass
 
+    @abstractmethod
+    async def get_historical_data(self, symbol: str, timeframe: str, limit: int) -> List[Dict[str, Any]]:
+        """
+        Asynchronously fetches historical K-line (OHLCV) data.
+
+        Args:
+            symbol (str): The trading symbol.
+            timeframe (str): The timeframe (e.g., '1d', '1h', '5m').
+            limit (int): The number of data points to retrieve.
+
+        Returns:
+            A list of dictionaries, where each dict is an OHLCV candle.
+        """
+        pass
+
     async def close(self):
         """
         Cleanly close any open connections (e.g., WebSockets, HTTP sessions).

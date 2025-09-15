@@ -86,6 +86,13 @@ class BridgeProvider(BaseProvider):
         """
         return {'bids': [], 'asks': []}
 
+    async def get_historical_data(self, symbol: str, timeframe: str, limit: int) -> List[Dict[str, Any]]:
+        """
+        Historical data is not applicable for bridge quotes.
+        """
+        logger.info(f"Historical data not applicable for Bridge provider '{self.name}'.")
+        return []
+
     async def close(self):
         """Closes the httpx client session."""
         await self.client.aclose()

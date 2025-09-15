@@ -16,3 +16,4 @@ nest_asyncio
 PyYAML
 pytest
 pytest-asyncio
+pandas-ta

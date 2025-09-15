@@ -1,11 +1,13 @@
 import streamlit as st
 import pandas as pd
+import pandas_ta as ta
+from plotly.subplots import make_subplots
 import plotly.graph_objects as go
 import asyncio
 from datetime import datetime, timedelta
 
-from providers.cex import CEXProvider
-from ui.components import display_error
+from ..providers.cex import CEXProvider
+from .components import display_error
 
 def safe_run_async(coro):
     """安全地运行异步协程，避免事件循环冲突"""
@@ -357,3 +359,105 @@ def show_comparison_tab(qualitative_data: dict):
                     with col2:
                         st.markdown(f"**{display_key}**")
                         st.markdown(f"<div style='background-color: #f0f2f6; padding: 10px; border-radius: 5px; margin-bottom: 10px;'>{value}</div>", unsafe_allow_html=True)
+
+# --- 标签 7: K线图与历史数据 ---
+
+def _create_candlestick_chart(df: pd.DataFrame, symbol: str) -> go.Figure:
+    """
+    Creates a Plotly candlestick chart from a DataFrame.
+    If the DataFrame contains an RSI column, it adds a subplot for the RSI.
+    """
+    rsi_col = next((col for col in df.columns if 'RSI' in col), None)
+
+    if rsi_col:
+        # Create a figure with 2 rows; top for candlestick, bottom for RSI
+        fig = make_subplots(rows=2, cols=1, shared_xaxes=True,
+                           vertical_spacing=0.05, row_heights=[0.7, 0.3])
+    else:
+        # Create a regular figure with a single row
+        fig = make_subplots(rows=1, cols=1)
+
+    # --- Candlestick Trace ---
+    fig.add_trace(go.Candlestick(
+        x=pd.to_datetime(df['timestamp'], unit='ms'),
+        open=df['open'],
+        high=df['high'],
+        low=df['low'],
+        close=df['close'],
+        name=symbol
+    ), row=1, col=1)
+
+    # --- RSI Trace (if exists) ---
+    if rsi_col:
+        fig.add_trace(go.Scatter(
+            x=pd.to_datetime(df['timestamp'], unit='ms'),
+            y=df[rsi_col],
+            name='RSI',
+            line=dict(color='orange', width=1)
+        ), row=2, col=1)
+        # Add overbought/oversold lines for RSI
+        fig.add_hline(y=70, line_dash="dash", line_color="red", line_width=1, row=2, col=1)
+        fig.add_hline(y=30, line_dash="dash", line_color="green", line_width=1, row=2, col=1)
+        fig.update_yaxes(title_text="RSI", row=2, col=1)
+
+    # --- Layout ---
+    fig.update_layout(
+        title_text=f"{symbol} 价格走势",
+        xaxis_rangeslider_visible=False,
+        yaxis_title="价格 (USD)"
+    )
+    # Remove the shared x-axis title for the top plot
+    fig.update_xaxes(showticklabels=True, row=1, col=1)
+    fig.update_xaxes(title_text="日期", row=2 if rsi_col else 1, col=1)
+
+    return fig
+
+def show_kline_tab(cex_providers):
+    """显示一个用于获取和可视化历史K线数据的标签页。"""
+    st.header("📈 K线图与历史数据")
+    st.info("从此处的交易所获取历史K线（OHLCV）数据。数据在首次获取时会被缓存到本地 CSV 文件中，以加快后续加载速度。")
+
+    if not cex_providers:
+        st.warning("请在侧边栏中至少选择一个中心化交易所。")
+        return
+
+    # --- UI Controls ---
+    col1, col2, col3, col4 = st.columns(4)
+    selected_exchange_name = col1.selectbox("选择交易所", options=[p.name for p in cex_providers], key="kline_exchange")
+    symbol = col2.text_input("输入交易对", "BTC/USDT", key="kline_symbol")
+    timeframe = col3.selectbox("选择时间周期", options=['1d', '4h', '1h', '30m', '5m'], key="kline_timeframe")
+    limit = col4.number_input("数据点数量", min_value=20, max_value=500, value=100, key="kline_limit")
+
+    show_rsi = st.checkbox("显示RSI (14周期)", key="show_rsi")
+
+    if st.button("获取并显示K线数据", key="get_kline_data"):
+        provider = next((p for p in cex_providers if p.name == selected_exchange_name), None)
+        if not provider:
+            display_error("未找到选定的提供商。")
+            return
+
+        with st.spinner(f"正在从 {provider.name} 获取 {symbol} 的 {timeframe} 数据..."):
+            data = safe_run_async(provider.get_historical_data(symbol, timeframe, limit))
+
+            if not data:
+                display_error(f"无法获取数据。提供商可能不支持此交易对/时间周期，或者API可能不可用。")
+                return
+
+            df = pd.DataFrame(data)
+
+            # --- Technical Analysis Calculation ---
+            if show_rsi:
+                if 'close' in df.columns:
+                    # Use pandas-ta to calculate RSI and append it to the DataFrame
+                    df.ta.rsi(length=14, append=True)
+                else:
+                    st.warning("无法计算RSI，因为数据中缺少 'close' 列。")
+
+            st.success(f"成功获取 {len(df)} 条记录。")
+
+            # Display chart
+            st.plotly_chart(_create_candlestick_chart(df, symbol), use_container_width=True)
+
+            # Display data table in an expander
+            with st.expander("查看原始数据 (包含技术指标)"):
+                st.dataframe(df, use_container_width=True)

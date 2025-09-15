@@ -115,6 +115,36 @@ class MockExchange:
             }
         }
 
+    async def fetch_ohlcv(self, symbol: str, timeframe: str = '1d', limit: int = 100, params={}) -> List[List]:
+        """Simulates fetching historical OHLCV data."""
+        await asyncio.sleep(0.1) # Simulate network latency
+
+        if self._historical_data is not None and symbol == 'BTC/USDT' and timeframe == '1d':
+            # Use the mock CSV data for BTC/USDT daily
+            df = self._historical_data.copy()
+            # Ensure the timestamp is in the integer ms format ccxt expects
+            df['unix'] = df['unix'].astype(int)
+            # Select the required columns in the correct order
+            ohlcv = df[['unix', 'open', 'high', 'low', 'close', 'Volume BTC']].values.tolist()
+            # Return the last `limit` records
+            return ohlcv[-limit:]
+
+        # Fallback for other symbols/timeframes: generate random data
+        ohlcv_data = []
+        # Use milliseconds for timestamp
+        timestamp = int(time.time() * 1000) - limit * 86400000 # Start `limit` days ago
+        price = 50000
+        for _ in range(limit):
+            open_price = price * random.uniform(0.99, 1.01)
+            high_price = open_price * random.uniform(1.0, 1.02)
+            low_price = open_price * random.uniform(0.98, 1.0)
+            close_price = random.uniform(low_price, high_price)
+            volume = random.uniform(100, 1000)
+            ohlcv_data.append([timestamp, open_price, high_price, low_price, close_price, volume])
+            price = close_price
+            timestamp += 86400000 # Add one day in milliseconds
+        return ohlcv_data
+
 class MockCCXTPro:
     """Mocks the ccxtpro library by dynamically creating MockExchange instances."""
     def __getattr__(self, name: str):
@@ -178,6 +208,68 @@ class CEXProvider(BaseProvider):
         """Closes the underlying ccxt.pro exchange connection."""
         # The mock exchange also has a 'close' method, so this works for both cases.
         await self.exchange.close()
+
+    async def get_historical_data(self, symbol: str, timeframe: str, limit: int) -> List[Dict[str, Any]]:
+        """
+        Fetches historical OHLCV data, implementing a cache-first strategy.
+
+        The method first checks for a locally cached CSV file in the `data/` directory.
+        The filename is standardized based on the provider name, symbol, and timeframe
+        (e.g., 'BINANCE_BTC-USDT_1d.csv').
+
+        - If a valid cache file is found, it returns the data from the CSV.
+        - If the file doesn't exist or is invalid, it fetches the data from the
+          exchange API, saves it to the CSV cache for future use, and then
+          returns the data.
+
+        Args:
+            symbol: The trading symbol (e.g., 'BTC/USDT').
+            timeframe: The K-line timeframe (e.g., '1d', '4h').
+            limit: The number of data points to retrieve.
+
+        Returns:
+            A list of dictionaries, where each dictionary represents an OHLCV candle,
+            or an empty list if an error occurs.
+        """
+        # Sanitize inputs to create a valid filename
+        safe_symbol = symbol.replace('/', '_')
+        cache_filename = f"{self.name.upper()}_{safe_symbol}_{timeframe}.csv"
+        # The path should be relative to the project root, where the app is run.
+        cache_filepath = f"data/{cache_filename}"
+
+        # 1. Check for a local cache first
+        try:
+            logger.info(f"Checking for cached data at: {cache_filepath}")
+            df = pd.read_csv(cache_filepath)
+            # Basic validation to see if the file seems correct
+            required_cols = {'timestamp', 'open', 'high', 'low', 'close', 'volume'}
+            if required_cols.issubset(df.columns):
+                logger.info(f"Cache hit. Loading data from {cache_filepath}")
+                # Return the last `limit` records from the cached file
+                return df.tail(limit).to_dict('records')
+        except FileNotFoundError:
+            logger.info("Cache miss. Fetching data from exchange.")
+        except Exception as e:
+            logger.warning(f"Could not read cache file {cache_filepath}. Error: {e}. Refetching.")
+
+        # 2. If no cache, fetch from the exchange
+        try:
+            ohlcv = await self.exchange.fetch_ohlcv(symbol, timeframe, limit=limit)
+            if not ohlcv:
+                logger.warning(f"Exchange returned no data for {symbol} {timeframe}.")
+                return []
+
+            df = pd.DataFrame(ohlcv, columns=['timestamp', 'open', 'high', 'low', 'close', 'volume'])
+            df['datetime'] = pd.to_datetime(df['timestamp'], unit='ms')
+
+            # 3. Save the new data to the cache
+            logger.info(f"Saving new data to cache: {cache_filepath}")
+            df.to_csv(cache_filepath, index=False)
+
+            return df.to_dict('records')
+        except Exception as e:
+            logger.error(f"Failed to fetch or process historical data for {symbol} from {self.name}: {e}")
+            return []
 
     async def get_transfer_fees(self, asset: str) -> Dict[str, Any]:
         """

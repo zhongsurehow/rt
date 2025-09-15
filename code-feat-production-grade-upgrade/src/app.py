@@ -7,14 +7,14 @@ import logging
 # --- Basic Logging Configuration ---
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
 
-from config import load_config
-from db import DatabaseManager
-from engine import ArbitrageEngine
-from providers.cex import CEXProvider
-from providers.dex import DEXProvider
-from providers.bridge import BridgeProvider
-from ui.tabs import show_realtime_tab, show_depth_tab, show_arbitrage_tab, show_history_tab
-from ui.components import sidebar_controls
+from .config import load_config
+from .db import DatabaseManager
+from .engine import ArbitrageEngine
+from .providers.cex import CEXProvider
+from .providers.dex import DEXProvider
+from .providers.bridge import BridgeProvider
+from .ui.tabs import show_realtime_tab, show_depth_tab, show_arbitrage_tab, show_history_tab, show_kline_tab
+from .ui.components import sidebar_controls
 
 # Apply nest_asyncio to allow running asyncio event loops within Streamlit's loop
 # This is crucial for integrating async libraries with Streamlit
@@ -160,39 +160,43 @@ def main():
     arbitrage_engine = ArbitrageEngine(providers, config.get('arbitrage', {}))
 
     # Main content area with tabs
+    cex_providers = [p for p in providers if isinstance(p, CEXProvider)]
+
     if st.session_state.get('demo_mode', True):
-        tab_names = ["🎯 功能指南", "实时行情", "市场深度", "套利机会", "费用对比", "交易所对比", "历史分析"]
-        tab0, tab1, tab2, tab3, tab4, tab5, tab6 = st.tabs(tab_names)
+        tab_names = ["🎯 功能指南", "实时行情", "市场深度", "📈 K线图", "套利机会", "费用对比", "交易所对比", "历史分析"]
+        tabs = st.tabs(tab_names)
+        tab_map = {name: tab for name, tab in zip(tab_names, tabs)}
         
-        with tab0:
-            from ui.demo_guide import show_demo_guide, show_feature_highlights
+        with tab_map["🎯 功能指南"]:
+            from .ui.demo_guide import show_demo_guide, show_feature_highlights
             show_demo_guide()
             show_feature_highlights()
     else:
-        tab_names = ["实时行情", "市场深度", "套利机会", "费用对比", "交易所对比", "历史分析"]
-        tab1, tab2, tab3, tab4, tab5, tab6 = st.tabs(tab_names)
+        tab_names = ["实时行情", "市场深度", "📈 K线图", "套利机会", "费用对比", "交易所对比", "历史分析"]
+        tabs = st.tabs(tab_names)
+        tab_map = {name: tab for name, tab in zip(tab_names, tabs)}
 
-    with tab1:
+    with tab_map["实时行情"]:
         show_realtime_tab(providers, db_manager)
 
-    with tab2:
-        # Pass only CEX providers to the depth tab
-        cex_providers = [p for p in providers if isinstance(p, CEXProvider)]
+    with tab_map["市场深度"]:
         show_depth_tab(cex_providers)
 
-    with tab3:
+    with tab_map["📈 K线图"]:
+        show_kline_tab(cex_providers)
+
+    with tab_map["套利机会"]:
         show_arbitrage_tab(arbitrage_engine)
 
-    with tab4:
-        from ui.tabs import show_fees_tab
-        cex_providers = [p for p in providers if isinstance(p, CEXProvider)]
+    with tab_map["费用对比"]:
+        from .ui.tabs import show_fees_tab
         show_fees_tab(cex_providers)
 
-    with tab5:
-        from ui.tabs import show_comparison_tab
+    with tab_map["交易所对比"]:
+        from .ui.tabs import show_comparison_tab
         show_comparison_tab(config.get('qualitative_data', {}))
 
-    with tab6:
+    with tab_map["历史分析"]:
         show_history_tab(db_manager)
 
 

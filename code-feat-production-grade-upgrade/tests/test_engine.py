@@ -2,8 +2,10 @@ import pytest
 import asyncio
 import sys
 import os
-sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-from engine import ArbitrageEngine
+
+# The project root is expected to be in the python path when running pytest.
+# This can be achieved by running `pytest` from the root, or by configuring pytest.
+from src.engine import ArbitrageEngine
 
 # --- Mock Objects for Testing ---
 
