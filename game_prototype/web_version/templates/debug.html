@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>调试页面</title>
+    <style>
+        body {
+            background: #1a1a1a;
+            color: white;
+            font-family: Arial, sans-serif;
+            padding: 20px;
+            margin: 0;
+        }
+        .debug-info {
+            background: #333;
+            padding: 20px;
+            border-radius: 8px;
+            margin: 10px 0;
+        }
+        .error { color: #ff6b6b; }
+        .success { color: #51cf66; }
+        .warning { color: #ffd43b; }
+    </style>
+</head>
+<body>
+    <h1>调试页面</h1>
+    
+    <div class="debug-info">
+        <h2>基本HTML测试</h2>
+        <p class="success">✅ 如果你能看到这个文字，说明HTML正常加载</p>
+        <p class="success">✅ 如果这个文字是绿色的，说明CSS正常工作</p>
+    </div>
+    
+    <div class="debug-info">
+        <h2>JavaScript测试</h2>
+        <p id="js-test" class="warning">⏳ JavaScript测试中...</p>
+        <button onclick="testClick()">点击测试</button>
+        <p id="click-result"></p>
+    </div>
+    
+    <div class="debug-info">
+        <h2>Vue.js测试</h2>
+        <div id="vue-app">
+            <p v-if="vueWorking" class="success">✅ Vue.js正常工作！消息: [[ message ]]</p>
+            <p v-else class="error">❌ Vue.js未正常工作</p>
+            <button @click="changeMessage">改变消息</button>
+        </div>
+    </div>
+    
+    <div class="debug-info">
+        <h2>网络测试</h2>
+        <button onclick="testNetwork()">测试网络连接</button>
+        <p id="network-result"></p>
+    </div>
+
+    <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+    <script>
+        // 基本JavaScript测试
+        document.getElementById('js-test').innerHTML = '<span class="success">✅ JavaScript正常工作</span>';
+        
+        function testClick() {
+            document.getElementById('click-result').innerHTML = '<span class="success">✅ 点击事件正常工作</span>';
+        }
+        
+        // Vue.js测试
+        const { createApp } = Vue;
+        
+        createApp({
+            delimiters: ['[[', ']]'],
+            data() {
+                return {
+                    vueWorking: true,
+                    message: 'Hello Vue!'
+                };
+            },
+            methods: {
+                changeMessage() {
+                    this.message = '消息已改变 - ' + new Date().toLocaleTimeString();
+                }
+            }
+        }).mount('#vue-app');
+        
+        // 网络测试
+        function testNetwork() {
+            fetch('/api/games')
+                .then(response => {
+                    document.getElementById('network-result').innerHTML = 
+                        '<span class="success">✅ 网络连接正常，状态码: ' + response.status + '</span>';
+                })
+                .catch(error => {
+                    document.getElementById('network-result').innerHTML = 
+                        '<span class="error">❌ 网络连接失败: ' + error.message + '</span>';
+                });
+        }
+        
+        console.log('调试页面已加载');
+    </script>
+</body>
+</html>

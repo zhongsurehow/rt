@@ -1,0 +1,490 @@
+/* 天机变游戏样式文件 */
+@import url('https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@400;500;600;700&display=swap');
+
+:root {
+    --primary-color: #1e3c72;
+    --secondary-color: #2a5298;
+    --accent-color: #007bff;
+    --success-color: #28a745;
+    --warning-color: #ffc107;
+    --danger-color: #dc3545;
+    --light-color: #f8f9fa;
+    --dark-color: #343a40;
+    
+    --element-wood: #4caf50;
+    --element-fire: #f44336;
+    --element-earth: #ff9800;
+    --element-metal: #9e9e9e;
+    --element-water: #2196f3;
+    
+    --border-radius: 12px;
+    --transition: all 0.3s ease;
+    --shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+    --shadow-hover: 0 8px 30px rgba(0, 0, 0, 0.15);
+}
+
+* {
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Noto Serif SC', serif;
+    background: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%);
+    min-height: 100vh;
+    margin: 0;
+    padding: 0;
+    color: #333;
+}
+
+/* 游戏棋盘样式 */
+.game-board {
+    background: radial-gradient(circle at center, rgba(255,255,255,0.1) 0%, rgba(255,255,255,0.05) 100%);
+    backdrop-filter: blur(10px);
+    border: 2px solid rgba(255,255,255,0.2);
+    border-radius: var(--border-radius);
+    padding: 2rem;
+    box-shadow: var(--shadow);
+}
+
+.card-slot {
+    background: rgba(255,255,255,0.1);
+    border: 2px dashed rgba(255,255,255,0.3);
+    border-radius: var(--border-radius);
+    transition: var(--transition);
+    cursor: pointer;
+    min-height: 120px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+}
+
+.card-slot:hover {
+    background: rgba(255,255,255,0.2);
+    border-color: rgba(255,255,255,0.5);
+    transform: scale(1.02);
+}
+
+.card-slot.occupied {
+    background: rgba(255,255,255,0.15);
+    border: 2px solid rgba(255,255,255,0.4);
+    cursor: default;
+}
+
+.card-slot.occupied:hover {
+    transform: none;
+}
+
+/* 手牌样式 */
+.hand-card {
+    background: linear-gradient(145deg, #ffffff 0%, #f8f9fa 100%);
+    border: 2px solid #e9ecef;
+    border-radius: var(--border-radius);
+    padding: 1rem;
+    transition: var(--transition);
+    cursor: pointer;
+    box-shadow: var(--shadow);
+}
+
+.hand-card:hover {
+    transform: translateY(-5px);
+    box-shadow: var(--shadow-hover);
+    border-color: var(--accent-color);
+}
+
+.hand-card.selected {
+    transform: translateY(-10px);
+    box-shadow: 0 15px 40px rgba(0,123,255,0.3);
+    border-color: var(--accent-color);
+    background: linear-gradient(145deg, #e3f2fd 0%, #bbdefb 100%);
+}
+
+.hand-card.disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+.hand-card.disabled:hover {
+    transform: none;
+    box-shadow: var(--shadow);
+}
+
+/* 玩家状态面板 */
+.player-stats {
+    background: rgba(255,255,255,0.1);
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255,255,255,0.2);
+    border-radius: var(--border-radius);
+    padding: 1.5rem;
+    box-shadow: var(--shadow);
+}
+
+.stat-bar {
+    background: rgba(255,255,255,0.2);
+    border-radius: 10px;
+    overflow: hidden;
+    height: 8px;
+}
+
+.stat-fill {
+    height: 100%;
+    border-radius: 10px;
+    transition: width 0.3s ease;
+}
+
+.stat-fill.qi { background: linear-gradient(90deg, #ff6b6b, #ee5a24); }
+.stat-fill.dao { background: linear-gradient(90deg, #4834d4, #686de0); }
+.stat-fill.sincerity { background: linear-gradient(90deg, #00d2d3, #01a3a4); }
+
+/* 卦象符号 */
+.hexagram-symbol {
+    font-family: 'SimSun', serif;
+    font-size: 2rem;
+    font-weight: bold;
+    text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+}
+
+/* 五行元素颜色 */
+.element-wood { color: var(--element-wood); }
+.element-fire { color: var(--element-fire); }
+.element-earth { color: var(--element-earth); }
+.element-metal { color: var(--element-metal); }
+.element-water { color: var(--element-water); }
+
+/* 阴阳太极图 */
+.yin-yang {
+    background: conic-gradient(from 0deg, #000 0deg 180deg, #fff 180deg 360deg);
+    border-radius: 50%;
+    position: relative;
+    width: 48px;
+    height: 48px;
+}
+
+.yin-yang::before {
+    content: '';
+    position: absolute;
+    top: 25%;
+    left: 50%;
+    width: 50%;
+    height: 50%;
+    background: #fff;
+    border-radius: 50%;
+    transform: translateX(-50%);
+}
+
+.yin-yang::after {
+    content: '';
+    position: absolute;
+    bottom: 25%;
+    left: 50%;
+    width: 50%;
+    height: 50%;
+    background: #000;
+    border-radius: 50%;
+    transform: translateX(-50%);
+}
+
+/* 动画效果 */
+.pulse {
+    animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.7; }
+}
+
+.slide-in {
+    animation: slideIn 0.5s ease-out;
+}
+
+@keyframes slideIn {
+    from { transform: translateX(-100%); opacity: 0; }
+    to { transform: translateX(0); opacity: 1; }
+}
+
+.fade-in {
+    animation: fadeIn 0.3s ease-in;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+.bounce {
+    animation: bounce 0.6s ease-in-out;
+}
+
+@keyframes bounce {
+    0%, 20%, 50%, 80%, 100% { transform: translateY(0); }
+    40% { transform: translateY(-10px); }
+    60% { transform: translateY(-5px); }
+}
+
+/* 按钮样式 */
+.btn {
+    background: linear-gradient(135deg, var(--accent-color), #0056b3);
+    color: white;
+    border: none;
+    padding: 0.75rem 1.5rem;
+    border-radius: var(--border-radius);
+    cursor: pointer;
+    transition: var(--transition);
+    font-weight: 500;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+}
+
+.btn:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-hover);
+    background: linear-gradient(135deg, #0056b3, var(--accent-color));
+}
+
+.btn:active {
+    transform: translateY(0);
+}
+
+.btn:disabled {
+    background: #6c757d;
+    cursor: not-allowed;
+    transform: none;
+    box-shadow: none;
+}
+
+.btn-success {
+    background: linear-gradient(135deg, var(--success-color), #1e7e34);
+}
+
+.btn-warning {
+    background: linear-gradient(135deg, var(--warning-color), #e0a800);
+}
+
+.btn-danger {
+    background: linear-gradient(135deg, var(--danger-color), #c82333);
+}
+
+.btn-secondary {
+    background: linear-gradient(135deg, #6c757d, #545b62);
+}
+
+/* 模态框样式 */
+.modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.5);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+    backdrop-filter: blur(5px);
+}
+
+.modal-content {
+    background: white;
+    border-radius: var(--border-radius);
+    padding: 2rem;
+    max-width: 90vw;
+    max-height: 90vh;
+    overflow-y: auto;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+    animation: modalSlideIn 0.3s ease-out;
+}
+
+@keyframes modalSlideIn {
+    from { transform: translateY(-50px); opacity: 0; }
+    to { transform: translateY(0); opacity: 1; }
+}
+
+/* 导航栏样式 */
+.navbar {
+    background: rgba(0, 0, 0, 0.2);
+    backdrop-filter: blur(10px);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+    padding: 1rem 2rem;
+}
+
+.navbar-brand {
+    color: white;
+    font-size: 1.5rem;
+    font-weight: 600;
+    text-decoration: none;
+}
+
+.navbar-nav {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+
+.nav-link {
+    color: rgba(255, 255, 255, 0.8);
+    text-decoration: none;
+    transition: var(--transition);
+    padding: 0.5rem 1rem;
+    border-radius: var(--border-radius);
+}
+
+.nav-link:hover {
+    color: white;
+    background: rgba(255, 255, 255, 0.1);
+}
+
+/* 响应式设计 */
+@media (max-width: 1024px) {
+    .game-layout {
+        flex-direction: column;
+    }
+    
+    .game-board {
+        padding: 1.5rem;
+    }
+    
+    .card-slot {
+        min-height: 100px;
+    }
+}
+
+@media (max-width: 768px) {
+    .navbar {
+        padding: 0.75rem 1rem;
+    }
+    
+    .game-board {
+        padding: 1rem;
+    }
+    
+    .card-slot {
+        min-height: 80px;
+    }
+    
+    .hexagram-symbol {
+        font-size: 1.5rem;
+    }
+    
+    .player-stats {
+        padding: 1rem;
+    }
+    
+    .hand-card {
+        padding: 0.75rem;
+    }
+}
+
+@media (max-width: 480px) {
+    .modal-content {
+        padding: 1rem;
+        margin: 1rem;
+    }
+    
+    .game-board {
+        padding: 0.75rem;
+    }
+    
+    .card-slot {
+        min-height: 60px;
+    }
+    
+    .hexagram-symbol {
+        font-size: 1.2rem;
+    }
+}
+
+/* 工具提示 */
+.tooltip {
+    position: relative;
+    cursor: help;
+}
+
+.tooltip::before {
+    content: attr(data-tooltip);
+    position: absolute;
+    bottom: 100%;
+    left: 50%;
+    transform: translateX(-50%);
+    background: rgba(0, 0, 0, 0.8);
+    color: white;
+    padding: 0.5rem;
+    border-radius: 4px;
+    font-size: 0.875rem;
+    white-space: nowrap;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.3s;
+    z-index: 1000;
+}
+
+.tooltip:hover::before {
+    opacity: 1;
+}
+
+/* 加载动画 */
+.loading {
+    display: inline-block;
+    width: 20px;
+    height: 20px;
+    border: 3px solid rgba(255, 255, 255, 0.3);
+    border-radius: 50%;
+    border-top-color: white;
+    animation: spin 1s ease-in-out infinite;
+}
+
+@keyframes spin {
+    to { transform: rotate(360deg); }
+}
+
+/* 状态指示器 */
+.status-indicator {
+    display: inline-block;
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    margin-right: 0.5rem;
+}
+
+.status-online { background: var(--success-color); }
+.status-offline { background: var(--danger-color); }
+.status-away { background: var(--warning-color); }
+
+/* 卡牌效果 */
+.card-glow {
+    box-shadow: 0 0 20px rgba(0, 123, 255, 0.5);
+}
+
+.card-shake {
+    animation: shake 0.5s ease-in-out;
+}
+
+@keyframes shake {
+    0%, 100% { transform: translateX(0); }
+    25% { transform: translateX(-5px); }
+    75% { transform: translateX(5px); }
+}
+
+/* 游戏结束效果 */
+.victory-effect {
+    animation: victoryPulse 2s ease-in-out infinite;
+}
+
+@keyframes victoryPulse {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.05); }
+}
+
+.defeat-effect {
+    animation: defeatShake 0.5s ease-in-out;
+    filter: grayscale(50%);
+}
+
+@keyframes defeatShake {
+    0%, 100% { transform: translateX(0); }
+    25% { transform: translateX(-10px); }
+    75% { transform: translateX(10px); }
+}

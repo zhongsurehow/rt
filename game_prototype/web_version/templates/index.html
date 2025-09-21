@@ -1,0 +1,1079 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>天机变 - 易经策略卡牌游戏</title>
+    <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@400;500;600;700&display=swap');
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Microsoft YaHei', 'Noto Serif SC', serif;
+            background: linear-gradient(135deg, #0f0f23 0%, #1a1a2e 25%, #16213e 50%, #0f3460 75%, #0f0f23 100%);
+            min-height: 100vh;
+            color: #fff;
+            overflow-x: hidden;
+            position: relative;
+        }
+        
+        /* 动态背景粒子效果 */
+        .particles {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 1;
+        }
+        
+        .particle {
+            position: absolute;
+            width: 2px;
+            height: 2px;
+            background: rgba(255, 215, 0, 0.6);
+            border-radius: 50%;
+            animation: float-particle 20s infinite linear;
+        }
+        
+        @keyframes float-particle {
+            0% {
+                transform: translateY(100vh) translateX(0);
+                opacity: 0;
+            }
+            10% {
+                opacity: 1;
+            }
+            90% {
+                opacity: 1;
+            }
+            100% {
+                transform: translateY(-100px) translateX(100px);
+                opacity: 0;
+            }
+        }
+        
+        /* 主容器 */
+        .main-container {
+            position: relative;
+            z-index: 2;
+            min-height: 100vh;
+        }
+        
+        /* 导航栏 */
+        .navbar {
+            background: rgba(15, 15, 35, 0.95);
+            backdrop-filter: blur(20px);
+            border-bottom: 1px solid rgba(255, 215, 0, 0.2);
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 1000;
+            transition: all 0.3s ease;
+        }
+        
+        .navbar.scrolled {
+            background: rgba(15, 15, 35, 0.98);
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+        }
+        
+        /* 英雄区域 */
+        .hero-section {
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            background: radial-gradient(ellipse at center, rgba(255, 215, 0, 0.1) 0%, transparent 70%);
+        }
+        
+        .hero-content {
+            text-align: center;
+            max-width: 800px;
+            padding: 2rem;
+            position: relative;
+        }
+        
+        /* 太极图主视觉 */
+        .taiji-main {
+            width: 200px;
+            height: 200px;
+            margin: 0 auto 3rem;
+            position: relative;
+            animation: rotate-slow 60s linear infinite;
+        }
+        
+        .taiji-circle {
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+            background: linear-gradient(90deg, #000 0%, #000 50%, #fff 50%, #fff 100%);
+            position: relative;
+            box-shadow: 0 0 50px rgba(255, 215, 0, 0.5), inset 0 0 20px rgba(255, 215, 0, 0.3);
+            border: 3px solid rgba(255, 215, 0, 0.8);
+        }
+        
+        .taiji-circle::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 25%;
+            width: 50%;
+            height: 50%;
+            background: #000;
+            border-radius: 0 100px 100px 0;
+            transform-origin: 0 100%;
+        }
+        
+        .taiji-circle::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            right: 25%;
+            width: 50%;
+            height: 50%;
+            background: #fff;
+            border-radius: 100px 0 0 100px;
+            transform-origin: 100% 0;
+        }
+        
+        .taiji-dot-white {
+            position: absolute;
+            top: 25%;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 25%;
+            height: 25%;
+            background: #fff;
+            border-radius: 50%;
+        }
+        
+        .taiji-dot-black {
+            position: absolute;
+            bottom: 25%;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 25%;
+            height: 25%;
+            background: #000;
+            border-radius: 50%;
+        }
+        
+        @keyframes rotate-slow {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+        
+        /* 标题样式 */
+        .main-title {
+            font-size: 4rem;
+            font-weight: 700;
+            background: linear-gradient(45deg, #ffd700, #ffed4e, #ffd700);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 1.5rem;
+            text-shadow: 0 0 30px rgba(255, 215, 0, 0.5);
+            animation: glow-pulse 3s ease-in-out infinite;
+        }
+        
+        @keyframes glow-pulse {
+            0%, 100% { filter: brightness(1); }
+            50% { filter: brightness(1.2); }
+        }
+        
+        .subtitle {
+            font-size: 1.5rem;
+            color: rgba(255, 255, 255, 0.9);
+            margin-bottom: 3rem;
+            line-height: 1.6;
+        }
+        
+        /* 八卦装饰 */
+        .bagua-decorations {
+            position: absolute;
+            width: 400px;
+            height: 400px;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            pointer-events: none;
+        }
+        
+        .bagua-symbol {
+            position: absolute;
+            font-size: 2rem;
+            color: rgba(255, 215, 0, 0.6);
+            animation: float-bagua 4s ease-in-out infinite;
+        }
+        
+        .bagua-symbol:nth-child(1) { top: 0; left: 50%; transform: translateX(-50%); animation-delay: 0s; }
+        .bagua-symbol:nth-child(2) { top: 15%; right: 15%; animation-delay: 0.5s; }
+        .bagua-symbol:nth-child(3) { top: 50%; right: 0; transform: translateY(-50%); animation-delay: 1s; }
+        .bagua-symbol:nth-child(4) { bottom: 15%; right: 15%; animation-delay: 1.5s; }
+        .bagua-symbol:nth-child(5) { bottom: 0; left: 50%; transform: translateX(-50%); animation-delay: 2s; }
+        .bagua-symbol:nth-child(6) { bottom: 15%; left: 15%; animation-delay: 2.5s; }
+        .bagua-symbol:nth-child(7) { top: 50%; left: 0; transform: translateY(-50%); animation-delay: 3s; }
+        .bagua-symbol:nth-child(8) { top: 15%; left: 15%; animation-delay: 3.5s; }
+        
+        @keyframes float-bagua {
+            0%, 100% { transform: translateY(0) scale(1); opacity: 0.6; }
+            50% { transform: translateY(-10px) scale(1.1); opacity: 1; }
+        }
+        
+        /* 游戏模式选择 */
+        .game-modes {
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(20px);
+            border-radius: 20px;
+            padding: 2rem;
+            border: 1px solid rgba(255, 215, 0, 0.2);
+            max-width: 500px;
+            margin: 0 auto 4rem;
+        }
+        
+        .mode-option {
+            background: rgba(255, 255, 255, 0.05);
+            border: 2px solid rgba(255, 215, 0, 0.3);
+            border-radius: 15px;
+            padding: 1.5rem;
+            margin-bottom: 1rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .mode-option:hover {
+            background: rgba(255, 215, 0, 0.1);
+            border-color: rgba(255, 215, 0, 0.6);
+            transform: translateY(-2px);
+        }
+        
+        .mode-option.selected {
+            background: rgba(255, 215, 0, 0.15);
+            border-color: #ffd700;
+            box-shadow: 0 0 20px rgba(255, 215, 0, 0.3);
+        }
+        
+        .mode-option::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 215, 0, 0.2), transparent);
+            transition: left 0.5s ease;
+        }
+        
+        .mode-option:hover::before {
+            left: 100%;
+        }
+        
+        .start-button {
+            background: linear-gradient(45deg, #ffd700, #ffed4e);
+            color: #000;
+            border: none;
+            border-radius: 15px;
+            padding: 1rem 2rem;
+            font-size: 1.2rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            width: 100%;
+            margin-top: 1rem;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .start-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 30px rgba(255, 215, 0, 0.4);
+        }
+        
+        /* 指南按钮样式 */
+        .guide-button {
+            background: rgba(255, 255, 255, 0.1);
+            border: 2px solid rgba(255, 215, 0, 0.4);
+            border-radius: 10px;
+            padding: 0.75rem 1.5rem;
+            color: #fff;
+            font-size: 0.9rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            flex: 1;
+            text-align: center;
+        }
+        
+        .guide-button:hover {
+            background: rgba(255, 215, 0, 0.2);
+            border-color: rgba(255, 215, 0, 0.8);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 15px rgba(255, 215, 0, 0.3);
+        }
+        
+        .start-button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+        
+        .player-input {
+            background: rgba(255, 255, 255, 0.1);
+            border: 2px solid rgba(255, 215, 0, 0.3);
+            border-radius: 10px;
+            padding: 1rem;
+            color: #fff;
+            width: 100%;
+            margin-bottom: 1rem;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+        }
+        
+        .player-input:focus {
+            outline: none;
+            border-color: #ffd700;
+            box-shadow: 0 0 15px rgba(255, 215, 0, 0.3);
+        }
+        
+        .player-input::placeholder {
+            color: rgba(255, 255, 255, 0.5);
+        }
+        
+        /* 特色功能区域 */
+        .features-section {
+            padding: 4rem 2rem;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        
+        .features-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
+            margin-top: 3rem;
+        }
+        
+        .feature-card {
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(20px);
+            border-radius: 20px;
+            padding: 2rem;
+            border: 1px solid rgba(255, 215, 0, 0.2);
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .feature-card:hover {
+            transform: translateY(-10px);
+            border-color: rgba(255, 215, 0, 0.5);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+        }
+        
+        .feature-icon {
+            width: 80px;
+            height: 80px;
+            border-radius: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 1.5rem;
+            font-size: 2rem;
+            color: #fff;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .feature-icon.wisdom {
+            background: linear-gradient(45deg, #667eea, #764ba2);
+        }
+        
+        .feature-icon.balance {
+            background: linear-gradient(45deg, #f093fb, #f5576c);
+        }
+        
+        .feature-icon.elements {
+            background: linear-gradient(45deg, #4facfe, #00f2fe);
+        }
+        
+        .feature-title {
+            font-size: 1.5rem;
+            font-weight: 600;
+            color: #ffd700;
+            margin-bottom: 1rem;
+        }
+        
+        .feature-description {
+             color: rgba(255, 255, 255, 0.8);
+             line-height: 1.6;
+         }
+
+         /* 英雄区域样式 */
+         .hero-section {
+             text-align: center;
+             padding: 6rem 2rem 4rem;
+             position: relative;
+             overflow: hidden;
+         }
+
+         .hero-content {
+             max-width: 800px;
+             margin: 0 auto;
+             position: relative;
+             z-index: 2;
+         }
+
+         .taiji-main {
+             margin-bottom: 3rem;
+             display: flex;
+             justify-content: center;
+         }
+
+         .taiji-circle {
+             width: 120px;
+             height: 120px;
+             border-radius: 50%;
+             background: linear-gradient(90deg, #000 0%, #000 50%, #fff 50%, #fff 100%);
+             position: relative;
+             animation: rotate 20s linear infinite;
+             box-shadow: 0 0 30px rgba(255, 215, 0, 0.5);
+             border: 3px solid #ffd700;
+         }
+
+         .taiji-circle::before {
+             content: '';
+             position: absolute;
+             top: 0;
+             left: 25%;
+             width: 50%;
+             height: 50%;
+             background: #000;
+             border-radius: 0 60px 60px 0;
+             transform-origin: 0 100%;
+         }
+
+         .taiji-circle::after {
+             content: '';
+             position: absolute;
+             bottom: 0;
+             right: 25%;
+             width: 50%;
+             height: 50%;
+             background: #fff;
+             border-radius: 60px 0 0 60px;
+             transform-origin: 100% 0;
+         }
+
+         .taiji-dot-white {
+             position: absolute;
+             top: 25%;
+             left: 50%;
+             transform: translateX(-50%);
+             width: 20px;
+             height: 20px;
+             background: #fff;
+             border-radius: 50%;
+         }
+
+         .taiji-dot-black {
+             position: absolute;
+             bottom: 25%;
+             left: 50%;
+             transform: translateX(-50%);
+             width: 20px;
+             height: 20px;
+             background: #000;
+             border-radius: 50%;
+         }
+
+         @keyframes rotate {
+             from { transform: rotate(0deg); }
+             to { transform: rotate(360deg); }
+         }
+
+         .main-title {
+             font-size: 4rem;
+             font-weight: 700;
+             background: linear-gradient(45deg, #ffd700, #ffed4e, #ffd700);
+             background-size: 200% 200%;
+             -webkit-background-clip: text;
+             -webkit-text-fill-color: transparent;
+             background-clip: text;
+             animation: titleGlow 3s ease-in-out infinite;
+             margin-bottom: 1.5rem;
+             text-shadow: 0 0 30px rgba(255, 215, 0, 0.5);
+         }
+
+         @keyframes titleGlow {
+             0%, 100% { background-position: 0% 50%; }
+             50% { background-position: 100% 50%; }
+         }
+
+         .subtitle {
+             font-size: 1.3rem;
+             color: rgba(255, 255, 255, 0.9);
+             line-height: 1.6;
+             margin-bottom: 3rem;
+             max-width: 600px;
+             margin-left: auto;
+             margin-right: auto;
+         }
+
+         .bagua-decorations {
+             display: flex;
+             justify-content: center;
+             gap: 2rem;
+             flex-wrap: wrap;
+             margin-top: 2rem;
+         }
+
+         .bagua-symbol {
+             font-size: 2rem;
+             color: rgba(255, 215, 0, 0.8);
+             animation: float 6s ease-in-out infinite;
+             transition: all 0.3s ease;
+         }
+
+         .bagua-symbol:nth-child(odd) {
+             animation-delay: -3s;
+         }
+
+         .bagua-symbol:hover {
+             color: #ffd700;
+             transform: scale(1.2);
+         }
+
+         @keyframes float {
+             0%, 100% { transform: translateY(0px); }
+             50% { transform: translateY(-10px); }
+         }
+
+         /* 响应式设计 */
+         @media (max-width: 768px) {
+             .main-title {
+                 font-size: 2.5rem;
+             }
+             
+             .subtitle {
+                 font-size: 1.1rem;
+             }
+             
+             .taiji-circle {
+                 width: 80px;
+                 height: 80px;
+             }
+             
+             .bagua-symbol {
+                 font-size: 1.5rem;
+             }
+             
+             .features-grid {
+                 grid-template-columns: 1fr;
+             }
+         }
+    </style>
+</head>
+<body class="hexagram-bg">
+    <div id="app">
+        <!-- 导航栏 -->
+        <nav class="bg-white/10 backdrop-blur-md border-b border-white/20">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                <div class="flex justify-between items-center h-16">
+                    <div class="flex items-center space-x-3">
+                        <div class="w-10 h-10 bg-gradient-to-br from-yellow-400 to-orange-500 rounded-lg flex items-center justify-center">
+                            <i class="fas fa-yin-yang text-white text-lg"></i>
+                        </div>
+                        <h1 class="text-2xl font-bold text-white">天机变</h1>
+                    </div>
+                    <div class="flex items-center space-x-4">
+                        <button @click="showRules = true" class="text-white/80 hover:text-white transition-colors">
+                            <i class="fas fa-book mr-2"></i>游戏规则
+                        </button>
+                        <button @click="showAbout = true" class="text-white/80 hover:text-white transition-colors">
+                            <i class="fas fa-info-circle mr-2"></i>关于
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </nav>
+
+        <!-- 动态背景粒子 -->
+        <div class="particles">
+            <div class="particle" v-for="n in 50" :key="n"></div>
+        </div>
+
+        <!-- 主容器 -->
+        <div class="main-container">
+            <!-- 英雄区域 -->
+            <section class="hero-section">
+                <div class="hero-content">
+                    <div class="taiji-main">
+                        <div class="taiji-circle">
+                            <div class="taiji-dot-white"></div>
+                            <div class="taiji-dot-black"></div>
+                        </div>
+                    </div>
+                    <h1 class="main-title">天机变</h1>
+                    <p class="subtitle">
+                        体验古老智慧与现代策略的完美融合<br>
+                        在八卦阵中感受五行相生相克的奥秘
+                    </p>
+                    <div class="bagua-decorations">
+                        <span class="bagua-symbol">☰</span>
+                        <span class="bagua-symbol">☱</span>
+                        <span class="bagua-symbol">☲</span>
+                        <span class="bagua-symbol">☳</span>
+                        <span class="bagua-symbol">☴</span>
+                        <span class="bagua-symbol">☵</span>
+                        <span class="bagua-symbol">☶</span>
+                        <span class="bagua-symbol">☷</span>
+                    </div>
+                </div>
+            </section>
+
+            <!-- 游戏模式选择 -->
+            <section class="game-modes">
+                <h2 style="text-align: center; color: #ffd700; margin-bottom: 2rem; font-size: 2rem;">选择游戏模式</h2>
+                
+                <div class="mode-option" :class="{selected: selectedMode === 'single'}" @click="selectedMode = 'single'">
+                    <h3 style="color: #ffd700; margin-bottom: 0.5rem;">🤖 单人模式</h3>
+                    <p style="color: rgba(255,255,255,0.8); margin: 0;">与智能AI对战，体验策略博弈的乐趣</p>
+                </div>
+                
+                <div class="mode-option" :class="{selected: selectedMode === 'multi'}" @click="selectedMode = 'multi'">
+                    <h3 style="color: #ffd700; margin-bottom: 0.5rem;">👥 多人模式</h3>
+                    <p style="color: rgba(255,255,255,0.8); margin: 0;">与朋友一起体验天机变的奥秘</p>
+                </div>
+                
+                <input v-if="selectedMode" 
+                       v-model="playerName" 
+                       class="player-input" 
+                       :placeholder="selectedMode === 'single' ? '输入您的名字（可选）' : '输入您的名字'"
+                       maxlength="20">
+                
+                <button class="start-button" 
+                        :disabled="!selectedMode || (selectedMode === 'multi' && !playerName.trim()) || isCreating"
+                        @click="startGame">
+                    <span v-if="isCreating">创建中...</span>
+                    <span v-else-if="selectedMode === 'single'">🎮 开始单人游戏</span>
+                    <span v-else-if="selectedMode === 'multi'">🚀 创建游戏房间</span>
+                    <span v-else>请选择游戏模式</span>
+                </button>
+                
+                <!-- 新手指南按钮 -->
+                <div class="guide-buttons" style="margin-top: 1.5rem; display: flex; gap: 1rem;">
+                    <button class="guide-button" @click="showGameRules()">
+                        📖 游戏规则
+                    </button>
+                    <button class="guide-button" @click="showGameTutorial()">
+                        🎓 新手教程
+                    </button>
+                    <button class="guide-button" @click="showGameAbout()">
+                        ℹ️ 关于游戏
+                    </button>
+                </div>
+            </section>
+
+            <!-- 特色功能 -->
+            <section class="features-section">
+                <h2 style="text-align: center; color: #ffd700; margin-bottom: 1rem; font-size: 2.5rem;">游戏特色</h2>
+                <p style="text-align: center; color: rgba(255,255,255,0.8); margin-bottom: 3rem; font-size: 1.2rem;">
+                    融合传统文化与现代游戏设计的独特体验
+                </p>
+                
+                <div class="features-grid">
+                    <div class="feature-card">
+                        <div class="feature-icon wisdom">🧠</div>
+                        <h3 class="feature-title">智慧策略</h3>
+                        <p class="feature-description">
+                            基于古代兵法和易经智慧，每一步都需要深思熟虑。运用五行相生相克的原理，制定最佳策略。
+                        </p>
+                    </div>
+                    
+                    <div class="feature-card">
+                        <div class="feature-icon balance">⚖️</div>
+                        <h3 class="feature-title">平衡博弈</h3>
+                        <p class="feature-description">
+                            精心设计的游戏平衡系统，确保每场对战都充满变数。阴阳调和，攻守兼备。
+                        </p>
+                    </div>
+                    
+                    <div class="feature-card">
+                        <div class="feature-icon elements">🌟</div>
+                        <h3 class="feature-title">五行奥秘</h3>
+                        <p class="feature-description">
+                            金木水火土五行元素相互作用，创造丰富的战术组合。掌握五行之道，成为真正的策略大师。
+                        </p>
+                    </div>
+                </div>
+            </section>
+        </div>
+
+        <!-- 最近游戏记录 -->
+        <main class="max-w-6xl mx-auto px-4 py-12">
+            <div v-if="recentGames.length > 0" class="bg-white/10 backdrop-blur-md rounded-2xl p-6">
+                <h3 class="text-xl font-semibold text-white mb-4">
+                    <i class="fas fa-history mr-2"></i>最近游戏
+                </h3>
+                <div class="space-y-3">
+                    <div v-for="game in recentGames" :key="game.id" 
+                         class="flex items-center justify-between p-3 bg-white/5 rounded-lg">
+                        <div>
+                            <div class="text-white font-medium">
+                            <span v-if="game.mode === 'single'">单人模式</span>
+                            <span v-else>多人对战</span>
+                        </div>
+                            <div class="text-white/70 text-sm">[[ formatTime(game.created_at) ]]</div>
+                        </div>
+                        <button @click="joinGame(game.id)" 
+                                class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-lg transition-colors">
+                            继续游戏
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </main>
+
+        <!-- 游戏规则模态框 -->
+        <div v-if="showRules" class="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50" @click="showRules = false">
+            <div class="bg-white rounded-2xl max-w-2xl w-full max-h-[80vh] overflow-y-auto" @click.stop>
+                <div class="p-6">
+                    <div class="flex justify-between items-center mb-4">
+                        <h2 class="text-2xl font-bold text-gray-800">游戏规则</h2>
+                        <button @click="showRules = false" class="text-gray-500 hover:text-gray-700">
+                            <i class="fas fa-times text-xl"></i>
+                        </button>
+                    </div>
+                    <div class="prose prose-sm max-w-none">
+                        <h3>基本概念</h3>
+                        <p>天机变是一款融合易经哲学的策略卡牌游戏。玩家通过打出卦象卡牌、平衡阴阳五行来获得胜利。</p>
+                        
+                        <h3>玩家属性</h3>
+                        <ul>
+                            <li><strong>气 (Qi)</strong>：生命力，影响行动能力</li>
+                            <li><strong>道行 (Dao)</strong>：修为，影响卡牌威力</li>
+                            <li><strong>诚意 (Sincerity)</strong>：真诚度，影响学习效果</li>
+                            <li><strong>阴阳</strong>：需要保持平衡，影响特殊能力</li>
+                            <li><strong>五行</strong>：木火土金水，相生相克</li>
+                        </ul>
+                        
+                        <h3>胜利条件</h3>
+                        <p>通过合理运用卦象、维持阴阳平衡、掌握五行相生相克关系来击败对手。</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 游戏规则弹窗 -->
+        <div v-if="showRules" class="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+            <div class="bg-white rounded-2xl p-8 max-w-4xl mx-4 max-h-[80vh] overflow-y-auto">
+                <div class="flex items-center justify-between mb-6">
+                    <h2 class="text-3xl font-bold text-gray-800">📖 天机变游戏规则</h2>
+                    <button @click="showRules = false" class="text-gray-500 hover:text-gray-700 text-2xl">×</button>
+                </div>
+                
+                <div class="space-y-6 text-gray-700">
+                    <section>
+                        <h3 class="text-xl font-semibold text-gray-800 mb-3">🎯 游戏目标</h3>
+                        <p class="mb-2">在八卦阵中通过策略布局，率先达到以下任一胜利条件：</p>
+                        <ul class="list-disc list-inside space-y-1 ml-4">
+                            <li><strong>道行胜利</strong>：道行值达到100点</li>
+                            <li><strong>分数胜利</strong>：总分数达到50分</li>
+                            <li><strong>控制胜利</strong>：同时控制4个或以上八卦位置</li>
+                        </ul>
+                    </section>
+                    
+                    <section>
+                        <h3 class="text-xl font-semibold text-gray-800 mb-3">🎴 基本玩法</h3>
+                        <ol class="list-decimal list-inside space-y-2 ml-4">
+                            <li><strong>选择位置</strong>：点击八卦位置移动到该位置</li>
+                            <li><strong>使用卡牌</strong>：选择手牌中的卡牌使用</li>
+                            <li><strong>管理资源</strong>：平衡阴气、阳气和气力</li>
+                            <li><strong>策略布局</strong>：利用五行相生相克制定策略</li>
+                        </ol>
+                    </section>
+                    
+                    <section>
+                        <h3 class="text-xl font-semibold text-gray-800 mb-3">⚡ 五行系统</h3>
+                        <div class="grid grid-cols-2 gap-4">
+                            <div>
+                                <h4 class="font-semibold mb-2">相生关系：</h4>
+                                <ul class="text-sm space-y-1">
+                                    <li>🌿 木生火 🔥</li>
+                                    <li>🔥 火生土 🏔️</li>
+                                    <li>🏔️土生金 ⚡</li>
+                                    <li>⚡ 金生水 💧</li>
+                                    <li>💧 水生木 🌿</li>
+                                </ul>
+                            </div>
+                            <div>
+                                <h4 class="font-semibold mb-2">相克关系：</h4>
+                                <ul class="text-sm space-y-1">
+                                    <li>🌿 木克土 🏔️</li>
+                                    <li>🔥 火克金 ⚡</li>
+                                    <li>🏔️土克水 💧</li>
+                                    <li>⚡ 金克木 🌿</li>
+                                    <li>💧 水克火 🔥</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </section>
+                    
+                    <section>
+                        <h3 class="text-xl font-semibold text-gray-800 mb-3">🎭 八卦位置</h3>
+                        <div class="grid grid-cols-4 gap-2 text-sm">
+                            <div class="text-center p-2 bg-gray-100 rounded">☰ 乾<br>天</div>
+                            <div class="text-center p-2 bg-gray-100 rounded">☱ 兑<br>泽</div>
+                            <div class="text-center p-2 bg-gray-100 rounded">☲ 离<br>火</div>
+                            <div class="text-center p-2 bg-gray-100 rounded">☳ 震<br>雷</div>
+                            <div class="text-center p-2 bg-gray-100 rounded">☴ 巽<br>风</div>
+                            <div class="text-center p-2 bg-gray-100 rounded">☵ 坎<br>水</div>
+                            <div class="text-center p-2 bg-gray-100 rounded">☶ 艮<br>山</div>
+                            <div class="text-center p-2 bg-gray-100 rounded">☷ 坤<br>地</div>
+                        </div>
+                    </section>
+                </div>
+                
+                <div class="mt-8 text-center">
+                    <button @click="showRules = false; showTutorial = true" 
+                            class="bg-gradient-to-r from-blue-500 to-purple-600 text-white px-6 py-3 rounded-lg mr-4">
+                        🎓 开始教程
+                    </button>
+                    <button @click="showRules = false" 
+                            class="bg-gradient-to-r from-yellow-400 to-orange-500 text-white px-6 py-3 rounded-lg">
+                        开始游戏
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- 新手教程弹窗 -->
+        <div v-if="showTutorial" class="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+            <div class="bg-white rounded-2xl p-8 max-w-3xl mx-4 max-h-[80vh] overflow-y-auto">
+                <div class="flex items-center justify-between mb-6">
+                    <h2 class="text-3xl font-bold text-gray-800">🎓 新手教程</h2>
+                    <button @click="showTutorial = false" class="text-gray-500 hover:text-gray-700 text-2xl">×</button>
+                </div>
+                
+                <div class="space-y-6 text-gray-700">
+                    <section>
+                        <h3 class="text-xl font-semibold text-gray-800 mb-3">第一步：了解界面</h3>
+                        <div class="bg-blue-50 p-4 rounded-lg">
+                            <ul class="space-y-2">
+                                <li>🎯 <strong>八卦阵</strong>：游戏的主要区域，点击移动到不同位置</li>
+                                <li>🃏 <strong>手牌区</strong>：显示你的卡牌，点击使用</li>
+                                <li>📊 <strong>状态栏</strong>：显示阴气、阳气、气力和道行</li>
+                                <li>📝 <strong>日志区</strong>：显示游戏进程和提示</li>
+                            </ul>
+                        </div>
+                    </section>
+                    
+                    <section>
+                        <h3 class="text-xl font-semibold text-gray-800 mb-3">第二步：基本操作</h3>
+                        <div class="bg-green-50 p-4 rounded-lg">
+                            <ol class="space-y-2">
+                                <li>1️⃣ <strong>移动</strong>：点击八卦位置移动角色</li>
+                                <li>2️⃣ <strong>使用卡牌</strong>：点击手牌中的卡牌</li>
+                                <li>3️⃣ <strong>查看效果</strong>：观察资源和分数变化</li>
+                                <li>4️⃣ <strong>结束回合</strong>：点击"结束回合"按钮</li>
+                            </ol>
+                        </div>
+                    </section>
+                    
+                    <section>
+                        <h3 class="text-xl font-semibold text-gray-800 mb-3">第三步：策略要点</h3>
+                        <div class="bg-yellow-50 p-4 rounded-lg">
+                            <ul class="space-y-2">
+                                <li>💡 <strong>平衡资源</strong>：保持阴阳平衡，避免资源枯竭</li>
+                                <li>🔄 <strong>利用五行</strong>：使用相生相克关系获得优势</li>
+                                <li>🎯 <strong>控制位置</strong>：占据关键八卦位置</li>
+                                <li>📈 <strong>积累道行</strong>：通过智慧行动提升道行值</li>
+                            </ul>
+                        </div>
+                    </section>
+                </div>
+                
+                <div class="mt-8 text-center">
+                    <button @click="showTutorial = false; selectedMode = 'single'" 
+                            class="bg-gradient-to-r from-green-500 to-blue-600 text-white px-8 py-3 rounded-lg">
+                        🚀 开始练习
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- 关于模态框 -->
+        <div v-if="showAbout" class="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50" @click="showAbout = false">
+            <div class="bg-white rounded-2xl max-w-md w-full" @click.stop>
+                <div class="p-6 text-center">
+                    <div class="w-16 h-16 bg-gradient-to-br from-yellow-400 to-orange-500 rounded-full flex items-center justify-center mx-auto mb-4">
+                        <i class="fas fa-yin-yang text-white text-2xl"></i>
+                    </div>
+                    <h2 class="text-2xl font-bold text-gray-800 mb-4">关于天机变</h2>
+                    <p class="text-gray-600 mb-6">
+                        天机变是一款将传统易经文化与现代卡牌游戏完美结合的作品。
+                        在游戏中体验古老智慧，在娱乐中学习传统文化。
+                    </p>
+                    <div class="text-sm text-gray-500 mb-4">
+                        版本 2.0.0 | 基于 FastAPI + Vue.js
+                    </div>
+                    <div class="space-y-2 mb-6">
+                    <a href="https://github.com/your-repo/tianjibian" target="_blank" 
+                       class="block text-blue-600 hover:text-blue-800 text-sm">
+                        📁 项目文档
+                    </a>
+                    <a href="/rules" 
+                       class="block text-blue-600 hover:text-blue-800 text-sm">
+                        📖 游戏规则
+                    </a>
+                    <a href="https://github.com/your-repo/tianjibian/blob/main/README.md" target="_blank" 
+                       class="block text-blue-600 hover:text-blue-800 text-sm">
+                        📚 完整文档
+                    </a>
+                </div>
+                    <button @click="showAbout = false" 
+                            class="bg-gradient-to-r from-yellow-400 to-orange-500 text-white px-6 py-2 rounded-lg">
+                        了解了
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- 加载提示 -->
+        <div v-if="isCreating" class="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+            <div class="bg-white rounded-2xl p-8 text-center">
+                <div class="animate-spin w-12 h-12 border-4 border-blue-500 border-t-transparent rounded-full mx-auto mb-4"></div>
+                <p class="text-gray-700">正在创建游戏...</p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const { createApp } = Vue;
+
+        createApp({
+            delimiters: ['[[', ']]'],
+            data() {
+                return {
+                    playerName: '',
+                    selectedMode: '',
+                    gameMode: 'single',
+                    isCreating: false,
+                    showRules: false,
+                    showAbout: false,
+                    showTutorial: false,
+                    recentGames: []
+                }
+            },
+            mounted() {
+                this.loadRecentGames();
+            },
+            methods: {
+                showGameRules() {
+                    this.showRules = true;
+                },
+                
+                showGameTutorial() {
+                    this.showTutorial = true;
+                },
+                
+                showGameAbout() {
+                    this.showAbout = true;
+                },
+                
+                startGame() {
+                    // 将selectedMode映射到gameMode
+                    if (this.selectedMode === 'single') {
+                        this.gameMode = 'single';
+                        this.playerName = this.playerName || '玩家';
+                    } else if (this.selectedMode === 'multi') {
+                        this.gameMode = 'multiplayer';
+                    }
+                    this.createGame();
+                },
+                
+                async createGame() {
+                    if (!this.playerName.trim()) return;
+                    
+                    this.isCreating = true;
+                    
+                    try {
+                        const response = await fetch('/api/games', {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json'
+                            },
+                            body: JSON.stringify({
+                                player_name: this.playerName,
+                                game_mode: this.gameMode,
+                                max_players: this.gameMode === 'multiplayer' ? 2 : 1
+                            })
+                        });
+                        
+                        const data = await response.json();
+                        
+                        if (data.success) {
+                            // 保存到本地存储
+                            this.saveGameToLocal(data.game_id);
+                            // 跳转到游戏页面
+                            window.location.href = data.game_url;
+                        } else {
+                            alert('创建游戏失败：' + data.message);
+                        }
+                    } catch (error) {
+                        console.error('创建游戏错误:', error);
+                        alert('创建游戏失败，请稍后重试');
+                    } finally {
+                        this.isCreating = false;
+                    }
+                },
+                
+                saveGameToLocal(gameId) {
+                    const games = JSON.parse(localStorage.getItem('tianjibian_games') || '[]');
+                    games.unshift({
+                        id: gameId,
+                        mode: this.gameMode,
+                        player_name: this.playerName,
+                        created_at: new Date().toISOString()
+                    });
+                    // 只保留最近5个游戏
+                    localStorage.setItem('tianjibian_games', JSON.stringify(games.slice(0, 5)));
+                },
+                
+                loadRecentGames() {
+                    this.recentGames = JSON.parse(localStorage.getItem('tianjibian_games') || '[]');
+                },
+                
+                joinGame(gameId) {
+                    window.location.href = `/game/${gameId}`;
+                },
+                
+                formatTime(timeStr) {
+                    const time = new Date(timeStr);
+                    const now = new Date();
+                    const diff = now - time;
+                    
+                    if (diff < 60000) return '刚刚';
+                    if (diff < 3600000) return Math.floor(diff / 60000) + '分钟前';
+                    if (diff < 86400000) return Math.floor(diff / 3600000) + '小时前';
+                    return Math.floor(diff / 86400000) + '天前';
+                }
+            }
+        }).mount('#app');
+    </script>
+</body>
+</html>

@@ -1,0 +1,52 @@
+version: '3.8'
+
+services:
+  # 天机变游戏Web应用
+  tianjibian-web:
+    build: .
+    ports:
+      - "9000:9000"
+    environment:
+      - PYTHONPATH=/app
+      - REDIS_URL=redis://redis:6379
+      - DATABASE_URL=sqlite:///./tianjibian.db
+    volumes:
+      - ./data:/app/data
+    depends_on:
+      - redis
+    restart: unless-stopped
+    networks:
+      - tianjibian-network
+
+  # Redis缓存服务
+  redis:
+    image: redis:7-alpine
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    restart: unless-stopped
+    networks:
+      - tianjibian-network
+
+  # Nginx反向代理（可选）
+  nginx:
+    image: nginx:alpine
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./ssl:/etc/nginx/ssl:ro
+    depends_on:
+      - tianjibian-web
+    restart: unless-stopped
+    networks:
+      - tianjibian-network
+
+volumes:
+  redis_data:
+
+networks:
+  tianjibian-network:
+    driver: bridge
