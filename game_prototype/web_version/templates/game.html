@@ -610,6 +610,96 @@
             0%, 100% { opacity: 1; }
             50% { opacity: 0.5; }
         }
+
+        /* Card Codex Modal Styles */
+        .codex-modal {
+            position: fixed;
+            z-index: 1002; /* Higher than other elements */
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            overflow: auto;
+            background-color: rgba(0,0,0,0.8);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .codex-modal-content {
+            background: rgba(17, 24, 39, 0.9); /* bg-gray-900 with opacity */
+            backdrop-filter: blur(10px);
+            margin: auto;
+            padding: 24px;
+            border: 1px solid rgba(255, 215, 0, 0.3);
+            width: 90%;
+            max-width: 1400px;
+            border-radius: 12px;
+            color: #fff;
+            max-height: 90vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .codex-close-btn {
+            color: #aaa;
+            position: absolute;
+            top: 16px;
+            right: 24px;
+            font-size: 28px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: color 0.3s;
+        }
+        .codex-close-btn:hover {
+            color: #fff;
+        }
+
+        .codex-tabs {
+            margin-bottom: 20px;
+            flex-shrink: 0;
+        }
+
+        .codex-tab-link {
+            background: rgba(255,255,255,0.1);
+            color: #fff;
+            border: 1px solid transparent;
+            padding: 10px 15px;
+            cursor: pointer;
+            transition: all 0.3s;
+            border-radius: 6px;
+            margin-right: 10px;
+        }
+
+        .codex-tab-link.active, .codex-tab-link:hover {
+            background: #ffd700;
+            color: #000;
+            border-color: #ffd700;
+        }
+
+        .codex-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+            gap: 15px;
+            overflow-y: auto;
+            flex-grow: 1;
+            padding-right: 10px; /* For scrollbar */
+        }
+
+        .codex-card {
+            background: rgba(255,255,255,0.05);
+            border-radius: 8px;
+            padding: 12px;
+            border: 1px solid rgba(255,255,255,0.1);
+            font-size: 13px;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+        .codex-card .card-name { font-weight: bold; color: #ffd700; font-size: 16px; }
+        .codex-card .card-type { font-size: 12px; color: #ccc; margin-top: 4px; }
+        .codex-card .card-desc { font-size: 13px; margin-top: 8px; flex-grow: 1; }
+        .codex-card .card-cost-power { font-size: 12px; margin-top: 8px; color: #88aaff; }
     </style>
 </head>
 <body class="bg-gradient-to-br from-indigo-900 via-purple-900 to-pink-800 min-h-screen">
@@ -1303,6 +1393,9 @@
                             <div class="bg-gradient-to-r from-blue-500 to-purple-500 h-2 rounded-full transition-all" 
                                  :style="{width: (playedCards / totalCards * 100) + '%'}"></div>
                         </div>
+                        <button @click="showCodex = true" class="w-full mt-3 bg-blue-500 text-white py-2 rounded-lg hover:bg-blue-600 transition-colors">
+                            查看图鉴
+                        </button>
                     </div>
                 </div>
 
@@ -1675,6 +1768,31 @@
             <div class="flex items-center">
                 <span class="mr-2">💡</span>
                 <span>[[ actionHint ]]</span>
+            </div>
+        </div>
+
+        <!-- Card Codex Modal -->
+        <div v-if="showCodex" class="codex-modal" @click.self="showCodex = false">
+            <div class="codex-modal-content">
+                <span class="codex-close-btn" @click="showCodex = false">&times;</span>
+                <h2 class="text-2xl font-bold mb-4">卡牌图鉴</h2>
+                <div class="codex-tabs">
+                    <button @click="codexFilter = 'all'" :class="['codex-tab-link', { 'active': codexFilter === 'all' }]">所有</button>
+                    <button @click="codexFilter = 'gua'" :class="['codex-tab-link', { 'active': codexFilter === 'gua' }]">卦象</button>
+                    <button @click="codexFilter = 'tian'" :class="['codex-tab-link', { 'active': codexFilter === 'tian' }]">天时</button>
+                    <button @click="codexFilter = 'di'" :class="['codex-tab-link', { 'active': codexFilter === 'di' }]">地利</button>
+                    <button @click="codexFilter = 'ren'" :class="['codex-tab-link', { 'active': codexFilter === 'ren' }]">人和</button>
+                </div>
+                <div class="codex-grid">
+                    <div v-for="card in filteredCodexCards" :key="card.id" class="codex-card">
+                        <div>
+                            <div class="card-name">[[ card.name ]]</div>
+                            <div class="card-type">[[ card.type ]] - [[ card.element ]]</div>
+                            <div class="card-desc">[[ card.description ]]</div>
+                        </div>
+                        <div class="card-cost-power">消耗: [[ card.cost ]] | 威力: [[ card.power ]]</div>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
@@ -2407,6 +2525,108 @@
             delimiters: ['[[', ']]'], // 使用不同的分隔符避免与Jinja2冲突
             data() {
                 return {
+                    showCodex: false,
+                    codexFilter: 'all',
+                    allCards: [
+                        // === 完整64卦系统 ===
+                        // 乾宫八卦
+                        { id: 1, name: '乾为天', type: '六十四卦', category: '乾宫', element: '金', cost: 3, power: 5, description: '天行健，君子以自强不息。乾卦纯阳，象征刚健、创造、领导。', effect: '获得3点道行，下回合行动优先，激活领导力', link: 'https://baike.baidu.com/item/乾卦' },
+                        { id: 2, name: '天风姤', type: '六十四卦', category: '乾宫', element: '金', cost: 2, power: 3, description: '天下有风，姤。一阴始生，阳气渐消。', effect: '削弱对手1点威力，获得1点气', link: 'https://baike.baidu.com/item/姤卦' },
+                        { id: 3, name: '天山遁', type: '六十四卦', category: '乾宫', element: '金', cost: 2, power: 2, description: '天下有山，遁。君子以远小人，不恶而严。', effect: '回避攻击，下回合获得反击机会', link: 'https://baike.baidu.com/item/遁卦' },
+                        { id: 4, name: '天地否', type: '六十四卦', category: '乾宫', element: '金', cost: 3, power: 1, description: '天地不交，否。内阴外阳，闭塞不通。', effect: '阻止对手下回合行动，自身获得防护', link: 'https://baike.baidu.com/item/否卦' },
+                        { id: 5, name: '风地观', type: '六十四卦', category: '乾宫', element: '木', cost: 2, power: 2, description: '风行地上，观。君子以省方观民设教。', effect: '查看所有玩家状态，获得洞察加成', link: 'https://baike.baidu.com/item/观卦' },
+                        { id: 6, name: '山地剥', type: '六十四卦', category: '乾宫', element: '土', cost: 3, power: 4, description: '山附于地，剥。上以厚下安宅。', effect: '剥夺对手1张手牌，获得其效果', link: 'https://baike.baidu.com/item/剥卦' },
+                        { id: 7, name: '火地晋', type: '六十四卦', category: '乾宫', element: '火', cost: 2, power: 4, description: '明出地上，晋。君子以自昭明德。', effect: '提升自身威力+2，照亮隐藏信息', link: 'https://baike.baidu.com/item/晋卦' },
+                        { id: 8, name: '火天大有', type: '六十四卦', category: '乾宫', element: '火', cost: 4, power: 6, description: '火在天上，大有。君子以遏恶扬善，顺天休命。', effect: '获得大量资源，威力+3，道行+2', link: 'https://baike.baidu.com/item/大有卦' },
+
+                        // 坤宫八卦
+                        { id: 9, name: '坤为地', type: '六十四卦', category: '坤宫', element: '土', cost: 3, power: 3, description: '地势坤，君子以厚德载物。坤卦纯阴，象征柔顺、包容、承载。', effect: '恢复3点生命值，获得厚德载物效果', link: 'https://baike.baidu.com/item/坤卦' },
+                        { id: 10, name: '地雷复', type: '六十四卦', category: '坤宫', element: '土', cost: 2, power: 3, description: '雷在地中，复。先王以至日闭关，商旅不行。', effect: '重置冷却时间，获得新生机会', link: 'https://baike.baidu.com/item/复卦' },
+                        { id: 11, name: '地泽临', type: '六十四卦', category: '坤宫', element: '土', cost: 2, power: 4, description: '泽上有地，临。君子以教思无穷，容保民无疆。', effect: '临近胜利，威力+2，影响相邻玩家', link: 'https://baike.baidu.com/item/临卦' },
+                        { id: 12, name: '地天泰', type: '六十四卦', category: '坤宫', element: '土', cost: 3, power: 5, description: '天地交，泰。后以财成天地之道，辅相天地之宜。', effect: '天地交泰，所有属性+1，获得和谐加成', link: 'https://baike.baidu.com/item/泰卦' },
+                        { id: 13, name: '雷天大壮', type: '六十四卦', category: '坤宫', element: '木', cost: 3, power: 6, description: '雷在天上，大壮。君子以非礼弗履。', effect: '威力大增+3，震慑所有对手', link: 'https://baike.baidu.com/item/大壮卦' },
+                        { id: 14, name: '泽天夬', type: '六十四卦', category: '坤宫', element: '金', cost: 4, power: 5, description: '泽上于天，夬。君子以施禄及下，居德则忌。', effect: '决断执行，立即解决一个问题', link: 'https://baike.baidu.com/item/夬卦' },
+                        { id: 15, name: '水天需', type: '六十四卦', category: '坤宫', element: '水', cost: 2, power: 2, description: '云上于天，需。君子以饮食宴乐。', effect: '等待时机，下回合获得双倍效果', link: 'https://baike.baidu.com/item/需卦' },
+                        { id: 16, name: '水地比', type: '六十四卦', category: '坤宫', element: '水', cost: 2, power: 3, description: '地上有水，比。先王以建万国，亲诸侯。', effect: '与其他玩家结盟，共享部分效果', link: 'https://baike.baidu.com/item/比卦' },
+
+                        // 震宫八卦
+                        { id: 17, name: '震为雷', type: '六十四卦', category: '震宫', element: '木', cost: 2, power: 4, description: '洊雷，震。君子以恐惧修省。震卦象征震动、觉醒、行动。', effect: '震动全场，对所有敌人造成1点伤害', link: 'https://baike.baidu.com/item/震卦' },
+                        { id: 18, name: '雷地豫', type: '六十四卦', category: '震宫', element: '木', cost: 2, power: 3, description: '雷出地奋，豫。先王以作乐崇德，殷荐之上帝。', effect: '获得愉悦状态，下回合威力+2', link: 'https://baike.baidu.com/item/豫卦' },
+                        { id: 19, name: '雷水解', type: '六十四卦', category: '震宫', element: '木', cost: 3, power: 3, description: '雷雨作，解。君子以赦过宥罪。', effect: '解除所有负面状态，获得新开始', link: 'https://baike.baidu.com/item/解卦' },
+                        { id: 20, name: '雷风恒', type: '六十四卦', category: '震宫', element: '木', cost: 3, power: 4, description: '雷风，恒。君子以立不易方。', effect: '获得恒久效果，持续3回合威力+1', link: 'https://baike.baidu.com/item/恒卦' },
+                        { id: 21, name: '地风升', type: '六十四卦', category: '震宫', element: '土', cost: 2, power: 3, description: '地中生木，升。君子以顺德，积小以高大。', effect: '逐步提升，每回合威力+1', link: 'https://baike.baidu.com/item/升卦' },
+                        { id: 22, name: '水风井', type: '六十四卦', category: '震宫', element: '水', cost: 2, power: 2, description: '木上有水，井。君子以劳民劝相。', effect: '提供持续资源，每回合恢复1点生命', link: 'https://baike.baidu.com/item/井卦' },
+                        { id: 23, name: '泽风大过', type: '六十四卦', category: '震宫', element: '金', cost: 4, power: 7, description: '泽灭木，大过。君子以独立不惧，遁世无闷。', effect: '超越极限，威力大幅提升+4', link: 'https://baike.baidu.com/item/大过卦' },
+                        { id: 24, name: '泽雷随', type: '六十四卦', category: '震宫', element: '金', cost: 2, power: 3, description: '泽中有雷，随。君子以向晦入宴息。', effect: '跟随强者，复制目标玩家的上一个效果', link: 'https://baike.baidu.com/item/随卦' },
+
+                        // 巽宫八卦
+                        { id: 25, name: '巽为风', type: '六十四卦', category: '巽宫', element: '木', cost: 1, power: 2, description: '随风，巽。君子以申命行事。巽卦象征风、顺从、渗透。', effect: '灵活移动，获得1点气，无视阻挡', link: 'https://baike.baidu.com/item/巽卦' },
+                        { id: 26, name: '风天小畜', type: '六十四卦', category: '巽宫', element: '木', cost: 2, power: 2, description: '风行天上，小畜。君子以懿文德。', effect: '小有积蓄，获得1点道行和1点诚意', link: 'https://baike.baidu.com/item/小畜卦' },
+                        { id: 27, name: '风火家人', type: '六十四卦', category: '巽宫', element: '木', cost: 2, power: 3, description: '风自火出，家人。君子以言有物，而行有恒。', effect: '家和万事兴，与盟友共享效果', link: 'https://baike.baidu.com/item/家人卦' },
+                        { id: 28, name: '风雷益', type: '六十四卦', category: '巽宫', element: '木', cost: 3, power: 4, description: '风雷，益。君子以见善则迁，有过则改。', effect: '获得增益，威力+2，道行+1', link: 'https://baike.baidu.com/item/益卦' },
+                        { id: 29, name: '天雷无妄', type: '六十四卦', category: '巽宫', element: '金', cost: 3, power: 3, description: '天下雷行，无妄。先王以茂对时，育万物。', effect: '无妄之灾，随机效果（可能有利或不利）', link: 'https://baike.baidu.com/item/无妄卦' },
+                        { id: 30, name: '火雷噬嗑', type: '六十四卦', category: '巽宫', element: '火', cost: 3, power: 5, description: '雷电噬嗑，噬嗑。先王以明罚敕法。', effect: '咬合决断，对目标造成4点伤害', link: 'https://baike.baidu.com/item/噬嗑卦' },
+                        { id: 31, name: '山雷颐', type: '六十四卦', category: '巽宫', element: '土', cost: 2, power: 2, description: '山下有雷，颐。君子以慎言语，节饮食。', effect: '颐养生息，恢复2点生命值，获得养生效果', link: 'https://baike.baidu.com/item/颐卦' },
+                        { id: 32, name: '山风蛊', type: '六十四卦', category: '巽宫', element: '土', cost: 3, power: 3, description: '山下有风，蛊。君子以振民育德。', effect: '整顿革新，清除负面状态，获得新机', link: 'https://baike.baidu.com/item/蛊卦' },
+
+                        // 坎宫八卦
+                        { id: 33, name: '坎为水', type: '六十四卦', category: '坎宫', element: '水', cost: 2, power: 3, description: '习坎，有孚。维心亨，行有尚。坎卦象征水、险阻、智慧。', effect: '智慧如水，查看对手手牌，抽取1张卡', link: 'https://baike.baidu.com/item/坎卦' },
+                        { id: 34, name: '水泽节', type: '六十四卦', category: '坎宫', element: '水', cost: 2, power: 2, description: '泽上有水，节。君子以制数度，议德行。', effect: '节制有度，减少消耗，获得节约效果', link: 'https://baike.baidu.com/item/节卦' },
+                        { id: 35, name: '水雷屯', type: '六十四卦', category: '坎宫', element: '水', cost: 3, power: 4, description: '云雷屯，君子以经纶。屯卦象征初生艰难。', effect: '屯积力量，抽取2张卡，获得1点诚意', link: 'https://baike.baidu.com/item/屯卦' },
+                        { id: 36, name: '水火既济', type: '六十四卦', category: '坎宫', element: '水', cost: 4, power: 5, description: '水在火上，既济。君子以思患而豫防之。', effect: '水火既济，完美平衡，所有效果+1', link: 'https://baike.baidu.com/item/既济卦' },
+                        { id: 37, name: '泽火革', type: '六十四卦', category: '坎宫', element: '金', cost: 3, power: 4, description: '泽中有火，革。君子以治历明时。', effect: '革故鼎新，改变游戏规则1回合', link: 'https://baike.baidu.com/item/革卦' },
+                        { id: 38, name: '雷火丰', type: '六十四卦', category: '坎宫', element: '木', cost: 3, power: 5, description: '雷电皆至，丰。君子以折狱致刑。', effect: '丰收时节，获得丰厚奖励，威力+3', link: 'https://baike.baidu.com/item/丰卦' },
+                        { id: 39, name: '地火明夷', type: '六十四卦', category: '坎宫', element: '土', cost: 2, power: 2, description: '明入地中，明夷。君子以莅众，用晦而明。', effect: '明夷待时，隐藏实力，下回合威力翻倍', link: 'https://baike.baidu.com/item/明夷卦' },
+                        { id: 40, name: '地水师', type: '六十四卦', category: '坎宫', element: '土', cost: 3, power: 4, description: '地中有水，师。君子以容民畜众。', effect: '统帅军队，召集援军，获得额外行动', link: 'https://baike.baidu.com/item/师卦' },
+
+                        // 离宫八卦
+                        { id: 41, name: '离为火', type: '六十四卦', category: '离宫', element: '火', cost: 2, power: 3, description: '明两作，离。大人以继明照于四方。离卦象征火、光明、文明。', effect: '光明照耀，揭示隐藏信息，造成2点伤害', link: 'https://baike.baidu.com/item/离卦' },
+                        { id: 42, name: '火山旅', type: '六十四卦', category: '离宫', element: '火', cost: 2, power: 3, description: '山上有火，旅。君子以明慎用刑，而不留狱。', effect: '旅途奔波，移动灵活，获得探索奖励', link: 'https://baike.baidu.com/item/旅卦' },
+                        { id: 43, name: '火风鼎', type: '六十四卦', category: '离宫', element: '火', cost: 3, power: 4, description: '木上有火，鼎。君子以正位凝命。', effect: '鼎新革故，提升品质，威力+2，道行+1', link: 'https://baike.baidu.com/item/鼎卦' },
+                        { id: 44, name: '火水未济', type: '六十四卦', category: '离宫', element: '火', cost: 3, power: 3, description: '火在水上，未济。君子以慎辨物居方。', effect: '未济待成，蓄势待发，下回合效果翻倍', link: 'https://baike.baidu.com/item/未济卦' },
+                        { id: 45, name: '山水蒙', type: '六十四卦', category: '离宫', element: '土', cost: 2, power: 2, description: '山下出泉，蒙。君子以果行育德。', effect: '启蒙教育，学习技能，下次出牌效果翻倍', link: 'https://baike.baidu.com/item/蒙卦' },
+                        { id: 46, name: '风水涣', type: '六十四卦', category: '离宫', element: '木', cost: 2, power: 3, description: '风行水上，涣。先王以享于帝立庙。', effect: '涣散聚合，重新分配资源', link: 'https://baike.baidu.com/item/涣卦' },
+                        { id: 47, name: '天水讼', type: '六十四卦', category: '离宫', element: '金', cost: 4, power: 5, description: '天与水违行，讼。君子以作事谋始。', effect: '争讼冲突，强制对手弃牌，造成3点伤害', link: 'https://baike.baidu.com/item/讼卦' },
+                        { id: 48, name: '天火同人', type: '六十四卦', category: '离宫', element: '金', cost: 3, power: 4, description: '天与火，同人。君子以类族辨物。', effect: '同人协力，与所有盟友共享效果', link: 'https://baike.baidu.com/item/同人卦' },
+
+                        // 艮宫八卦
+                        { id: 49, name: '艮为山', type: '六十四卦', category: '艮宫', element: '土', cost: 3, power: 1, description: '兼山，艮。君子以思不出其位。艮卦象征山、静止、稳定。', effect: '稳如泰山，获得护盾，免疫下次攻击', link: 'https://baike.baidu.com/item/艮卦' },
+                        { id: 50, name: '山火贲', type: '六十四卦', category: '艮宫', element: '土', cost: 2, power: 3, description: '山下有火，贲。君子以明庶政，无敢折狱。', effect: '文饰美化，提升形象，获得魅力加成', link: 'https://baike.baidu.com/item/贲卦' },
+                        { id: 51, name: '山天大畜', type: '六十四卦', category: '艮宫', element: '土', cost: 3, power: 4, description: '天在山中，大畜。君子以多识前言往行，以畜其德。', effect: '大有积蓄，获得2点道行，2点诚意', link: 'https://baike.baidu.com/item/大畜卦' },
+                        { id: 52, name: '山泽损', type: '六十四卦', category: '艮宫', element: '土', cost: 2, power: 2, description: '山下有泽，损。君子以惩忿窒欲。', effect: '损己利人，牺牲1点生命值，盟友获得2点', link: 'https://baike.baidu.com/item/损卦' },
+                        { id: 53, name: '火泽睽', type: '六十四卦', category: '艮宫', element: '火', cost: 3, power: 3, description: '上火下泽，睽。君子以同而异。', effect: '睽违分离，分化对手联盟', link: 'https://baike.baidu.com/item/睽卦' },
+                        { id: 54, name: '天泽履', type: '六十四卦', category: '艮宫', element: '金', cost: 2, power: 3, description: '上天下泽，履。君子以辨上下，定民志。', effect: '履行正道，获得正义加成，威力+1', link: 'https://baike.baidu.com/item/履卦' },
+                        { id: 55, name: '风泽中孚', type: '六十四卦', category: '艮宫', element: '木', cost: 2, power: 3, description: '泽上有风，中孚。君子以议狱缓死。', effect: '中心诚信，获得信任，与所有玩家和解', link: 'https://baike.baidu.com/item/中孚卦' },
+                        { id: 56, name: '风山渐', type: '六十四卦', category: '艮宫', element: '木', cost: 2, power: 2, description: '山上有木，渐。君子以居贤德善俗。', effect: '渐进发展，每回合威力+1，持续3回合', link: 'https://baike.baidu.com/item/渐卦' },
+
+                        // 兑宫八卦
+                        { id: 57, name: '兑为泽', type: '六十四卦', category: '兑宫', element: '金', cost: 1, power: 2, description: '丽泽，兑。君子以朋友讲习。兑卦象征泽、喜悦、交流。', effect: '喜悦和谐，与其他玩家交换卡牌或资源', link: 'https://baike.baidu.com/item/兑卦' },
+                        { id: 58, name: '泽水困', type: '六十四卦', category: '兑宫', element: '金', cost: 3, power: 2, description: '泽无水，困。君子以致命遂志。', effect: '困境求生，在危机中获得突破机会', link: 'https://baike.baidu.com/item/困卦' },
+                        { id: 59, name: '泽地萃', type: '六十四卦', category: '兑宫', element: '金', cost: 2, power: 4, description: '泽上于地，萃。君子以除戎器，戒不虞。', effect: '聚集力量，召集所有盟友共同行动', link: 'https://baike.baidu.com/item/萃卦' },
+                        { id: 60, name: '泽山咸', type: '六十四卦', category: '兑宫', element: '金', cost: 2, power: 3, description: '山上有泽，咸。君子以虚受人。', effect: '感应相通，与目标玩家心意相通', link: 'https://baike.baidu.com/item/咸卦' },
+                        { id: 61, name: '水山蹇', type: '六十四卦', category: '兑宫', element: '水', cost: 3, power: 2, description: '山上有水，蹇。君子以反身修德。', effect: '蹇难困顿，反思修德，下回合获得智慧加成', link: 'https://baike.baidu.com/item/蹇卦' },
+                        { id: 62, name: '地山谦', type: '六十四卦', category: '兑宫', element: '土', cost: 1, power: 2, description: '地中有山，谦。君子以裒多益寡，称物平施。', effect: '谦逊美德，获得所有人好感，免疫攻击1回合', link: 'https://baike.baidu.com/item/谦卦' },
+                        { id: 63, name: '雷山小过', type: '六十四卦', category: '兑宫', element: '木', cost: 2, power: 3, description: '山上有雷，小过。君子以行过乎恭，丧过乎哀，用过乎俭。', effect: '小有过错，谨慎行事，获得谨慎加成', link: 'https://baike.baidu.com/item/小过卦' },
+                        { id: 64, name: '雷泽归妹', type: '六十四卦', category: '兑宫', element: '木', cost: 3, power: 4, description: '泽上有雷，归妹。君子以永终知敝。', effect: '归妹成家，获得伴侣支持，威力+2', link: 'https://baike.baidu.com/item/归妹卦' },
+
+                        // === 天时地利人和卡牌（保留精华部分）===
+                        // 天时卡牌（精选）
+                        { id: 101, name: '立春', type: '天时卡', category: '节气', element: '木', cost: 1, power: 2, description: '万物复苏，生机勃发。春季第一个节气，象征新的开始。', effect: '所有玩家获得1点气，木属性卡牌效果+1', link: 'https://baike.baidu.com/item/立春' },
+                        { id: 102, name: '夏至', type: '天时卡', category: '节气', element: '火', cost: 3, power: 4, description: '阳气最盛，白昼最长。夏季顶峰，火元素达到极致。', effect: '火属性卡牌威力翻倍，获得3点道行', link: 'https://baike.baidu.com/item/夏至' },
+                        { id: 103, name: '秋分', type: '天时卡', category: '节气', element: '金', cost: 2, power: 3, description: '秋高气爽，收获时节。金秋时节，收获智慧。', effect: '抽取3张卡，金属性效果增强', link: 'https://baike.baidu.com/item/秋分' },
+                        { id: 104, name: '冬至', type: '天时卡', category: '节气', element: '水', cost: 3, power: 2, description: '阴气最盛，一阳来复。冬季深处，蕴含新生。', effect: '获得护盾，下回合行动力翻倍', link: 'https://baike.baidu.com/item/冬至' },
+                        { id: 105, name: '甲子', type: '天时卡', category: '干支', element: '木', cost: 2, power: 4, description: '六十甲子之首，象征新的轮回开始。', effect: '重置所有冷却，获得额外回合', link: 'https://baike.baidu.com/item/甲子' },
+
+                        // 地利卡牌（精选）
+                        { id: 201, name: '中央土', type: '地利卡', category: '方位', element: '土', cost: 3, power: 5, description: '中央戊己土，四方之主。土气最为厚重。', effect: '所有属性平衡增强，获得稳定核心', link: 'https://baike.baidu.com/item/中央' },
+                        { id: 202, name: '高山', type: '地利卡', category: '地形', element: '土', cost: 3, power: 4, description: '巍峨高山，不可撼动。提供强大的防御力。', effect: '获得山岳护盾，免疫物理攻击', link: 'https://baike.baidu.com/item/高山' },
+                        { id: 203, name: '江河', type: '地利卡', category: '地形', element: '水', cost: 2, power: 3, description: '奔流不息的江河，带来生命活力。', effect: '持续恢复生命值，水属性增强', link: 'https://baike.baidu.com/item/江河' },
+
+                        // 人和卡牌（精选）
+                        { id: 301, name: '兵法三十六计', type: '人和卡', category: '策略', element: '无', cost: 4, power: 6, description: '古代兵法智慧结晶，包含三十六种战略战术。', effect: '选择一种计策执行，效果随机但强大', link: 'https://baike.baidu.com/item/三十六计' },
+                        { id: 302, name: '知己知彼', type: '人和卡', category: '策略', element: '无', cost: 2, power: 2, description: '孙子兵法核心思想，了解敌我双方情况。', effect: '查看所有对手手牌和状态', link: 'https://baike.baidu.com/item/知己知彼' },
+                        { id: 303, name: '琴棋书画', type: '人和卡', category: '技能', element: '无', cost: 2, power: 3, description: '文人四艺，修身养性之道。', effect: '获得文化加成，诚意+2，道行+1', link: 'https://baike.baidu.com/item/琴棋书画' }
+                    ],
                     tianJiBianGame: null, // TianJiBianGame实例
                     gameState: {
                         game_id: 'test123',
@@ -2653,6 +2873,19 @@
                 isMyTurn() {
                     return this.gameState && this.currentPlayer && 
                            this.gameState.current_player === this.currentPlayer.id;
+                },
+                filteredCodexCards() {
+                    if (this.codexFilter === 'all') {
+                        return this.allCards;
+                    }
+                    const filterMap = {
+                        'tian': '天时卡',
+                        'di': '地利卡',
+                        'ren': '人和卡',
+                        'gua': '六十四卦'
+                    };
+                    const filterType = filterMap[this.codexFilter];
+                    return this.allCards.filter(card => card.type === filterType);
                 }
             },
             mounted() {
