@@ -1,0 +1,276 @@
+{
+  "effect_types": {
+    "MODIFY_ATTRIBUTE": {
+      "description": "修改玩家或目标的属性值",
+      "parameters": {
+        "attribute": {
+          "type": "string",
+          "required": true,
+          "valid_values": ["yang", "yin", "dao", "health", "energy", "wisdom", "luck"]
+        },
+        "value": {
+          "type": "number",
+          "required": true,
+          "description": "修改的数值，正数为增加，负数为减少"
+        },
+        "target": {
+          "type": "string",
+          "required": false,
+          "default": "self",
+          "valid_values": ["self", "opponent", "all"]
+        }
+      }
+    },
+    "DRAW_CARDS": {
+      "description": "抽取卡牌",
+      "parameters": {
+        "amount": {
+          "type": "number",
+          "required": true,
+          "min": 1,
+          "max": 5
+        },
+        "card_type": {
+          "type": "string",
+          "required": false,
+          "valid_values": ["any", "hexagram", "action", "special"]
+        }
+      }
+    },
+    "HEAL": {
+      "description": "恢复生命值或能量",
+      "parameters": {
+        "amount": {
+          "type": "number",
+          "required": true,
+          "min": 1
+        },
+        "type": {
+          "type": "string",
+          "required": false,
+          "default": "health",
+          "valid_values": ["health", "energy", "both"]
+        }
+      }
+    },
+    "DAMAGE": {
+      "description": "造成伤害",
+      "parameters": {
+        "amount": {
+          "type": "number",
+          "required": true,
+          "min": 1
+        },
+        "damage_type": {
+          "type": "string",
+          "required": false,
+          "default": "direct",
+          "valid_values": ["direct", "yang", "yin", "elemental"]
+        },
+        "target": {
+          "type": "string",
+          "required": false,
+          "default": "opponent",
+          "valid_values": ["opponent", "self", "all"]
+        }
+      }
+    },
+    "SHIELD": {
+      "description": "提供护盾保护",
+      "parameters": {
+        "amount": {
+          "type": "number",
+          "required": true,
+          "min": 1
+        },
+        "duration": {
+          "type": "number",
+          "required": false,
+          "default": 1,
+          "description": "持续回合数"
+        },
+        "shield_type": {
+          "type": "string",
+          "required": false,
+          "default": "physical",
+          "valid_values": ["physical", "magical", "elemental", "all"]
+        }
+      }
+    },
+    "BUFF": {
+      "description": "施加增益效果",
+      "parameters": {
+        "buff_type": {
+          "type": "string",
+          "required": true,
+          "valid_values": ["strength", "wisdom", "speed", "luck", "regeneration"]
+        },
+        "amount": {
+          "type": "number",
+          "required": true
+        },
+        "duration": {
+          "type": "number",
+          "required": false,
+          "default": 3,
+          "description": "持续回合数"
+        }
+      }
+    },
+    "DEBUFF": {
+      "description": "施加负面效果",
+      "parameters": {
+        "debuff_type": {
+          "type": "string",
+          "required": true,
+          "valid_values": ["weakness", "confusion", "slow", "curse", "poison"]
+        },
+        "amount": {
+          "type": "number",
+          "required": true
+        },
+        "duration": {
+          "type": "number",
+          "required": false,
+          "default": 2,
+          "description": "持续回合数"
+        },
+        "target": {
+          "type": "string",
+          "required": false,
+          "default": "opponent",
+          "valid_values": ["opponent", "self", "all"]
+        }
+      }
+    },
+    "TRANSFORM": {
+      "description": "转换卡牌或状态",
+      "parameters": {
+        "transform_type": {
+          "type": "string",
+          "required": true,
+          "valid_values": ["card_to_card", "element_to_element", "state_change"]
+        },
+        "source": {
+          "type": "string",
+          "required": true
+        },
+        "target": {
+          "type": "string",
+          "required": true
+        }
+      }
+    },
+    "SPECIAL_ACTION": {
+      "description": "特殊行动效果",
+      "parameters": {
+        "action_type": {
+          "type": "string",
+          "required": true,
+          "valid_values": ["meditation", "divination", "enlightenment", "breakthrough"]
+        },
+        "power": {
+          "type": "number",
+          "required": false,
+          "default": 1
+        }
+      }
+    },
+    "CONDITIONAL": {
+      "description": "条件触发效果",
+      "parameters": {
+        "condition": {
+          "type": "object",
+          "required": true,
+          "properties": {
+            "type": {
+              "type": "string",
+              "valid_values": ["attribute_check", "card_count", "turn_number", "element_balance"]
+            },
+            "operator": {
+              "type": "string",
+              "valid_values": [">=", "<=", "==", "!=", ">", "<"]
+            },
+            "value": {
+              "type": "number"
+            }
+          }
+        },
+        "effect_if_true": {
+          "type": "array",
+          "description": "条件为真时执行的效果"
+        },
+        "effect_if_false": {
+          "type": "array",
+          "description": "条件为假时执行的效果",
+          "required": false
+        }
+      }
+    }
+  },
+  "effect_combinations": {
+    "synergy_effects": {
+      "yang_boost_with_fire": {
+        "description": "阳气增强配合火元素时的协同效果",
+        "conditions": [
+          {"type": "MODIFY_ATTRIBUTE", "attribute": "yang"},
+          {"element": "fire"}
+        ],
+        "bonus_multiplier": 1.5
+      },
+      "yin_harmony": {
+        "description": "阴性效果的和谐共振",
+        "conditions": [
+          {"element": "yin"},
+          {"count": ">=2"}
+        ],
+        "bonus_effect": {
+          "type": "HEAL",
+          "amount": 2
+        }
+      }
+    },
+    "counter_effects": {
+      "fire_water_clash": {
+        "description": "火水相冲的对抗效果",
+        "conditions": [
+          {"element": "fire"},
+          {"element": "water"}
+        ],
+        "result": "neutralize",
+        "damage_reduction": 0.5
+      }
+    }
+  },
+  "timing_rules": {
+    "immediate": {
+      "description": "立即执行的效果",
+      "examples": ["DAMAGE", "HEAL", "DRAW_CARDS"]
+    },
+    "start_of_turn": {
+      "description": "回合开始时执行",
+      "examples": ["BUFF", "REGENERATION"]
+    },
+    "end_of_turn": {
+      "description": "回合结束时执行",
+      "examples": ["POISON", "DEBUFF_DECAY"]
+    },
+    "triggered": {
+      "description": "特定条件触发",
+      "examples": ["CONDITIONAL", "COUNTER_ATTACK"]
+    }
+  },
+  "validation_rules": {
+    "resource_limits": {
+      "max_cards_in_hand": 7,
+      "max_energy_per_turn": 10,
+      "max_attribute_value": 100,
+      "min_attribute_value": 0
+    },
+    "effect_stacking": {
+      "same_buff_type": "replace",
+      "different_buff_types": "stack",
+      "shield_effects": "add"
+    }
+  }
+}

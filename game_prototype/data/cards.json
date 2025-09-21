@@ -1,0 +1,322 @@
+{
+  "cards": {
+    "qian_card": {
+      "id": "qian_card",
+      "name": "乾为天",
+      "description": "天行健，君子以自强不息",
+      "cost": 5,
+      "type": "hexagram",
+      "rarity": "legendary",
+      "element": "yang",
+      "trigram": "qian",
+      "effects": [
+        {
+          "type": "MODIFY_ATTRIBUTE",
+          "attribute": "yang",
+          "value": 3,
+          "description": "增加3点阳气"
+        },
+        {
+          "type": "DRAW_CARDS",
+          "amount": 1,
+          "description": "抽取1张卡牌"
+        },
+        {
+          "type": "GAIN_AP",
+          "amount": 1,
+          "description": "获得1点行动力"
+        }
+      ],
+      "conditions": [
+        {
+          "type": "MIN_YANG",
+          "value": 2,
+          "description": "需要至少2点阳气才能使用"
+        }
+      ],
+      "flavor_text": "乾道变化，各正性命",
+      "artwork": "🌟",
+      "sound_effect": "thunder"
+    },
+    "kun_card": {
+      "id": "kun_card", 
+      "name": "坤为地",
+      "description": "地势坤，君子以厚德载物",
+      "cost": 4,
+      "type": "hexagram",
+      "rarity": "legendary",
+      "element": "yin",
+      "trigram": "kun",
+      "effects": [
+        {
+          "type": "MODIFY_ATTRIBUTE",
+          "attribute": "yin",
+          "value": 3,
+          "description": "增加3点阴气"
+        },
+        {
+          "type": "HEAL",
+          "amount": 2,
+          "description": "恢复2点生命值"
+        },
+        {
+          "type": "GAIN_DEFENSE",
+          "amount": 2,
+          "description": "获得2点防御力"
+        }
+      ],
+      "conditions": [
+        {
+          "type": "MIN_YIN",
+          "value": 2,
+          "description": "需要至少2点阴气才能使用"
+        }
+      ],
+      "flavor_text": "坤厚载物，德合无疆",
+      "artwork": "🌍",
+      "sound_effect": "earth"
+    },
+    "zhen_card": {
+      "id": "zhen_card",
+      "name": "震为雷",
+      "description": "洊雷，震；君子以恐惧修省",
+      "cost": 3,
+      "type": "hexagram",
+      "rarity": "rare",
+      "element": "yang",
+      "trigram": "zhen",
+      "effects": [
+        {
+          "type": "DAMAGE",
+          "target": "opponent",
+          "amount": 3,
+          "description": "对对手造成3点伤害"
+        },
+        {
+          "type": "STUN",
+          "target": "opponent",
+          "duration": 1,
+          "description": "震慑对手1回合"
+        }
+      ],
+      "conditions": [],
+      "flavor_text": "雷声震天，万物惊蛰",
+      "artwork": "⚡",
+      "sound_effect": "thunder"
+    },
+    "xun_card": {
+      "id": "xun_card",
+      "name": "巽为风",
+      "description": "随风，巽；君子以申命行事",
+      "cost": 2,
+      "type": "hexagram", 
+      "rarity": "common",
+      "element": "yin",
+      "trigram": "xun",
+      "effects": [
+        {
+          "type": "MOVE_CARD",
+          "from": "opponent_hand",
+          "to": "player_hand",
+          "amount": 1,
+          "description": "从对手手牌中获得1张卡牌"
+        },
+        {
+          "type": "MODIFY_ATTRIBUTE",
+          "attribute": "agility",
+          "value": 2,
+          "description": "增加2点敏捷"
+        }
+      ],
+      "conditions": [],
+      "flavor_text": "风行水上，自然成文",
+      "artwork": "🌪️",
+      "sound_effect": "wind"
+    },
+    "kan_card": {
+      "id": "kan_card",
+      "name": "坎为水",
+      "description": "习坎，有孚，维心亨",
+      "cost": 3,
+      "type": "hexagram",
+      "rarity": "uncommon",
+      "element": "yin",
+      "trigram": "kan",
+      "effects": [
+        {
+          "type": "CLEANSE",
+          "target": "self",
+          "description": "清除自身所有负面效果"
+        },
+        {
+          "type": "MODIFY_ATTRIBUTE",
+          "attribute": "wisdom",
+          "value": 2,
+          "description": "增加2点智慧"
+        },
+        {
+          "type": "DRAW_CARDS",
+          "amount": 2,
+          "description": "抽取2张卡牌"
+        }
+      ],
+      "conditions": [],
+      "flavor_text": "水流不息，智慧如泉",
+      "artwork": "🌊",
+      "sound_effect": "water"
+    },
+    "li_card": {
+      "id": "li_card",
+      "name": "离为火",
+      "description": "明两作，离；大人以继明照于四方",
+      "cost": 3,
+      "type": "hexagram",
+      "rarity": "uncommon", 
+      "element": "yang",
+      "trigram": "li",
+      "effects": [
+        {
+          "type": "DAMAGE",
+          "target": "all_opponents",
+          "amount": 2,
+          "description": "对所有对手造成2点伤害"
+        },
+        {
+          "type": "REVEAL",
+          "target": "opponent_hand",
+          "amount": 3,
+          "description": "查看对手3张手牌"
+        },
+        {
+          "type": "MODIFY_ATTRIBUTE",
+          "attribute": "insight",
+          "value": 3,
+          "description": "增加3点洞察力"
+        }
+      ],
+      "conditions": [],
+      "flavor_text": "离明照耀，无所不见",
+      "artwork": "🔥",
+      "sound_effect": "fire"
+    },
+    "gen_card": {
+      "id": "gen_card",
+      "name": "艮为山",
+      "description": "兼山，艮；君子以思不出其位",
+      "cost": 4,
+      "type": "hexagram",
+      "rarity": "rare",
+      "element": "yang",
+      "trigram": "gen",
+      "effects": [
+        {
+          "type": "BLOCK",
+          "target": "self",
+          "amount": 5,
+          "description": "获得5点格挡值"
+        },
+        {
+          "type": "COUNTER_ATTACK",
+          "damage": 2,
+          "description": "反击时造成2点伤害"
+        },
+        {
+          "type": "MODIFY_ATTRIBUTE",
+          "attribute": "stability",
+          "value": 3,
+          "description": "增加3点稳定性"
+        }
+      ],
+      "conditions": [],
+      "flavor_text": "山止如山，不动如山",
+      "artwork": "⛰️",
+      "sound_effect": "mountain"
+    },
+    "dui_card": {
+      "id": "dui_card",
+      "name": "兑为泽",
+      "description": "丽泽，兑；君子以朋友讲习",
+      "cost": 2,
+      "type": "hexagram",
+      "rarity": "common",
+      "element": "yin",
+      "trigram": "dui",
+      "effects": [
+        {
+          "type": "HEAL",
+          "target": "all_allies",
+          "amount": 2,
+          "description": "为所有盟友恢复2点生命值"
+        },
+        {
+          "type": "SHARE_CARDS",
+          "amount": 1,
+          "description": "与盟友分享1张卡牌"
+        },
+        {
+          "type": "MODIFY_ATTRIBUTE",
+          "attribute": "charisma",
+          "value": 2,
+          "description": "增加2点魅力"
+        }
+      ],
+      "conditions": [],
+      "flavor_text": "泽润万物，和悦相处",
+      "artwork": "🌸",
+      "sound_effect": "lake"
+    }
+  },
+  "card_sets": {
+    "basic_set": {
+      "name": "基础八卦",
+      "description": "包含八个基本卦象的卡牌",
+      "cards": ["qian_card", "kun_card", "zhen_card", "xun_card", "kan_card", "li_card", "gen_card", "dui_card"]
+    },
+    "advanced_set": {
+      "name": "高级卦象",
+      "description": "包含复合卦象和特殊效果卡牌",
+      "cards": []
+    }
+  },
+  "effect_types": {
+    "MODIFY_ATTRIBUTE": {
+      "description": "修改玩家属性",
+      "parameters": ["attribute", "value"],
+      "examples": ["yang", "yin", "wisdom", "agility", "stability"]
+    },
+    "DAMAGE": {
+      "description": "造成伤害",
+      "parameters": ["target", "amount"],
+      "targets": ["opponent", "all_opponents", "self"]
+    },
+    "HEAL": {
+      "description": "恢复生命值",
+      "parameters": ["target", "amount"],
+      "targets": ["self", "ally", "all_allies"]
+    },
+    "DRAW_CARDS": {
+      "description": "抽取卡牌",
+      "parameters": ["amount"]
+    },
+    "GAIN_AP": {
+      "description": "获得行动点",
+      "parameters": ["amount"]
+    },
+    "BLOCK": {
+      "description": "获得格挡值",
+      "parameters": ["target", "amount"]
+    },
+    "STUN": {
+      "description": "震慑效果",
+      "parameters": ["target", "duration"]
+    },
+    "CLEANSE": {
+      "description": "清除负面效果",
+      "parameters": ["target"]
+    },
+    "REVEAL": {
+      "description": "查看卡牌",
+      "parameters": ["target", "amount"]
+    }
+  }
+}

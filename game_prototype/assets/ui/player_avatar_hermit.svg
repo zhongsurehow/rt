@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="80" height="80" viewBox="0 0 80 80" xmlns="http://www.w3.org/2000/svg">
+  <!-- 背景圆形 -->
+  <circle cx="40" cy="40" r="38" fill="#708090" stroke="#2f4f4f" stroke-width="2"/>
+  
+  <!-- 斗笠 -->
+  <ellipse cx="40" cy="25" rx="25" ry="8" fill="#8b7355" stroke="#654321" stroke-width="1"/>
+  <ellipse cx="40" cy="22" rx="20" ry="6" fill="#a0522d"/>
+  
+  <!-- 脸部 -->
+  <ellipse cx="40" cy="45" rx="16" ry="18" fill="#fdbcb4"/>
+  
+  <!-- 眼睛（智慧的眼神） -->
+  <ellipse cx="36" cy="42" rx="2" ry="3" fill="#2c3e50"/>
+  <ellipse cx="44" cy="42" rx="2" ry="3" fill="#2c3e50"/>
+  <circle cx="36" cy="41" r="0.5" fill="#ecf0f1"/>
+  <circle cx="44" cy="41" r="0.5" fill="#ecf0f1"/>
+  
+  <!-- 鼻子 -->
+  <ellipse cx="40" cy="47" rx="1" ry="2" fill="#f4a460"/>
+  
+  <!-- 嘴巴（慈祥的微笑） -->
+  <path d="M 37 52 Q 40 54 43 52" stroke="#8b4513" stroke-width="2" fill="none"/>
+  
+  <!-- 长胡须 -->
+  <path d="M 30 55 Q 25 65 30 70" stroke="#d3d3d3" stroke-width="3" fill="none"/>
+  <path d="M 35 57 Q 30 67 35 72" stroke="#d3d3d3" stroke-width="2" fill="none"/>
+  <path d="M 40 58 Q 35 68 40 73" stroke="#d3d3d3" stroke-width="2" fill="none"/>
+  <path d="M 45 57 Q 50 67 45 72" stroke="#d3d3d3" stroke-width="2" fill="none"/>
+  <path d="M 50 55 Q 55 65 50 70" stroke="#d3d3d3" stroke-width="3" fill="none"/>
+  
+  <!-- 道袍 -->
+  <path d="M 25 65 Q 40 70 55 65 L 55 75 L 25 75 Z" fill="#696969" stroke="#2f4f4f" stroke-width="1"/>
+  
+  <!-- 道教符号 -->
+  <g transform="translate(40, 70) scale(0.3)">
+    <!-- 太极图案 -->
+    <circle r="8" fill="#ecf0f1" stroke="#2c3e50" stroke-width="1"/>
+    <path d="M 0,-6 A 6,6 0 0,1 0,6 A 3,3 0 0,1 0,0 A 3,3 0 0,0 0,-6 Z" fill="#2c3e50"/>
+    <circle cy="-3" r="1.5" fill="#ecf0f1"/>
+    <circle cy="3" r="1.5" fill="#2c3e50"/>
+  </g>
+  
+  <!-- 智慧光环 -->
+  <circle cx="40" cy="40" r="36" fill="none" stroke="#87ceeb" stroke-width="1" opacity="0.7"/>
+  <circle cx="40" cy="40" r="34" fill="none" stroke="#87ceeb" stroke-width="0.5" opacity="0.5"/>
+</svg>

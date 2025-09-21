@@ -1,0 +1,370 @@
+{
+  "hexagrams": {
+    "qian": {
+      "id": "qian",
+      "name": "乾",
+      "chinese_name": "乾为天",
+      "number": 1,
+      "symbol": "☰",
+      "binary": "111111",
+      "element": "yang",
+      "nature": "天",
+      "attribute": "刚健",
+      "direction": "西北",
+      "season": "秋冬之交",
+      "time": "戌亥",
+      "color": "金白",
+      "body_part": "头",
+      "family_member": "父",
+      "animal": "马",
+      "virtue": "元亨利贞",
+      "keywords": ["创造", "领导", "刚强", "主动"],
+      "upper_trigram": "qian",
+      "lower_trigram": "qian",
+      "judgment": "乾：元，亨，利，贞。",
+      "image": "天行健，君子以自强不息。",
+      "meaning": "天道刚健，运行不息，君子观此卦象，从而以天为法，自强不息。",
+      "divination_meanings": {
+        "general": "大吉大利，事业成功，但需要持续努力",
+        "career": "事业蒸蒸日上，适合创业和领导",
+        "relationship": "感情稳定，但需要主动表达",
+        "health": "身体健康，精力充沛",
+        "wealth": "财运亨通，投资有利"
+      },
+      "game_effects": {
+        "base_power": 6,
+        "special_abilities": ["leadership", "creation", "yang_boost"],
+        "synergy_with": ["kun", "zhen", "li"],
+        "counter_to": ["kun"],
+        "weakness_to": []
+      }
+    },
+    "kun": {
+      "id": "kun",
+      "name": "坤",
+      "chinese_name": "坤为地",
+      "number": 2,
+      "symbol": "☷",
+      "binary": "000000",
+      "element": "yin",
+      "nature": "地",
+      "attribute": "柔顺",
+      "direction": "西南",
+      "season": "夏秋之交",
+      "time": "未申",
+      "color": "黄黑",
+      "body_part": "腹",
+      "family_member": "母",
+      "animal": "牛",
+      "virtue": "厚德载物",
+      "keywords": ["包容", "承载", "柔顺", "滋养"],
+      "upper_trigram": "kun",
+      "lower_trigram": "kun",
+      "judgment": "坤：元，亨，利牝马之贞。君子有攸往，先迷后得主，利西南得朋，东北丧朋。安贞，吉。",
+      "image": "地势坤，君子以厚德载物。",
+      "meaning": "大地的形势是坤顺的，君子观此卦象，从而以地为法，增厚美德，容载万物。",
+      "divination_meanings": {
+        "general": "顺势而为，以柔克刚，厚德载物",
+        "career": "适合辅助工作，团队合作",
+        "relationship": "温柔体贴，包容理解",
+        "health": "注意脾胃，需要调养",
+        "wealth": "稳健理财，积少成多"
+      },
+      "game_effects": {
+        "base_power": 5,
+        "special_abilities": ["nurturing", "defense", "yin_boost"],
+        "synergy_with": ["qian", "xun", "kan"],
+        "counter_to": ["qian"],
+        "weakness_to": []
+      }
+    },
+    "zhen": {
+      "id": "zhen",
+      "name": "震",
+      "chinese_name": "震为雷",
+      "number": 51,
+      "symbol": "☳",
+      "binary": "001001",
+      "element": "yang",
+      "nature": "雷",
+      "attribute": "动",
+      "direction": "东",
+      "season": "春",
+      "time": "卯",
+      "color": "青绿",
+      "body_part": "足",
+      "family_member": "长男",
+      "animal": "龙",
+      "virtue": "奋发",
+      "keywords": ["震动", "奋起", "惊醒", "行动"],
+      "upper_trigram": "zhen",
+      "lower_trigram": "zhen",
+      "judgment": "震：亨。震来虩虩，笑言哑哑。震惊百里，不丧匕鬯。",
+      "image": "洊雷，震；君子以恐惧修省。",
+      "meaning": "雷声相继，震卦。君子观此卦象，从而戒惧恐惧，修身省过。",
+      "divination_meanings": {
+        "general": "震动变化，需要警醒，但终获成功",
+        "career": "突破现状，勇于创新",
+        "relationship": "感情有波动，需要沟通",
+        "health": "注意心脏，避免惊吓",
+        "wealth": "投资有风险，需要谨慎"
+      },
+      "game_effects": {
+        "base_power": 4,
+        "special_abilities": ["shock", "awakening", "speed_boost"],
+        "synergy_with": ["qian", "li", "xun"],
+        "counter_to": ["gen"],
+        "weakness_to": ["kun"]
+      }
+    },
+    "xun": {
+      "id": "xun",
+      "name": "巽",
+      "chinese_name": "巽为风",
+      "number": 57,
+      "symbol": "☴",
+      "binary": "110110",
+      "element": "yin",
+      "nature": "风",
+      "attribute": "入",
+      "direction": "东南",
+      "season": "春夏之交",
+      "time": "辰巳",
+      "color": "青白",
+      "body_part": "股",
+      "family_member": "长女",
+      "animal": "鸡",
+      "virtue": "谦逊",
+      "keywords": ["渗透", "柔和", "顺从", "传播"],
+      "upper_trigram": "xun",
+      "lower_trigram": "xun",
+      "judgment": "巽：小亨，利有攸往，利见大人。",
+      "image": "随风，巽；君子以申命行事。",
+      "meaning": "风行相随，巽卦。君子观此卦象，从而申明教命，施政行事。",
+      "divination_meanings": {
+        "general": "顺风而行，渐进发展，小有成就",
+        "career": "适合沟通协调，循序渐进",
+        "relationship": "温和相处，细水长流",
+        "health": "注意呼吸系统，多做运动",
+        "wealth": "财运平稳，细水长流"
+      },
+      "game_effects": {
+        "base_power": 3,
+        "special_abilities": ["penetration", "influence", "agility_boost"],
+        "synergy_with": ["kun", "zhen", "dui"],
+        "counter_to": ["li"],
+        "weakness_to": ["gen"]
+      }
+    },
+    "kan": {
+      "id": "kan",
+      "name": "坎",
+      "chinese_name": "坎为水",
+      "number": 29,
+      "symbol": "☵",
+      "binary": "010010",
+      "element": "yin",
+      "nature": "水",
+      "attribute": "陷",
+      "direction": "北",
+      "season": "冬",
+      "time": "子",
+      "color": "黑",
+      "body_part": "耳",
+      "family_member": "中男",
+      "animal": "豕",
+      "virtue": "智慧",
+      "keywords": ["流动", "智慧", "危险", "深度"],
+      "upper_trigram": "kan",
+      "lower_trigram": "kan",
+      "judgment": "坎：习坎，有孚，维心亨，行有尚。",
+      "image": "水洊至，习坎；君子以常德行，习教事。",
+      "meaning": "水流相继，坎卦。君子观此卦象，从而坚持德行，反复教习。",
+      "divination_meanings": {
+        "general": "困难重重，需要智慧和坚持",
+        "career": "遇到阻碍，需要耐心等待",
+        "relationship": "感情深沉，但有波折",
+        "health": "注意肾脏和血液循环",
+        "wealth": "财运不稳，需要谨慎理财"
+      },
+      "game_effects": {
+        "base_power": 4,
+        "special_abilities": ["flow", "wisdom", "cleansing"],
+        "synergy_with": ["kun", "gen", "dui"],
+        "counter_to": ["li"],
+        "weakness_to": ["kun"]
+      }
+    },
+    "li": {
+      "id": "li",
+      "name": "离",
+      "chinese_name": "离为火",
+      "number": 30,
+      "symbol": "☲",
+      "binary": "101101",
+      "element": "yang",
+      "nature": "火",
+      "attribute": "丽",
+      "direction": "南",
+      "season": "夏",
+      "time": "午",
+      "color": "红",
+      "body_part": "目",
+      "family_member": "中女",
+      "animal": "雉",
+      "virtue": "光明",
+      "keywords": ["光明", "美丽", "依附", "文明"],
+      "upper_trigram": "li",
+      "lower_trigram": "li",
+      "judgment": "离：利贞，亨。畜牝牛，吉。",
+      "image": "明两作，离；大人以继明照于四方。",
+      "meaning": "两个太阳相继出现，离卦。大人观此卦象，从而继承光明，照耀四方。",
+      "divination_meanings": {
+        "general": "光明正大，美好前景，但需要依附",
+        "career": "事业光明，适合文化教育",
+        "relationship": "感情热烈，但要注意理性",
+        "health": "注意心脏和眼睛",
+        "wealth": "财运光明，投资有利"
+      },
+      "game_effects": {
+        "base_power": 5,
+        "special_abilities": ["illumination", "beauty", "insight"],
+        "synergy_with": ["qian", "zhen", "dui"],
+        "counter_to": ["kan"],
+        "weakness_to": ["kan"]
+      }
+    },
+    "gen": {
+      "id": "gen",
+      "name": "艮",
+      "chinese_name": "艮为山",
+      "number": 52,
+      "symbol": "☶",
+      "binary": "100100",
+      "element": "yang",
+      "nature": "山",
+      "attribute": "止",
+      "direction": "东北",
+      "season": "冬春之交",
+      "time": "丑寅",
+      "color": "黄",
+      "body_part": "手",
+      "family_member": "少男",
+      "animal": "狗",
+      "virtue": "笃实",
+      "keywords": ["停止", "稳定", "阻碍", "专注"],
+      "upper_trigram": "gen",
+      "lower_trigram": "gen",
+      "judgment": "艮：艮其背，不获其身，行其庭，不见其人，无咎。",
+      "image": "兼山，艮；君子以思不出其位。",
+      "meaning": "两山相重，艮卦。君子观此卦象，从而思考不超出自己的地位。",
+      "divination_meanings": {
+        "general": "适可而止，稳重行事，不宜妄动",
+        "career": "保持现状，稳扎稳打",
+        "relationship": "感情稳定，但缺乏激情",
+        "health": "身体健康，注意脊椎",
+        "wealth": "财运稳定，不宜投机"
+      },
+      "game_effects": {
+        "base_power": 5,
+        "special_abilities": ["stability", "defense", "blocking"],
+        "synergy_with": ["kun", "kan", "dui"],
+        "counter_to": ["zhen"],
+        "weakness_to": ["xun"]
+      }
+    },
+    "dui": {
+      "id": "dui",
+      "name": "兑",
+      "chinese_name": "兑为泽",
+      "number": 58,
+      "symbol": "☱",
+      "binary": "011011",
+      "element": "yin",
+      "nature": "泽",
+      "attribute": "悦",
+      "direction": "西",
+      "season": "秋",
+      "time": "酉",
+      "color": "白",
+      "body_part": "口",
+      "family_member": "少女",
+      "animal": "羊",
+      "virtue": "喜悦",
+      "keywords": ["喜悦", "交流", "收获", "和谐"],
+      "upper_trigram": "dui",
+      "lower_trigram": "dui",
+      "judgment": "兑：亨，利贞。",
+      "image": "丽泽，兑；君子以朋友讲习。",
+      "meaning": "两个湖泽相连，兑卦。君子观此卦象，从而与朋友讲学习。",
+      "divination_meanings": {
+        "general": "和悦相处，收获喜悦，人际和谐",
+        "career": "适合合作，团队工作",
+        "relationship": "感情甜蜜，沟通顺畅",
+        "health": "心情愉快，注意口腔",
+        "wealth": "财运不错，合作有利"
+      },
+      "game_effects": {
+        "base_power": 3,
+        "special_abilities": ["joy", "communication", "harmony"],
+        "synergy_with": ["xun", "li", "gen"],
+        "counter_to": ["gen"],
+        "weakness_to": ["qian"]
+      }
+    }
+  },
+  "trigram_combinations": {
+    "qian_qian": "qian",
+    "kun_kun": "kun", 
+    "zhen_zhen": "zhen",
+    "xun_xun": "xun",
+    "kan_kan": "kan",
+    "li_li": "li",
+    "gen_gen": "gen",
+    "dui_dui": "dui"
+  },
+  "element_interactions": {
+    "yang_yang": {
+      "result": "强化",
+      "multiplier": 1.5,
+      "description": "阳气相合，力量增强"
+    },
+    "yin_yin": {
+      "result": "和谐",
+      "multiplier": 1.3,
+      "description": "阴气相合，和谐稳定"
+    },
+    "yang_yin": {
+      "result": "平衡",
+      "multiplier": 1.2,
+      "description": "阴阳调和，平衡发展"
+    },
+    "yin_yang": {
+      "result": "平衡",
+      "multiplier": 1.2,
+      "description": "阴阳调和，平衡发展"
+    }
+  },
+  "seasonal_effects": {
+    "spring": {
+      "favored_hexagrams": ["zhen", "xun"],
+      "bonus": 0.2,
+      "description": "春季有利于震、巽卦"
+    },
+    "summer": {
+      "favored_hexagrams": ["li", "dui"],
+      "bonus": 0.2,
+      "description": "夏季有利于离、兑卦"
+    },
+    "autumn": {
+      "favored_hexagrams": ["qian", "dui"],
+      "bonus": 0.2,
+      "description": "秋季有利于乾、兑卦"
+    },
+    "winter": {
+      "favored_hexagrams": ["kan", "gen"],
+      "bonus": 0.2,
+      "description": "冬季有利于坎、艮卦"
+    }
+  }
+}

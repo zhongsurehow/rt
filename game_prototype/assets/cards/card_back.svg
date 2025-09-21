@@ -1,0 +1,93 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="120" height="180" viewBox="0 0 120 180" xmlns="http://www.w3.org/2000/svg">
+  <!-- 卡牌背景 -->
+  <rect x="2" y="2" width="116" height="176" rx="8" ry="8" fill="#2c3e50" stroke="#34495e" stroke-width="2"/>
+  
+  <!-- 太极图案背景 -->
+  <circle cx="60" cy="90" r="50" fill="#ecf0f1" stroke="#bdc3c7" stroke-width="2"/>
+  
+  <!-- 太极图案 -->
+  <g transform="translate(60, 90)">
+    <!-- 阴阳鱼 -->
+    <path d="M 0,-40 A 40,40 0 0,1 0,40 A 20,20 0 0,1 0,0 A 20,20 0 0,0 0,-40 Z" fill="#2c3e50"/>
+    <path d="M 0,40 A 40,40 0 0,1 0,-40 A 20,20 0 0,1 0,0 A 20,20 0 0,0 0,40 Z" fill="#ecf0f1"/>
+    
+    <!-- 阴阳眼 -->
+    <circle cx="0" cy="-20" r="8" fill="#ecf0f1"/>
+    <circle cx="0" cy="20" r="8" fill="#2c3e50"/>
+  </g>
+  
+  <!-- 八卦符号环绕 -->
+  <g transform="translate(60, 90)">
+    <!-- 乾 -->
+    <g transform="rotate(0) translate(0, -65)">
+      <rect x="-8" y="-2" width="16" height="1.5" fill="#f39c12"/>
+      <rect x="-8" y="0" width="16" height="1.5" fill="#f39c12"/>
+      <rect x="-8" y="2" width="16" height="1.5" fill="#f39c12"/>
+    </g>
+    
+    <!-- 兑 -->
+    <g transform="rotate(45) translate(0, -65)">
+      <rect x="-8" y="-2" width="7" height="1.5" fill="#f39c12"/>
+      <rect x="1" y="-2" width="7" height="1.5" fill="#f39c12"/>
+      <rect x="-8" y="0" width="16" height="1.5" fill="#f39c12"/>
+      <rect x="-8" y="2" width="16" height="1.5" fill="#f39c12"/>
+    </g>
+    
+    <!-- 离 -->
+    <g transform="rotate(90) translate(0, -65)">
+      <rect x="-8" y="-2" width="16" height="1.5" fill="#f39c12"/>
+      <rect x="-8" y="0" width="7" height="1.5" fill="#f39c12"/>
+      <rect x="1" y="0" width="7" height="1.5" fill="#f39c12"/>
+      <rect x="-8" y="2" width="16" height="1.5" fill="#f39c12"/>
+    </g>
+    
+    <!-- 震 -->
+    <g transform="rotate(135) translate(0, -65)">
+      <rect x="-8" y="-2" width="7" height="1.5" fill="#f39c12"/>
+      <rect x="1" y="-2" width="7" height="1.5" fill="#f39c12"/>
+      <rect x="-8" y="0" width="7" height="1.5" fill="#f39c12"/>
+      <rect x="1" y="0" width="7" height="1.5" fill="#f39c12"/>
+      <rect x="-8" y="2" width="16" height="1.5" fill="#f39c12"/>
+    </g>
+    
+    <!-- 巽 -->
+    <g transform="rotate(180) translate(0, -65)">
+      <rect x="-8" y="-2" width="16" height="1.5" fill="#f39c12"/>
+      <rect x="-8" y="0" width="16" height="1.5" fill="#f39c12"/>
+      <rect x="-8" y="2" width="7" height="1.5" fill="#f39c12"/>
+      <rect x="1" y="2" width="7" height="1.5" fill="#f39c12"/>
+    </g>
+    
+    <!-- 坎 -->
+    <g transform="rotate(225) translate(0, -65)">
+      <rect x="-8" y="-2" width="7" height="1.5" fill="#f39c12"/>
+      <rect x="1" y="-2" width="7" height="1.5" fill="#f39c12"/>
+      <rect x="-8" y="0" width="16" height="1.5" fill="#f39c12"/>
+      <rect x="-8" y="2" width="7" height="1.5" fill="#f39c12"/>
+      <rect x="1" y="2" width="7" height="1.5" fill="#f39c12"/>
+    </g>
+    
+    <!-- 艮 -->
+    <g transform="rotate(270) translate(0, -65)">
+      <rect x="-8" y="-2" width="16" height="1.5" fill="#f39c12"/>
+      <rect x="-8" y="0" width="7" height="1.5" fill="#f39c12"/>
+      <rect x="1" y="0" width="7" height="1.5" fill="#f39c12"/>
+      <rect x="-8" y="2" width="7" height="1.5" fill="#f39c12"/>
+      <rect x="1" y="2" width="7" height="1.5" fill="#f39c12"/>
+    </g>
+    
+    <!-- 坤 -->
+    <g transform="rotate(315) translate(0, -65)">
+      <rect x="-8" y="-2" width="7" height="1.5" fill="#f39c12"/>
+      <rect x="1" y="-2" width="7" height="1.5" fill="#f39c12"/>
+      <rect x="-8" y="0" width="7" height="1.5" fill="#f39c12"/>
+      <rect x="1" y="0" width="7" height="1.5" fill="#f39c12"/>
+      <rect x="-8" y="2" width="7" height="1.5" fill="#f39c12"/>
+      <rect x="1" y="2" width="7" height="1.5" fill="#f39c12"/>
+    </g>
+  </g>
+  
+  <!-- 底部文字 -->
+  <text x="60" y="165" text-anchor="middle" font-family="serif" font-size="12" font-weight="bold" fill="#f39c12">天机变</text>
+</svg>

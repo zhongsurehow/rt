@@ -1,0 +1,41 @@
+version: '3.8'
+
+services:
+  tianjibian-game:
+    build: .
+    container_name: tianjibian-gui
+    environment:
+      - DISPLAY=:99
+    volumes:
+      # 挂载保存文件目录
+      - ./saves:/app/saves
+      # 挂载配置文件
+      - ./game_config.json:/app/game_config.json
+    ports:
+      - "8000:8000"
+    # 如果需要访问本地显示（Linux/Mac）
+    # volumes:
+    #   - /tmp/.X11-unix:/tmp/.X11-unix
+    # environment:
+    #   - DISPLAY=$DISPLAY
+    restart: unless-stopped
+
+  # VNC版本（可选）
+  tianjibian-vnc:
+    build: .
+    container_name: tianjibian-vnc
+    environment:
+      - DISPLAY=:1
+    ports:
+      - "5901:5901"  # VNC端口
+      - "8001:8000"  # 游戏端口
+    volumes:
+      - ./saves:/app/saves
+    command: >
+      bash -c "
+        Xvfb :1 -screen 0 1024x768x24 &
+        x11vnc -display :1 -nopw -listen localhost -xkb -rfbport 5901 &
+        sleep 2
+        python simple_gui_game.py
+      "
+    restart: unless-stopped

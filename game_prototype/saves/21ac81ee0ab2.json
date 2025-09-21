@@ -1,0 +1,46 @@
+{
+  "save_id": "21ac81ee0ab2",
+  "player_name": "测试玩家",
+  "game_state": {
+    "current_player": "测试玩家",
+    "turn": 15,
+    "season": "春",
+    "players": {
+      "测试玩家": {
+        "cards": [
+          "乾",
+          "坤",
+          "震"
+        ],
+        "score": 85,
+        "strategies_used": [
+          "兵不厌诈",
+          "声东击西",
+          "借刀杀人"
+        ]
+      }
+    },
+    "playtime": 420.5,
+    "achievements": [
+      "first_win"
+    ],
+    "statistics": {
+      "cards_played": 12,
+      "hexagrams_used": 8,
+      "strategies_used": 3
+    }
+  },
+  "timestamp": 1758302385.60435,
+  "game_version": "1.0.0",
+  "save_name": "测试存档",
+  "description": "这是一个测试存档",
+  "playtime": 420.5,
+  "achievements": [
+    "first_win"
+  ],
+  "statistics": {
+    "cards_played": 12,
+    "hexagrams_used": 8,
+    "strategies_used": 3
+  }
+}

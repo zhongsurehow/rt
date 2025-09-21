@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="80" height="80" viewBox="0 0 80 80" xmlns="http://www.w3.org/2000/svg">
+  <!-- 背景圆形 -->
+  <circle cx="40" cy="40" r="38" fill="#daa520" stroke="#b8860b" stroke-width="2"/>
+  
+  <!-- 皇冠 -->
+  <path d="M 20 25 L 25 15 L 30 20 L 35 10 L 40 20 L 45 10 L 50 20 L 55 15 L 60 25 L 60 30 L 20 30 Z" fill="#ffd700" stroke="#daa520" stroke-width="1"/>
+  
+  <!-- 皇冠装饰 -->
+  <circle cx="40" cy="15" r="3" fill="#ff4500"/>
+  <circle cx="30" cy="18" r="2" fill="#ff6347"/>
+  <circle cx="50" cy="18" r="2" fill="#ff6347"/>
+  
+  <!-- 脸部 -->
+  <ellipse cx="40" cy="45" rx="18" ry="20" fill="#fdbcb4"/>
+  
+  <!-- 眼睛 -->
+  <ellipse cx="35" cy="42" rx="2" ry="3" fill="#2c3e50"/>
+  <ellipse cx="45" cy="42" rx="2" ry="3" fill="#2c3e50"/>
+  
+  <!-- 鼻子 -->
+  <ellipse cx="40" cy="47" rx="1" ry="2" fill="#f4a460"/>
+  
+  <!-- 嘴巴 -->
+  <path d="M 37 52 Q 40 54 43 52" stroke="#8b4513" stroke-width="2" fill="none"/>
+  
+  <!-- 胡须 -->
+  <path d="M 32 55 Q 35 58 38 55" stroke="#8b4513" stroke-width="2" fill="none"/>
+  <path d="M 42 55 Q 45 58 48 55" stroke="#8b4513" stroke-width="2" fill="none"/>
+  <path d="M 37 57 Q 40 60 43 57" stroke="#8b4513" stroke-width="2" fill="none"/>
+  
+  <!-- 龙袍领口 -->
+  <path d="M 25 65 Q 40 70 55 65 L 55 75 L 25 75 Z" fill="#8b0000" stroke="#654321" stroke-width="1"/>
+  
+  <!-- 龙纹装饰 -->
+  <circle cx="35" cy="70" r="2" fill="#ffd700"/>
+  <circle cx="45" cy="70" r="2" fill="#ffd700"/>
+  
+  <!-- 威严光环 -->
+  <circle cx="40" cy="40" r="36" fill="none" stroke="#ffd700" stroke-width="1" opacity="0.5"/>
+</svg>
