@@ -1,0 +1,914 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>天机变 - 游戏过程模拟演示</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background: linear-gradient(135deg, #1a1a2e, #16213e, #0f3460);
+            font-family: 'Microsoft YaHei', sans-serif;
+            color: #fff;
+            overflow-x: hidden;
+        }
+
+        .simulation-container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .title {
+            font-size: 2.5em;
+            color: #ffd700;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
+            margin-bottom: 10px;
+        }
+
+        .subtitle {
+            font-size: 1.2em;
+            color: #ccc;
+            margin-bottom: 20px;
+        }
+
+        .game-area {
+            display: flex;
+            gap: 20px;
+            height: 800px;
+        }
+
+        .game-board {
+            flex: 2;
+            position: relative;
+            background: radial-gradient(circle, #2c3e50, #34495e);
+            border: 3px solid #ffd700;
+            border-radius: 20px;
+            padding: 20px;
+        }
+
+        .info-panel {
+            flex: 1;
+            background: rgba(0,0,0,0.8);
+            border: 2px solid #ffd700;
+            border-radius: 10px;
+            padding: 20px;
+            overflow-y: auto;
+        }
+
+        /* 游戏状态显示 */
+        .game-status {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            right: 20px;
+            background: rgba(0,0,0,0.7);
+            padding: 15px;
+            border-radius: 10px;
+            border: 2px solid #ffd700;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .status-item {
+            text-align: center;
+        }
+
+        .status-label {
+            font-size: 12px;
+            color: #ccc;
+            margin-bottom: 5px;
+        }
+
+        .status-value {
+            font-size: 16px;
+            font-weight: bold;
+            color: #ffd700;
+        }
+
+        /* 玩家区域 */
+        .players-area {
+            position: absolute;
+            top: 100px;
+            left: 20px;
+            right: 20px;
+            bottom: 200px;
+        }
+
+        .player {
+            position: absolute;
+            width: 120px;
+            height: 80px;
+            background: linear-gradient(45deg, #3498db, #2980b9);
+            border: 3px solid #fff;
+            border-radius: 10px;
+            padding: 10px;
+            text-align: center;
+            transition: all 0.5s ease;
+            cursor: pointer;
+        }
+
+        .player.active {
+            background: linear-gradient(45deg, #e74c3c, #c0392b);
+            transform: scale(1.1);
+            box-shadow: 0 0 20px rgba(231, 76, 60, 0.5);
+            animation: pulse 2s infinite;
+        }
+
+        .player.ai {
+            background: linear-gradient(45deg, #9b59b6, #8e44ad);
+        }
+
+        .player-name {
+            font-size: 12px;
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+
+        .player-stats {
+            font-size: 10px;
+            display: flex;
+            justify-content: space-between;
+        }
+
+        .player-cards {
+            position: absolute;
+            bottom: -30px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            gap: 2px;
+        }
+
+        .card-mini {
+            width: 15px;
+            height: 20px;
+            background: #ffd700;
+            border-radius: 2px;
+            border: 1px solid #fff;
+        }
+
+        /* 玩家位置 */
+        .player-1 { top: 10%; left: 40%; }
+        .player-2 { top: 20%; right: 10%; }
+        .player-3 { bottom: 20%; right: 10%; }
+        .player-4 { bottom: 10%; left: 40%; }
+
+        /* 中央区域 */
+        .center-area {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 300px;
+            height: 200px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .deck, .discard {
+            width: 80px;
+            height: 120px;
+            border: 2px solid #fff;
+            border-radius: 8px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .deck {
+            background: linear-gradient(45deg, #8e44ad, #9b59b6);
+        }
+
+        .discard {
+            background: linear-gradient(45deg, #34495e, #2c3e50);
+        }
+
+        .deck:hover, .discard:hover {
+            transform: scale(1.05);
+        }
+
+        .current-card {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 100px;
+            height: 140px;
+            background: linear-gradient(45deg, #f39c12, #e67e22);
+            border: 3px solid #fff;
+            border-radius: 10px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            font-size: 14px;
+            font-weight: bold;
+            opacity: 0;
+            transition: all 0.5s ease;
+            z-index: 10;
+        }
+
+        .current-card.show {
+            opacity: 1;
+            transform: translate(-50%, -50%) scale(1.2);
+        }
+
+        /* 季节指示器 */
+        .season-indicator {
+            position: absolute;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(0,0,0,0.8);
+            padding: 15px 30px;
+            border-radius: 20px;
+            border: 2px solid #ffd700;
+            text-align: center;
+        }
+
+        .season-name {
+            font-size: 18px;
+            font-weight: bold;
+            color: #ffd700;
+            margin-bottom: 5px;
+        }
+
+        .season-effect {
+            font-size: 12px;
+            color: #ccc;
+        }
+
+        /* 控制面板 */
+        .controls {
+            position: absolute;
+            bottom: 20px;
+            right: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .control-btn {
+            padding: 10px 20px;
+            background: linear-gradient(45deg, #27ae60, #2ecc71);
+            border: none;
+            border-radius: 5px;
+            color: white;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 12px;
+        }
+
+        .control-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.3);
+        }
+
+        .control-btn:disabled {
+            background: #7f8c8d;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        /* 信息面板样式 */
+        .info-section {
+            margin-bottom: 20px;
+            padding: 15px;
+            background: rgba(255,255,255,0.1);
+            border-radius: 8px;
+            border-left: 4px solid #ffd700;
+        }
+
+        .info-title {
+            color: #ffd700;
+            font-size: 16px;
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+
+        .info-content {
+            font-size: 14px;
+            line-height: 1.5;
+        }
+
+        .log-entry {
+            padding: 8px;
+            margin-bottom: 5px;
+            background: rgba(255,255,255,0.05);
+            border-radius: 4px;
+            border-left: 3px solid #3498db;
+            font-size: 12px;
+        }
+
+        .log-entry.action {
+            border-left-color: #e74c3c;
+        }
+
+        .log-entry.system {
+            border-left-color: #f39c12;
+        }
+
+        /* 动画效果 */
+        @keyframes pulse {
+            0% { box-shadow: 0 0 0 0 rgba(231, 76, 60, 0.7); }
+            70% { box-shadow: 0 0 0 10px rgba(231, 76, 60, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(231, 76, 60, 0); }
+        }
+
+        @keyframes cardDraw {
+            0% { transform: translate(-50%, -50%) scale(0) rotate(180deg); opacity: 0; }
+            50% { transform: translate(-50%, -50%) scale(1.5) rotate(90deg); opacity: 0.8; }
+            100% { transform: translate(-50%, -50%) scale(1.2) rotate(0deg); opacity: 1; }
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .fade-in {
+            animation: fadeIn 0.5s ease;
+        }
+
+        /* 响应式设计 */
+        @media (max-width: 1200px) {
+            .game-area {
+                flex-direction: column;
+                height: auto;
+            }
+            
+            .game-board {
+                height: 600px;
+                margin-bottom: 20px;
+            }
+            
+            .info-panel {
+                height: 400px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="simulation-container">
+        <div class="header">
+            <h1 class="title">天机变 - 游戏过程模拟</h1>
+            <p class="subtitle">观看完整的游戏流程演示，深入理解游戏机制</p>
+        </div>
+
+        <div class="game-area">
+            <div class="game-board">
+                <!-- 游戏状态 -->
+                <div class="game-status">
+                    <div class="status-item">
+                        <div class="status-label">回合数</div>
+                        <div class="status-value" id="turn-count">1</div>
+                    </div>
+                    <div class="status-item">
+                        <div class="status-label">当前玩家</div>
+                        <div class="status-value" id="current-player">玩家1</div>
+                    </div>
+                    <div class="status-item">
+                        <div class="status-label">剩余卡牌</div>
+                        <div class="status-value" id="deck-count">52</div>
+                    </div>
+                    <div class="status-item">
+                        <div class="status-label">游戏阶段</div>
+                        <div class="status-value" id="game-phase">抽牌阶段</div>
+                    </div>
+                </div>
+
+                <!-- 玩家区域 -->
+                <div class="players-area">
+                    <div class="player player-1 active" id="player-1">
+                        <div class="player-name">玩家1</div>
+                        <div class="player-stats">
+                            <span>气: <span id="p1-qi">6</span></span>
+                            <span>道: <span id="p1-dao">0</span></span>
+                        </div>
+                        <div class="player-cards">
+                            <div class="card-mini"></div>
+                            <div class="card-mini"></div>
+                            <div class="card-mini"></div>
+                            <div class="card-mini"></div>
+                            <div class="card-mini"></div>
+                        </div>
+                    </div>
+
+                    <div class="player player-2 ai" id="player-2">
+                        <div class="player-name">AI-智者</div>
+                        <div class="player-stats">
+                            <span>气: <span id="p2-qi">6</span></span>
+                            <span>道: <span id="p2-dao">0</span></span>
+                        </div>
+                        <div class="player-cards">
+                            <div class="card-mini"></div>
+                            <div class="card-mini"></div>
+                            <div class="card-mini"></div>
+                            <div class="card-mini"></div>
+                            <div class="card-mini"></div>
+                        </div>
+                    </div>
+
+                    <div class="player player-3 ai" id="player-3">
+                        <div class="player-name">AI-贤人</div>
+                        <div class="player-stats">
+                            <span>气: <span id="p3-qi">6</span></span>
+                            <span>道: <span id="p3-dao">0</span></span>
+                        </div>
+                        <div class="player-cards">
+                            <div class="card-mini"></div>
+                            <div class="card-mini"></div>
+                            <div class="card-mini"></div>
+                            <div class="card-mini"></div>
+                            <div class="card-mini"></div>
+                        </div>
+                    </div>
+
+                    <div class="player player-4 ai" id="player-4">
+                        <div class="player-name">AI-学者</div>
+                        <div class="player-stats">
+                            <span>气: <span id="p4-qi">6</span></span>
+                            <span>道: <span id="p4-dao">0</span></span>
+                        </div>
+                        <div class="player-cards">
+                            <div class="card-mini"></div>
+                            <div class="card-mini"></div>
+                            <div class="card-mini"></div>
+                            <div class="card-mini"></div>
+                            <div class="card-mini"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 中央区域 -->
+                <div class="center-area">
+                    <div class="deck" id="deck" title="点击抽牌">
+                        <div>牌堆</div>
+                        <div id="deck-count-display">52张</div>
+                    </div>
+
+                    <div class="current-card" id="current-card">
+                        <div id="card-name">乾卦</div>
+                        <div id="card-cost">消耗: 3气</div>
+                        <div id="card-reward">奖励: 2道行</div>
+                    </div>
+
+                    <div class="discard" id="discard" title="弃牌堆">
+                        <div>弃牌</div>
+                        <div id="discard-count-display">0张</div>
+                    </div>
+                </div>
+
+                <!-- 季节指示器 -->
+                <div class="season-indicator">
+                    <div class="season-name" id="season-name">春季 🌸</div>
+                    <div class="season-effect" id="season-effect">万物复苏，气恢复+1</div>
+                </div>
+
+                <!-- 控制面板 -->
+                <div class="controls">
+                    <button class="control-btn" id="auto-play" onclick="toggleAutoPlay()">开始自动演示</button>
+                    <button class="control-btn" id="next-step" onclick="nextStep()">下一步</button>
+                    <button class="control-btn" onclick="resetSimulation()">重新开始</button>
+                    <button class="control-btn" onclick="skipToEnd()">跳到结束</button>
+                </div>
+            </div>
+
+            <div class="info-panel">
+                <div class="info-section">
+                    <div class="info-title">🎮 当前状态</div>
+                    <div class="info-content" id="current-status">
+                        游戏开始，玩家1的回合。点击"开始自动演示"观看完整游戏流程。
+                    </div>
+                </div>
+
+                <div class="info-section">
+                    <div class="info-title">📋 游戏日志</div>
+                    <div class="info-content" id="game-log">
+                        <div class="log-entry system">游戏开始，4名玩家参与</div>
+                        <div class="log-entry system">初始资源：每人6点气，0点道行</div>
+                        <div class="log-entry system">当前季节：春季，气恢复+1</div>
+                    </div>
+                </div>
+
+                <div class="info-section">
+                    <div class="info-title">🃏 卡牌说明</div>
+                    <div class="info-content" id="card-explanation">
+                        选择或抽取卡牌后，这里会显示详细的卡牌说明和效果。
+                    </div>
+                </div>
+
+                <div class="info-section">
+                    <div class="info-title">📊 游戏统计</div>
+                    <div class="info-content" id="game-stats">
+                        <div>总回合数: <span id="total-turns">0</span></div>
+                        <div>已使用卡牌: <span id="cards-played">0</span></div>
+                        <div>领先玩家: <span id="leading-player">暂无</span></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // 游戏状态
+        let gameState = {
+            currentPlayer: 0,
+            turn: 1,
+            phase: 'draw', // draw, action, end
+            deckCount: 52,
+            discardCount: 0,
+            season: 0,
+            autoPlay: false,
+            players: [
+                { name: '玩家1', qi: 6, dao: 0, cards: 5, isAI: false },
+                { name: 'AI-智者', qi: 6, dao: 0, cards: 5, isAI: true },
+                { name: 'AI-贤人', qi: 6, dao: 0, cards: 5, isAI: true },
+                { name: 'AI-学者', qi: 6, dao: 0, cards: 5, isAI: true }
+            ]
+        };
+
+        // 卡牌数据
+        const cards = [
+            { name: '乾卦', cost: 3, reward: 2, effect: '天行健，君子以自强不息' },
+            { name: '坤卦', cost: 2, reward: 3, effect: '地势坤，君子以厚德载物' },
+            { name: '震卦', cost: 4, reward: 1, effect: '雷声震震，启发智慧' },
+            { name: '巽卦', cost: 2, reward: 2, effect: '风行天下，传播道理' },
+            { name: '坎卦', cost: 3, reward: 2, effect: '水流不息，克服困难' },
+            { name: '离卦', cost: 3, reward: 3, effect: '火光明亮，照亮前路' },
+            { name: '艮卦', cost: 2, reward: 1, effect: '山岳稳重，坚持不懈' },
+            { name: '兑卦', cost: 1, reward: 2, effect: '泽润万物，和谐共处' }
+        ];
+
+        // 季节数据
+        const seasons = [
+            { name: '春季 🌸', effect: '万物复苏，气恢复+1' },
+            { name: '夏季 ☀️', effect: '阳气旺盛，攻击效果+1' },
+            { name: '秋季 🍂', effect: '收获季节，道行获得+1' },
+            { name: '冬季 ❄️', effect: '蛰伏期间，手牌上限+1' }
+        ];
+
+        let autoPlayInterval;
+        let stepCount = 0;
+
+        // 初始化
+        function init() {
+            updateDisplay();
+            addLog('system', '游戏初始化完成，准备开始');
+        }
+
+        // 更新显示
+        function updateDisplay() {
+            // 更新状态栏
+            document.getElementById('turn-count').textContent = gameState.turn;
+            document.getElementById('current-player').textContent = gameState.players[gameState.currentPlayer].name;
+            document.getElementById('deck-count').textContent = gameState.deckCount;
+            document.getElementById('deck-count-display').textContent = gameState.deckCount + '张';
+            document.getElementById('discard-count-display').textContent = gameState.discardCount + '张';
+            
+            // 更新阶段
+            const phases = { draw: '抽牌阶段', action: '行动阶段', end: '结束阶段' };
+            document.getElementById('game-phase').textContent = phases[gameState.phase];
+
+            // 更新玩家状态
+            gameState.players.forEach((player, index) => {
+                const playerElement = document.getElementById(`player-${index + 1}`);
+                playerElement.classList.toggle('active', index === gameState.currentPlayer);
+                
+                document.getElementById(`p${index + 1}-qi`).textContent = player.qi;
+                document.getElementById(`p${index + 1}-dao`).textContent = player.dao;
+                
+                // 更新手牌显示
+                const cardsContainer = playerElement.querySelector('.player-cards');
+                cardsContainer.innerHTML = '';
+                for (let i = 0; i < player.cards; i++) {
+                    const cardMini = document.createElement('div');
+                    cardMini.className = 'card-mini';
+                    cardsContainer.appendChild(cardMini);
+                }
+            });
+
+            // 更新季节
+            const season = seasons[gameState.season];
+            document.getElementById('season-name').textContent = season.name;
+            document.getElementById('season-effect').textContent = season.effect;
+
+            // 更新统计
+            document.getElementById('total-turns').textContent = Math.floor(stepCount / 4);
+            document.getElementById('cards-played').textContent = 52 - gameState.deckCount;
+            
+            const leadingPlayer = gameState.players.reduce((max, player) => 
+                player.dao > max.dao ? player : max
+            );
+            document.getElementById('leading-player').textContent = leadingPlayer.dao > 0 ? leadingPlayer.name : '暂无';
+        }
+
+        // 添加日志
+        function addLog(type, message) {
+            const logContainer = document.getElementById('game-log');
+            const logEntry = document.createElement('div');
+            logEntry.className = `log-entry ${type} fade-in`;
+            logEntry.textContent = message;
+            
+            logContainer.appendChild(logEntry);
+            logContainer.scrollTop = logContainer.scrollHeight;
+            
+            // 限制日志数量
+            if (logContainer.children.length > 20) {
+                logContainer.removeChild(logContainer.firstChild);
+            }
+        }
+
+        // 显示卡牌
+        function showCard(card) {
+            const cardElement = document.getElementById('current-card');
+            document.getElementById('card-name').textContent = card.name;
+            document.getElementById('card-cost').textContent = `消耗: ${card.cost}气`;
+            document.getElementById('card-reward').textContent = `奖励: ${card.reward}道行`;
+            
+            cardElement.classList.add('show');
+            cardElement.style.animation = 'cardDraw 1s ease';
+            
+            // 更新卡牌说明
+            document.getElementById('card-explanation').innerHTML = `
+                <strong>${card.name}</strong><br>
+                消耗气值: ${card.cost}<br>
+                获得道行: ${card.reward}<br>
+                效果: ${card.effect}
+            `;
+            
+            setTimeout(() => {
+                cardElement.classList.remove('show');
+                cardElement.style.animation = '';
+            }, 3000);
+        }
+
+        // 下一步
+        function nextStep() {
+            stepCount++;
+            const currentPlayer = gameState.players[gameState.currentPlayer];
+            
+            switch (gameState.phase) {
+                case 'draw':
+                    // 抽牌阶段
+                    if (gameState.deckCount > 0) {
+                        const card = cards[Math.floor(Math.random() * cards.length)];
+                        showCard(card);
+                        gameState.deckCount--;
+                        currentPlayer.cards++;
+                        addLog('action', `${currentPlayer.name} 抽取了 ${card.name}`);
+                        
+                        // 季节效果：春季气恢复+1
+                        if (gameState.season === 0) {
+                            currentPlayer.qi = Math.min(currentPlayer.qi + 1, 10);
+                            addLog('system', `春季效果：${currentPlayer.name} 恢复1点气`);
+                        }
+                    }
+                    gameState.phase = 'action';
+                    break;
+                    
+                case 'action':
+                    // 行动阶段
+                    if (currentPlayer.isAI) {
+                        // AI行动逻辑
+                        if (currentPlayer.qi >= 2 && Math.random() > 0.3) {
+                            const card = cards[Math.floor(Math.random() * cards.length)];
+                            if (currentPlayer.qi >= card.cost) {
+                                currentPlayer.qi -= card.cost;
+                                let daoGain = card.reward;
+                                
+                                // 秋季效果：道行获得+1
+                                if (gameState.season === 2) {
+                                    daoGain += 1;
+                                    addLog('system', `秋季效果：道行获得+1`);
+                                }
+                                
+                                currentPlayer.dao += daoGain;
+                                currentPlayer.cards--;
+                                gameState.discardCount++;
+                                addLog('action', `${currentPlayer.name} 使用了 ${card.name}，获得${daoGain}点道行`);
+                                showCard(card);
+                            } else {
+                                addLog('action', `${currentPlayer.name} 气不足，选择冥想恢复气值`);
+                                currentPlayer.qi = Math.min(currentPlayer.qi + 2, 10);
+                            }
+                        } else {
+                            addLog('action', `${currentPlayer.name} 选择冥想，恢复2点气`);
+                            currentPlayer.qi = Math.min(currentPlayer.qi + 2, 10);
+                        }
+                    } else {
+                        // 玩家行动（模拟）
+                        if (Math.random() > 0.5) {
+                            const card = cards[Math.floor(Math.random() * cards.length)];
+                            if (currentPlayer.qi >= card.cost) {
+                                currentPlayer.qi -= card.cost;
+                                let daoGain = card.reward;
+                                
+                                if (gameState.season === 2) {
+                                    daoGain += 1;
+                                }
+                                
+                                currentPlayer.dao += daoGain;
+                                currentPlayer.cards--;
+                                gameState.discardCount++;
+                                addLog('action', `${currentPlayer.name} 使用了 ${card.name}，获得${daoGain}点道行`);
+                                showCard(card);
+                            } else {
+                                addLog('action', `${currentPlayer.name} 气不足，冥想恢复气值`);
+                                currentPlayer.qi = Math.min(currentPlayer.qi + 2, 10);
+                            }
+                        } else {
+                            addLog('action', `${currentPlayer.name} 选择冥想，恢复2点气`);
+                            currentPlayer.qi = Math.min(currentPlayer.qi + 2, 10);
+                        }
+                    }
+                    gameState.phase = 'end';
+                    break;
+                    
+                case 'end':
+                    // 结束阶段
+                    gameState.currentPlayer = (gameState.currentPlayer + 1) % 4;
+                    if (gameState.currentPlayer === 0) {
+                        gameState.turn++;
+                        // 每4回合换季节
+                        if (gameState.turn % 4 === 1) {
+                            gameState.season = (gameState.season + 1) % 4;
+                            addLog('system', `季节变化：${seasons[gameState.season].name}`);
+                        }
+                    }
+                    gameState.phase = 'draw';
+                    
+                    // 检查胜利条件
+                    const winner = gameState.players.find(p => p.dao >= 20);
+                    if (winner || gameState.deckCount <= 0 || gameState.turn > 20) {
+                        endGame(winner);
+                        return;
+                    }
+                    break;
+            }
+            
+            updateDisplay();
+            updateCurrentStatus();
+        }
+
+        // 更新当前状态说明
+        function updateCurrentStatus() {
+            const currentPlayer = gameState.players[gameState.currentPlayer];
+            const phaseTexts = {
+                draw: `${currentPlayer.name} 的抽牌阶段，准备抽取新卡牌`,
+                action: `${currentPlayer.name} 的行动阶段，可以使用卡牌或冥想`,
+                end: `${currentPlayer.name} 的回合结束，准备切换到下一位玩家`
+            };
+            
+            document.getElementById('current-status').textContent = phaseTexts[gameState.phase];
+        }
+
+        // 结束游戏
+        function endGame(winner) {
+            if (autoPlayInterval) {
+                clearInterval(autoPlayInterval);
+                gameState.autoPlay = false;
+                document.getElementById('auto-play').textContent = '开始自动演示';
+            }
+            
+            if (winner) {
+                addLog('system', `🎉 游戏结束！${winner.name} 获得胜利！道行: ${winner.dao}`);
+                document.getElementById('current-status').textContent = `游戏结束！${winner.name} 获得胜利！`;
+            } else if (gameState.deckCount <= 0) {
+                const topPlayer = gameState.players.reduce((max, player) => 
+                    player.dao > max.dao ? player : max
+                );
+                addLog('system', `🎉 卡牌用尽！${topPlayer.name} 以${topPlayer.dao}点道行获胜！`);
+                document.getElementById('current-status').textContent = `卡牌用尽！${topPlayer.name} 获胜！`;
+            } else {
+                const topPlayer = gameState.players.reduce((max, player) => 
+                    player.dao > max.dao ? player : max
+                );
+                addLog('system', `🎉 达到回合限制！${topPlayer.name} 以${topPlayer.dao}点道行获胜！`);
+                document.getElementById('current-status').textContent = `达到回合限制！${topPlayer.name} 获胜！`;
+            }
+            
+            document.getElementById('next-step').disabled = true;
+        }
+
+        // 自动演示
+        function toggleAutoPlay() {
+            gameState.autoPlay = !gameState.autoPlay;
+            const button = document.getElementById('auto-play');
+            
+            if (gameState.autoPlay) {
+                button.textContent = '暂停演示';
+                autoPlayInterval = setInterval(nextStep, 2000);
+                document.getElementById('next-step').disabled = true;
+            } else {
+                button.textContent = '开始自动演示';
+                clearInterval(autoPlayInterval);
+                document.getElementById('next-step').disabled = false;
+            }
+        }
+
+        // 重置模拟
+        function resetSimulation() {
+            if (autoPlayInterval) {
+                clearInterval(autoPlayInterval);
+            }
+            
+            gameState = {
+                currentPlayer: 0,
+                turn: 1,
+                phase: 'draw',
+                deckCount: 52,
+                discardCount: 0,
+                season: 0,
+                autoPlay: false,
+                players: [
+                    { name: '玩家1', qi: 6, dao: 0, cards: 5, isAI: false },
+                    { name: 'AI-智者', qi: 6, dao: 0, cards: 5, isAI: true },
+                    { name: 'AI-贤人', qi: 6, dao: 0, cards: 5, isAI: true },
+                    { name: 'AI-学者', qi: 6, dao: 0, cards: 5, isAI: true }
+                ]
+            };
+            
+            stepCount = 0;
+            document.getElementById('auto-play').textContent = '开始自动演示';
+            document.getElementById('next-step').disabled = false;
+            document.getElementById('game-log').innerHTML = `
+                <div class="log-entry system">游戏重新开始，4名玩家参与</div>
+                <div class="log-entry system">初始资源：每人6点气，0点道行</div>
+                <div class="log-entry system">当前季节：春季，气恢复+1</div>
+            `;
+            
+            updateDisplay();
+            updateCurrentStatus();
+        }
+
+        // 跳到结束
+        function skipToEnd() {
+            // 快速模拟到游戏结束
+            while (gameState.deckCount > 0 && gameState.turn <= 20) {
+                const winner = gameState.players.find(p => p.dao >= 20);
+                if (winner) break;
+                
+                // 快速执行步骤
+                const currentPlayer = gameState.players[gameState.currentPlayer];
+                
+                if (gameState.phase === 'draw') {
+                    gameState.deckCount--;
+                    currentPlayer.cards++;
+                    if (gameState.season === 0) {
+                        currentPlayer.qi = Math.min(currentPlayer.qi + 1, 10);
+                    }
+                    gameState.phase = 'action';
+                } else if (gameState.phase === 'action') {
+                    if (currentPlayer.qi >= 3) {
+                        const card = cards[Math.floor(Math.random() * cards.length)];
+                        currentPlayer.qi -= card.cost;
+                        let daoGain = card.reward;
+                        if (gameState.season === 2) daoGain += 1;
+                        currentPlayer.dao += daoGain;
+                        currentPlayer.cards--;
+                        gameState.discardCount++;
+                    } else {
+                        currentPlayer.qi = Math.min(currentPlayer.qi + 2, 10);
+                    }
+                    gameState.phase = 'end';
+                } else {
+                    gameState.currentPlayer = (gameState.currentPlayer + 1) % 4;
+                    if (gameState.currentPlayer === 0) {
+                        gameState.turn++;
+                        if (gameState.turn % 4 === 1) {
+                            gameState.season = (gameState.season + 1) % 4;
+                        }
+                    }
+                    gameState.phase = 'draw';
+                }
+            }
+            
+            const winner = gameState.players.find(p => p.dao >= 20);
+            updateDisplay();
+            endGame(winner);
+        }
+
+        // 初始化游戏
+        init();
+    </script>
+</body>
+</html>

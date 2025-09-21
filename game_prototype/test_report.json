@@ -1,0 +1,110 @@
+[
+  {
+    "test": "模块导入",
+    "result": true,
+    "details": "所有核心模块导入成功",
+    "timestamp": 1758299560.6759782
+  },
+  {
+    "test": "游戏状态创建",
+    "result": true,
+    "details": "2人游戏状态创建成功",
+    "timestamp": 1758299560.6759782
+  },
+  {
+    "test": "玩家创建",
+    "result": true,
+    "details": "成功创建2个玩家",
+    "timestamp": 1758299560.6759782
+  },
+  {
+    "test": "玩家资源初始化",
+    "result": true,
+    "details": "气: 0, 道行: 0",
+    "timestamp": 1758299560.6769745
+  },
+  {
+    "test": "初始手牌",
+    "result": true,
+    "details": "玩家有1张手牌",
+    "timestamp": 1758299560.6769745
+  },
+  {
+    "test": "卡牌属性",
+    "result": true,
+    "details": "卡牌: 乾, 关联卦: ('乾', '乾'), 任务数: 6",
+    "timestamp": 1758299560.6769745
+  },
+  {
+    "test": "行动函数导入",
+    "result": true,
+    "details": "成功导入行动函数",
+    "timestamp": 1758299560.6989708
+  },
+  {
+    "test": "冥想行动",
+    "result": true,
+    "details": "冥想行动执行成功",
+    "timestamp": 1758299560.7019715
+  },
+  {
+    "test": "AI函数导入",
+    "result": true,
+    "details": "成功导入AI决策函数",
+    "timestamp": 1758299560.7019715
+  },
+  {
+    "test": "AI决策",
+    "result": true,
+    "details": "AI选择了行动: meditate",
+    "timestamp": 1758299560.7019715
+  },
+  {
+    "test": "AI被迫跳过",
+    "result": true,
+    "details": "AI正确选择跳过: 1",
+    "timestamp": 1758299560.703976
+  },
+  {
+    "test": "胜利系统导入",
+    "result": true,
+    "details": "成功导入胜利条件系统",
+    "timestamp": 1758299560.7066789
+  },
+  {
+    "test": "胜利追踪器",
+    "result": true,
+    "details": "占卜次数: 1",
+    "timestamp": 1758299560.7072117
+  },
+  {
+    "test": "胜利条件检查",
+    "result": true,
+    "details": "检查到0个胜利条件",
+    "timestamp": 1758299560.7072117
+  },
+  {
+    "test": "道行胜利检查",
+    "result": true,
+    "details": "当前道行: 0",
+    "timestamp": 1758299560.7072117
+  },
+  {
+    "test": "教学系统",
+    "result": true,
+    "details": "教学系统加载成功",
+    "timestamp": 1758299560.7072117
+  },
+  {
+    "test": "成就系统",
+    "result": true,
+    "details": "成就系统加载成功",
+    "timestamp": 1758299560.708205
+  },
+  {
+    "test": "智慧系统",
+    "result": true,
+    "details": "智慧系统加载成功",
+    "timestamp": 1758299560.708205
+  }
+]

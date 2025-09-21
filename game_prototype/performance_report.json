@@ -1,0 +1,25 @@
+{
+  "cache_stats": {
+    "hits": 5,
+    "misses": 5,
+    "hit_ratio": 0.5
+  },
+  "function_stats": {
+    "test_function": {
+      "call_count": 10,
+      "total_time": 0.5825865268707275,
+      "average_time": 0.058258652687072754,
+      "max_time": 0.10889887809753418,
+      "min_time": 0.012009620666503906,
+      "recent_calls": [
+        "PerformanceMetrics(function_name='test_function', execution_time=0.06271076202392578, memory_usage=0, call_count=1, timestamp=1758302376.1122208)",
+        "PerformanceMetrics(function_name='test_function', execution_time=0.0800929069519043, memory_usage=0, call_count=1, timestamp=1758302376.1923137)",
+        "PerformanceMetrics(function_name='test_function', execution_time=0.05099606513977051, memory_usage=0, call_count=1, timestamp=1758302376.2433097)",
+        "PerformanceMetrics(function_name='test_function', execution_time=0.06602931022644043, memory_usage=4096, call_count=1, timestamp=1758302376.309339)",
+        "PerformanceMetrics(function_name='test_function', execution_time=0.09000158309936523, memory_usage=0, call_count=1, timestamp=1758302376.3993406)"
+      ]
+    }
+  },
+  "cache_size": 5,
+  "optimization_enabled": true
+}

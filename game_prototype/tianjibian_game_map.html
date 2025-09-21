@@ -1,0 +1,525 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>天机变 - 易经卡牌游戏地图</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 20px;
+            background: linear-gradient(135deg, #1a1a2e, #16213e, #0f3460);
+            font-family: 'Microsoft YaHei', sans-serif;
+            color: #fff;
+            overflow-x: auto;
+        }
+
+        .game-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            position: relative;
+        }
+
+        .game-title {
+            text-align: center;
+            font-size: 2.5em;
+            margin-bottom: 30px;
+            color: #ffd700;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
+        }
+
+        .game-board {
+            width: 800px;
+            height: 800px;
+            margin: 0 auto;
+            position: relative;
+            background: radial-gradient(circle, #2c3e50, #34495e);
+            border: 3px solid #ffd700;
+            border-radius: 50%;
+            box-shadow: 0 0 30px rgba(255, 215, 0, 0.3);
+        }
+
+        /* 太极图中心 */
+        .taiji-center {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 120px;
+            height: 120px;
+            background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><circle cx="50" cy="50" r="50" fill="white"/><path d="M50 0 A50 50 0 0 1 50 100 A25 25 0 0 1 50 50 A25 25 0 0 0 50 0" fill="black"/><circle cx="50" cy="25" r="12.5" fill="black"/><circle cx="50" cy="75" r="12.5" fill="white"/></svg>') center/contain no-repeat;
+            border-radius: 50%;
+            box-shadow: 0 0 20px rgba(255, 215, 0, 0.5);
+        }
+
+        /* 八卦位置 */
+        .bagua-positions {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+        }
+
+        .bagua-symbol {
+            position: absolute;
+            width: 60px;
+            height: 60px;
+            background: rgba(255, 215, 0, 0.1);
+            border: 2px solid #ffd700;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 14px;
+            font-weight: bold;
+            color: #ffd700;
+            transform: translate(-50%, -50%);
+        }
+
+        /* 八个方位 */
+        .qian { top: 10%; left: 50%; }
+        .kun { top: 90%; left: 50%; }
+        .zhen { top: 25%; left: 85%; }
+        .xun { top: 75%; left: 85%; }
+        .kan { top: 50%; left: 10%; }
+        .li { top: 50%; left: 90%; }
+        .gen { top: 25%; left: 15%; }
+        .dui { top: 75%; left: 15%; }
+
+        /* 玩家位置 */
+        .player-positions {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+        }
+
+        .player-seat {
+            position: absolute;
+            width: 80px;
+            height: 80px;
+            background: linear-gradient(45deg, #3498db, #2980b9);
+            border: 3px solid #fff;
+            border-radius: 50%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+            font-weight: bold;
+            transform: translate(-50%, -50%);
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.3);
+        }
+
+        .player-seat:hover {
+            transform: translate(-50%, -50%) scale(1.1);
+            box-shadow: 0 6px 12px rgba(0,0,0,0.4);
+        }
+
+        .player-seat.active {
+            background: linear-gradient(45deg, #e74c3c, #c0392b);
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0% { box-shadow: 0 0 0 0 rgba(231, 76, 60, 0.7); }
+            70% { box-shadow: 0 0 0 10px rgba(231, 76, 60, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(231, 76, 60, 0); }
+        }
+
+        /* 玩家位置布局 */
+        .player-1 { top: 15%; left: 50%; }
+        .player-2 { top: 30%; left: 80%; }
+        .player-3 { top: 70%; left: 80%; }
+        .player-4 { top: 85%; left: 50%; }
+        .player-5 { top: 70%; left: 20%; }
+        .player-6 { top: 30%; left: 20%; }
+        .player-7 { top: 40%; left: 15%; }
+        .player-8 { top: 60%; left: 85%; }
+
+        /* 季节指示器 */
+        .season-indicator {
+            position: absolute;
+            top: -50px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(0,0,0,0.7);
+            padding: 10px 20px;
+            border-radius: 20px;
+            border: 2px solid #ffd700;
+        }
+
+        .season-current {
+            color: #ffd700;
+            font-size: 18px;
+            font-weight: bold;
+        }
+
+        /* 卡牌区域 */
+        .card-areas {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+        }
+
+        .deck-area {
+            position: absolute;
+            top: 45%;
+            left: 35%;
+            width: 60px;
+            height: 80px;
+            background: linear-gradient(45deg, #8e44ad, #9b59b6);
+            border: 2px solid #fff;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 10px;
+            color: #fff;
+            transform: rotate(-15deg);
+        }
+
+        .discard-area {
+            position: absolute;
+            top: 45%;
+            right: 35%;
+            width: 60px;
+            height: 80px;
+            background: linear-gradient(45deg, #34495e, #2c3e50);
+            border: 2px solid #fff;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 10px;
+            color: #fff;
+            transform: rotate(15deg);
+        }
+
+        /* 信息面板 */
+        .info-panel {
+            position: absolute;
+            right: -300px;
+            top: 0;
+            width: 280px;
+            background: rgba(0,0,0,0.8);
+            border: 2px solid #ffd700;
+            border-radius: 10px;
+            padding: 20px;
+        }
+
+        .info-section {
+            margin-bottom: 20px;
+        }
+
+        .info-title {
+            color: #ffd700;
+            font-size: 16px;
+            font-weight: bold;
+            margin-bottom: 10px;
+            border-bottom: 1px solid #ffd700;
+            padding-bottom: 5px;
+        }
+
+        .info-content {
+            font-size: 14px;
+            line-height: 1.5;
+        }
+
+        /* 控制按钮 */
+        .controls {
+            position: absolute;
+            bottom: -80px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            gap: 10px;
+        }
+
+        .control-btn {
+            padding: 10px 20px;
+            background: linear-gradient(45deg, #27ae60, #2ecc71);
+            border: none;
+            border-radius: 5px;
+            color: white;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .control-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.3);
+        }
+
+        /* 响应式设计 */
+        @media (max-width: 1024px) {
+            .game-board {
+                width: 600px;
+                height: 600px;
+            }
+            .info-panel {
+                position: static;
+                width: 100%;
+                margin-top: 20px;
+            }
+        }
+
+        /* 连接线 */
+        .connection-lines {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+        }
+
+        .line {
+            position: absolute;
+            background: rgba(255, 215, 0, 0.3);
+            height: 2px;
+            transform-origin: left center;
+        }
+    </style>
+</head>
+<body>
+    <div class="game-container">
+        <h1 class="game-title">天机变 - 易经卡牌游戏地图</h1>
+        
+        <div class="game-board">
+            <!-- 季节指示器 -->
+            <div class="season-indicator">
+                <div class="season-current">当前季节：春季 🌸</div>
+            </div>
+
+            <!-- 太极中心 -->
+            <div class="taiji-center" title="太极中心 - 游戏核心"></div>
+
+            <!-- 八卦位置 -->
+            <div class="bagua-positions">
+                <div class="bagua-symbol qian" title="乾卦 - 天">乾</div>
+                <div class="bagua-symbol kun" title="坤卦 - 地">坤</div>
+                <div class="bagua-symbol zhen" title="震卦 - 雷">震</div>
+                <div class="bagua-symbol xun" title="巽卦 - 风">巽</div>
+                <div class="bagua-symbol kan" title="坎卦 - 水">坎</div>
+                <div class="bagua-symbol li" title="离卦 - 火">离</div>
+                <div class="bagua-symbol gen" title="艮卦 - 山">艮</div>
+                <div class="bagua-symbol dui" title="兑卦 - 泽">兑</div>
+            </div>
+
+            <!-- 玩家位置 -->
+            <div class="player-positions">
+                <div class="player-seat player-1 active" title="玩家1 - 当前回合">
+                    <div>玩家1</div>
+                    <div>气:8 道:12</div>
+                </div>
+                <div class="player-seat player-2" title="玩家2">
+                    <div>玩家2</div>
+                    <div>气:6 道:8</div>
+                </div>
+                <div class="player-seat player-3" title="玩家3">
+                    <div>AI-智者</div>
+                    <div>气:7 道:15</div>
+                </div>
+                <div class="player-seat player-4" title="玩家4">
+                    <div>AI-贤人</div>
+                    <div>气:5 道:10</div>
+                </div>
+                <div class="player-seat player-5" style="opacity: 0.5;" title="空位">
+                    <div>空位</div>
+                    <div>等待加入</div>
+                </div>
+                <div class="player-seat player-6" style="opacity: 0.5;" title="空位">
+                    <div>空位</div>
+                    <div>等待加入</div>
+                </div>
+            </div>
+
+            <!-- 卡牌区域 -->
+            <div class="card-areas">
+                <div class="deck-area" title="卡牌堆">
+                    <div>牌堆<br>剩余:42</div>
+                </div>
+                <div class="discard-area" title="弃牌堆">
+                    <div>弃牌<br>数量:8</div>
+                </div>
+            </div>
+
+            <!-- 连接线 -->
+            <div class="connection-lines">
+                <!-- 这里可以添加玩家之间的连接线 -->
+            </div>
+        </div>
+
+        <!-- 信息面板 -->
+        <div class="info-panel">
+            <div class="info-section">
+                <div class="info-title">🎮 地图说明</div>
+                <div class="info-content">
+                    • 圆形地图代表天地循环<br>
+                    • 太极中心象征阴阳平衡<br>
+                    • 八卦方位影响卡牌效果<br>
+                    • 玩家围绕中心而坐
+                </div>
+            </div>
+
+            <div class="info-section">
+                <div class="info-title">👥 玩家位置</div>
+                <div class="info-content">
+                    • 最多支持8名玩家<br>
+                    • 按顺时针方向行动<br>
+                    • 红色边框表示当前玩家<br>
+                    • 显示气值和道行数值
+                </div>
+            </div>
+
+            <div class="info-section">
+                <div class="info-title">🃏 游戏区域</div>
+                <div class="info-content">
+                    • 中央：太极核心区域<br>
+                    • 左侧：卡牌堆（抽牌）<br>
+                    • 右侧：弃牌堆（弃牌）<br>
+                    • 外围：八卦方位加成
+                </div>
+            </div>
+
+            <div class="info-section">
+                <div class="info-title">🌸 季节系统</div>
+                <div class="info-content">
+                    • 春：气恢复+1<br>
+                    • 夏：攻击效果+1<br>
+                    • 秋：道行获得+1<br>
+                    • 冬：手牌上限+1
+                </div>
+            </div>
+        </div>
+
+        <!-- 控制按钮 -->
+        <div class="controls">
+            <button class="control-btn" onclick="nextSeason()">下一季节</button>
+            <button class="control-btn" onclick="nextPlayer()">下一玩家</button>
+            <button class="control-btn" onclick="showCards()">查看手牌</button>
+            <button class="control-btn" onclick="resetGame()">重新开始</button>
+        </div>
+    </div>
+
+    <script>
+        let currentSeason = 0;
+        let currentPlayer = 1;
+        const seasons = ['春季 🌸', '夏季 ☀️', '秋季 🍂', '冬季 ❄️'];
+        const seasonEffects = [
+            '万物复苏，气恢复+1',
+            '阳气旺盛，攻击效果+1', 
+            '收获季节，道行获得+1',
+            '蛰伏期间，手牌上限+1'
+        ];
+
+        function nextSeason() {
+            currentSeason = (currentSeason + 1) % 4;
+            document.querySelector('.season-current').innerHTML = `当前季节：${seasons[currentSeason]}`;
+            
+            // 显示季节效果
+            showNotification(`季节变化：${seasons[currentSeason]} - ${seasonEffects[currentSeason]}`);
+        }
+
+        function nextPlayer() {
+            // 移除当前玩家的active状态
+            document.querySelector('.player-seat.active').classList.remove('active');
+            
+            // 切换到下一个玩家
+            currentPlayer = currentPlayer % 6 + 1;
+            const nextPlayerSeat = document.querySelector(`.player-${currentPlayer}`);
+            if (nextPlayerSeat && nextPlayerSeat.style.opacity !== '0.5') {
+                nextPlayerSeat.classList.add('active');
+            } else {
+                // 如果下一个位置是空位，继续寻找
+                nextPlayer();
+            }
+        }
+
+        function showCards() {
+            const cards = ['乾卦', '坤卦', '震卦', '巽卦', '坎卦'];
+            showNotification(`当前手牌：${cards.join(', ')}`);
+        }
+
+        function resetGame() {
+            currentSeason = 0;
+            currentPlayer = 1;
+            document.querySelector('.season-current').innerHTML = `当前季节：${seasons[0]}`;
+            
+            // 重置玩家状态
+            document.querySelectorAll('.player-seat').forEach(seat => {
+                seat.classList.remove('active');
+            });
+            document.querySelector('.player-1').classList.add('active');
+            
+            showNotification('游戏已重置');
+        }
+
+        function showNotification(message) {
+            // 创建通知元素
+            const notification = document.createElement('div');
+            notification.style.cssText = `
+                position: fixed;
+                top: 20px;
+                right: 20px;
+                background: rgba(0,0,0,0.9);
+                color: #ffd700;
+                padding: 15px 20px;
+                border-radius: 5px;
+                border: 2px solid #ffd700;
+                z-index: 1000;
+                animation: slideIn 0.3s ease;
+            `;
+            notification.textContent = message;
+            
+            document.body.appendChild(notification);
+            
+            // 3秒后移除通知
+            setTimeout(() => {
+                notification.style.animation = 'slideOut 0.3s ease';
+                setTimeout(() => {
+                    document.body.removeChild(notification);
+                }, 300);
+            }, 3000);
+        }
+
+        // 添加CSS动画
+        const style = document.createElement('style');
+        style.textContent = `
+            @keyframes slideIn {
+                from { transform: translateX(100%); opacity: 0; }
+                to { transform: translateX(0); opacity: 1; }
+            }
+            @keyframes slideOut {
+                from { transform: translateX(0); opacity: 1; }
+                to { transform: translateX(100%); opacity: 0; }
+            }
+        `;
+        document.head.appendChild(style);
+
+        // 玩家座位点击事件
+        document.querySelectorAll('.player-seat').forEach(seat => {
+            seat.addEventListener('click', function() {
+                if (this.style.opacity !== '0.5') {
+                    const playerInfo = this.querySelector('div').textContent;
+                    showNotification(`选中玩家：${playerInfo}`);
+                }
+            });
+        });
+
+        // 八卦符号点击事件
+        document.querySelectorAll('.bagua-symbol').forEach(symbol => {
+            symbol.addEventListener('click', function() {
+                const guaName = this.textContent;
+                const guaEffect = this.title;
+                showNotification(`${guaEffect} - 点击激活卦象效果`);
+            });
+        });
+
+        // 初始化提示
+        setTimeout(() => {
+            showNotification('欢迎来到天机变！点击各个元素探索游戏功能');
+        }, 1000);
+    </script>
+</body>
+</html>

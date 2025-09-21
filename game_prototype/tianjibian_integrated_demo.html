@@ -1,0 +1,1303 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>天机变 - 交互式八卦太极图</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Microsoft YaHei', Arial, sans-serif;
+            background: linear-gradient(135deg, #1a1a2e, #16213e, #0f3460);
+            color: white;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .header h1 {
+            font-size: 2.5em;
+            color: #ffd700;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
+            margin-bottom: 10px;
+        }
+
+        .header p {
+            font-size: 1.2em;
+            color: #cccccc;
+        }
+
+        .game-container {
+            display: flex;
+            gap: 40px;
+            align-items: flex-start;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+
+        .bagua-container {
+            position: relative;
+            width: 500px;
+            height: 500px;
+        }
+
+        .bagua-circle {
+            width: 400px;
+            height: 400px;
+            border-radius: 50%;
+            position: relative;
+            margin: 50px auto;
+            background: #D2691E;  /* 地部 - 棕橙色 */
+            border: 3px solid #8B4513;
+            overflow: hidden;
+        }
+
+        /* 扇形分割线 */
+        .sector-lines {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 10;
+        }
+
+        .sector-line {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 200px;
+            height: 2px;
+            background: #000;
+            transform-origin: 0 0;
+        }
+
+        .sector-line:nth-child(1) { transform: rotate(0deg); }
+        .sector-line:nth-child(2) { transform: rotate(45deg); }
+        .sector-line:nth-child(3) { transform: rotate(90deg); }
+        .sector-line:nth-child(4) { transform: rotate(135deg); }
+        .sector-line:nth-child(5) { transform: rotate(180deg); }
+        .sector-line:nth-child(6) { transform: rotate(225deg); }
+        .sector-line:nth-child(7) { transform: rotate(270deg); }
+        .sector-line:nth-child(8) { transform: rotate(315deg); }
+        
+        /* 地才 - 最外层，代表地位（基础修行位置） */
+        .earth-layer {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 360px;
+            height: 360px;
+            border-radius: 50%;
+            background: #8B4513;  /* 地才 - 深棕色，象征大地 */
+            border: 3px solid #654321;
+            transform: translate(-50%, -50%);
+            z-index: 1;
+        }
+        
+        /* 人才 - 中间层，代表人位（社交互动位置） */
+        .human-layer {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 260px;
+            height: 260px;
+            border-radius: 50%;
+            background: #4169E1;  /* 人才 - 蓝色，象征人间 */
+            border: 3px solid #0000CD;
+            transform: translate(-50%, -50%);
+            z-index: 2;
+        }
+        
+        /* 天才 - 内层，代表天位（高级修行位置） */
+        .heaven-layer {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 160px;
+            height: 160px;
+            border-radius: 50%;
+            background: #FFD700;  /* 天才 - 金色，象征天界 */
+            border: 3px solid #FFA500;
+            transform: translate(-50%, -50%);
+            z-index: 3;
+        }
+
+        /* 太极 - 中心，游戏核心 */
+        .taiji-layer {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            background: #FFFFFF;  /* 太极 - 白色背景 */
+            border: 3px solid #000000;
+            transform: translate(-50%, -50%);
+            z-index: 4;
+        }
+
+        .bagua-labels {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+        }
+
+        .bagua-label {
+            position: absolute;
+            width: 45px;
+            height: 45px;
+            border-radius: 50%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            font-size: 10px;
+            font-weight: bold;
+            color: #000;
+            text-shadow: 1px 1px 2px rgba(255,255,255,0.8);
+            cursor: pointer;
+            transition: all 0.3s ease;
+            z-index: 15;
+            transform: translate(-50%, -50%);
+        }
+        
+        /* 地才八卦标签样式 - 位于地位（基础修行位置） */
+        .bagua-label.earth {
+            background: rgba(255, 248, 220, 0.95);
+            border: 2px solid #8B4513;
+            border-radius: 5px;
+            padding: 4px 6px;
+            font-size: 14px;
+            font-weight: bold;
+            color: #654321;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.3);
+            min-width: 40px;
+            z-index: 10;
+        }
+
+        .bagua-label:hover {
+            transform: translate(-50%, -50%) scale(1.1);
+            box-shadow: 0 0 15px rgba(0,0,0,0.5);
+        }
+
+        .gua-symbol {
+            font-size: 14px;
+            margin-bottom: 1px;
+            font-weight: bold;
+        }
+
+        .gua-name {
+            font-size: 9px;
+            margin-bottom: 1px;
+            font-weight: bold;
+        }
+
+        .gua-attribute {
+            font-size: 7px;
+            opacity: 0.9;
+        }
+        
+        /* 人才层标签样式 - 位于人位（社交互动位置） */
+        .bagua-label.human {
+            background: rgba(173, 216, 230, 0.95);
+            border: 2px solid #4169E1;
+            color: #000080;
+        }
+        
+        /* 天才层标签样式 - 位于天位（高级修行位置） */
+        .bagua-label.heaven {
+            background: rgba(255, 215, 0, 0.95);
+            border: 2px solid #FFA500;
+            color: #B8860B;
+        }
+
+        /* 地才层八卦位置 - 深入扇形区域内部，远离交叉线 */
+        .kan.earth { 
+            top: 20%; 
+            left: 50%; 
+            transform: translate(-50%, -50%); 
+        }      /* 坎 - 正北扇形中心 */
+        
+        .gen.earth { 
+            top: 30%; 
+            right: 30%; 
+            transform: translate(50%, -50%); 
+        }     /* 艮 - 东北扇形中心 */
+        
+        .zhen.earth { 
+            top: 50%; 
+            right: 20%; 
+            transform: translate(50%, -50%); 
+        }    /* 震 - 正东扇形中心 */
+        
+        .xun.earth { 
+            bottom: 30%; 
+            right: 30%; 
+            transform: translate(50%, 50%); 
+        }   /* 巽 - 东南扇形中心 */
+        
+        .li.earth { 
+            bottom: 20%; 
+            left: 50%; 
+            transform: translate(-50%, 50%); 
+        }    /* 离 - 正南扇形中心 */
+        
+        .kun.earth { 
+            bottom: 30%; 
+            left: 30%; 
+            transform: translate(-50%, 50%); 
+        }   /* 坤 - 西南扇形中心 */
+        
+        .dui.earth { 
+            top: 50%; 
+            left: 20%; 
+            transform: translate(-50%, -50%); 
+        }    /* 兑 - 正西扇形中心 */
+        
+        .qian.earth { 
+            top: 30%; 
+            left: 30%; 
+            transform: translate(-50%, -50%); 
+        }   /* 乾 - 西北扇形中心 */
+
+        /* 人才层八卦区域位置 - 用于角色定位 */
+        .kan.human { 
+            top: 25%; 
+            left: 50%; 
+            transform: translate(-50%, -50%); 
+        }      /* 坎 - 人才层正北区域 */
+        
+        .gen.human { 
+            top: 35%; 
+            right: 35%; 
+            transform: translate(50%, -50%); 
+        }     /* 艮 - 人才层东北区域 */
+        
+        .zhen.human { 
+            top: 50%; 
+            right: 25%; 
+            transform: translate(50%, -50%); 
+        }    /* 震 - 人才层正东区域 */
+        
+        .xun.human { 
+            bottom: 35%; 
+            right: 35%; 
+            transform: translate(50%, 50%); 
+        }   /* 巽 - 人才层东南区域 */
+        
+        .li.human { 
+            bottom: 25%; 
+            left: 50%; 
+            transform: translate(-50%, 50%); 
+        }    /* 离 - 人才层正南区域 */
+        
+        .kun.human { 
+            bottom: 35%; 
+            left: 35%; 
+            transform: translate(-50%, 50%); 
+        }   /* 坤 - 人才层西南区域 */
+        
+        .dui.human { 
+            top: 50%; 
+            left: 25%; 
+            transform: translate(-50%, -50%); 
+        }    /* 兑 - 人才层正西区域 */
+        
+        .qian.human { 
+            top: 35%; 
+            left: 35%; 
+            transform: translate(-50%, -50%); 
+        }   /* 乾 - 人才层西北区域 */
+
+        /* 天才层八卦区域位置 - 用于角色定位 */
+        .kan.heaven { 
+            top: 35%; 
+            left: 50%; 
+            transform: translate(-50%, -50%); 
+        }      /* 坎 - 天才层正北区域 */
+        
+        .gen.heaven { 
+            top: 42%; 
+            right: 42%; 
+            transform: translate(50%, -50%); 
+        }     /* 艮 - 天才层东北区域 */
+        
+        .zhen.heaven { 
+            top: 50%; 
+            right: 35%; 
+            transform: translate(50%, -50%); 
+        }    /* 震 - 天才层正东区域 */
+        
+        .xun.heaven { 
+            bottom: 42%; 
+            right: 42%; 
+            transform: translate(50%, 50%); 
+        }   /* 巽 - 天才层东南区域 */
+        
+        .li.heaven { 
+            bottom: 35%; 
+            left: 50%; 
+            transform: translate(-50%, 50%); 
+        }    /* 离 - 天才层正南区域 */
+        
+        .kun.heaven { 
+            bottom: 42%; 
+            left: 42%; 
+            transform: translate(-50%, 50%); 
+        }   /* 坤 - 天才层西南区域 */
+        
+        .dui.heaven { 
+            top: 50%; 
+            left: 35%; 
+            transform: translate(-50%, -50%); 
+        }    /* 兑 - 天才层正西区域 */
+        
+        .qian.heaven { 
+            top: 42%; 
+            left: 42%; 
+            transform: translate(-50%, -50%); 
+        }   /* 乾 - 天才层西北区域 */
+
+        .taiji-center {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 80px;
+            height: 80px;
+            transform: translate(-50%, -50%);
+            border-radius: 50%;
+            border: 3px solid #000;
+            overflow: hidden;
+            background: #FFF;
+            z-index: 20;
+        }
+
+        .yin-yang {
+            width: 100%;
+            height: 100%;
+            position: relative;
+            background: linear-gradient(90deg, #000 50%, #fff 50%);
+        }
+
+        .yang {
+            position: absolute;
+            top: 0;
+            left: 50%;
+            width: 50%;
+            height: 50%;
+            background: #fff;
+            border-radius: 0 100% 100% 0 / 0 50% 50% 0;
+        }
+
+        .yang::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 25%;
+            height: 25%;
+            background: #000;
+            border-radius: 50%;
+            transform: translate(-50%, -50%);
+        }
+
+        .yin {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 50%;
+            height: 50%;
+            background: #000;
+            border-radius: 100% 0 0 100% / 50% 0 0 50%;
+        }
+
+        .yin::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 25%;
+            height: 25%;
+            background: #fff;
+            border-radius: 50%;
+            transform: translate(-50%, -50%);
+        }
+
+        .player-piece {
+            position: absolute;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: linear-gradient(45deg, #ffd700, #ffed4e);
+            border: 3px solid #fff;
+            box-shadow: 0 0 15px rgba(255, 215, 0, 0.8);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 18px;
+            font-weight: bold;
+            color: #000;
+            transition: all 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+            z-index: 10;
+            cursor: pointer;
+        }
+
+        .player-piece:hover {
+            transform: scale(1.2);
+            box-shadow: 0 0 25px rgba(255, 215, 0, 1);
+        }
+
+        .control-panel {
+            background: rgba(0, 0, 0, 0.8);
+            border-radius: 15px;
+            padding: 30px;
+            border: 2px solid #ffd700;
+            box-shadow: 0 0 20px rgba(255, 215, 0, 0.3);
+            min-width: 300px;
+        }
+
+        .control-panel h3 {
+            color: #ffd700;
+            margin-bottom: 20px;
+            text-align: center;
+            font-size: 1.5em;
+        }
+
+        .status-section {
+            margin-bottom: 25px;
+        }
+
+        .status-section h4 {
+            color: #cccccc;
+            margin-bottom: 15px;
+            font-size: 1.1em;
+        }
+
+        .status-buttons {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+        }
+
+        .status-btn {
+            padding: 12px 15px;
+            border: none;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            background: linear-gradient(45deg, #4a4a4a, #6a6a6a);
+            color: white;
+            border: 2px solid transparent;
+        }
+
+        .status-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+        }
+
+        .status-btn.active {
+            background: linear-gradient(45deg, #ffd700, #ffed4e);
+            color: #000;
+            border-color: #fff;
+            box-shadow: 0 0 15px rgba(255, 215, 0, 0.5);
+        }
+
+        .tianshi-btn { background: linear-gradient(45deg, #ff6b6b, #ff8e53); }
+        .tianshi-btn.active { background: linear-gradient(45deg, #ff6b6b, #ff8e53); color: white; }
+
+        .renhe-btn { background: linear-gradient(45deg, #4ecdc4, #45b7d1); }
+        .renhe-btn.active { background: linear-gradient(45deg, #4ecdc4, #45b7d1); color: white; }
+
+        .dili-btn { background: linear-gradient(45deg, #96ceb4, #ffeaa7); }
+        .dili-btn.active { background: linear-gradient(45deg, #96ceb4, #ffeaa7); color: #000; }
+
+        .current-status {
+            background: rgba(255, 215, 0, 0.1);
+            border: 1px solid #ffd700;
+            border-radius: 8px;
+            padding: 15px;
+            text-align: center;
+        }
+
+        .current-status h4 {
+            color: #ffd700;
+            margin-bottom: 10px;
+        }
+
+        .status-display {
+            font-size: 1.2em;
+            font-weight: bold;
+            color: #fff;
+        }
+
+        .legend {
+            margin-top: 20px;
+            font-size: 0.9em;
+            color: #cccccc;
+            line-height: 1.6;
+        }
+
+        .legend-item {
+            display: flex;
+            align-items: center;
+            margin-bottom: 8px;
+        }
+
+        .legend-color {
+            width: 20px;
+            height: 20px;
+            border-radius: 3px;
+            margin-right: 10px;
+            border: 1px solid #666;
+        }
+
+        .tianshi-color { background: linear-gradient(45deg, #ff6b6b, #ff8e53); }
+        .renhe-color { background: linear-gradient(45deg, #4ecdc4, #45b7d1); }
+        .dili-color { background: linear-gradient(45deg, #96ceb4, #ffeaa7); }
+
+        @keyframes moveToPosition {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.3); }
+            100% { transform: scale(1); }
+        }
+
+        .player-piece.moving {
+            animation: moveToPosition 0.8s ease-in-out;
+        }
+
+        /* 层级高亮样式 */
+        .current-layer {
+            box-shadow: 0 0 20px rgba(255, 215, 0, 0.8) !important;
+            border: 2px solid rgba(255, 215, 0, 0.6) !important;
+        }
+
+        .earth-layer.current-layer {
+            box-shadow: 0 0 20px rgba(150, 206, 180, 0.8) !important;
+            border: 2px solid rgba(150, 206, 180, 0.8) !important;
+        }
+
+        .human-layer.current-layer {
+            box-shadow: 0 0 20px rgba(78, 205, 196, 0.8) !important;
+            border: 2px solid rgba(78, 205, 196, 0.8) !important;
+        }
+
+        .heaven-layer.current-layer {
+            box-shadow: 0 0 20px rgba(255, 107, 107, 0.8) !important;
+            border: 2px solid rgba(255, 107, 107, 0.8) !important;
+        }
+
+        .taiji-center.current-layer {
+            box-shadow: 0 0 30px rgba(255, 215, 0, 1) !important;
+            border: 3px solid rgba(255, 215, 0, 0.9) !important;
+        }
+
+        /* 外层八卦方位标签样式 */
+        .outer-bagua-label {
+            position: absolute;
+            background: rgba(255, 255, 255, 0.95);
+            border: 2px solid #8B4513;
+            border-radius: 8px;
+            padding: 8px 12px;
+            text-align: center;
+            font-weight: bold;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+            z-index: 15;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            min-width: 80px;
+        }
+
+        .outer-bagua-label:hover {
+            transform: scale(1.1);
+            box-shadow: 0 6px 16px rgba(0, 0, 0, 0.4);
+            background: rgba(255, 248, 220, 1);
+        }
+
+        .outer-bagua-label .gua-symbol {
+            font-size: 20px;
+            color: #8B4513;
+            margin-bottom: 2px;
+        }
+
+        .outer-bagua-label .gua-name {
+            font-size: 14px;
+            color: #654321;
+            font-weight: bold;
+            margin-bottom: 2px;
+        }
+
+        .outer-bagua-label .gua-direction {
+            font-size: 10px;
+            color: #8B4513;
+            opacity: 0.8;
+        }
+
+        /* 外层八卦标签位置 - 位于扇形区域中心，一目了然 */
+        .kan-outer {
+            top: 12%;
+            left: 50%;
+            transform: translateX(-50%);
+        }
+
+        .gen-outer {
+            top: 20%;
+            right: 20%;
+            transform: translate(50%, -50%);
+        }
+
+        .zhen-outer {
+            top: 50%;
+            right: 12%;
+            transform: translate(50%, -50%);
+        }
+
+        .xun-outer {
+            bottom: 20%;
+            right: 20%;
+            transform: translate(50%, 50%);
+        }
+
+        .li-outer {
+            bottom: 12%;
+            left: 50%;
+            transform: translateX(-50%);
+        }
+
+        .kun-outer {
+            bottom: 20%;
+            left: 20%;
+            transform: translate(-50%, 50%);
+        }
+
+        .dui-outer {
+            top: 50%;
+            left: 12%;
+            transform: translate(-50%, -50%);
+        }
+
+        .qian-outer {
+            top: 20%;
+            left: 20%;
+            transform: translate(-50%, -50%);
+        }
+
+        /* 三才层级标识样式 */
+        .layer-indicator {
+            position: absolute;
+            background: rgba(255, 255, 255, 0.9);
+            border: 2px solid;
+            border-radius: 12px;
+            padding: 10px 15px;
+            text-align: center;
+            font-weight: bold;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+            z-index: 20;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .layer-indicator:hover {
+            transform: scale(1.05);
+            box-shadow: 0 6px 16px rgba(0, 0, 0, 0.3);
+        }
+
+        .layer-indicator .layer-name {
+            font-size: 16px;
+            font-weight: bold;
+            margin-bottom: 4px;
+        }
+
+        .layer-indicator .layer-desc {
+            font-size: 12px;
+            margin-bottom: 2px;
+            opacity: 0.8;
+        }
+
+        .layer-indicator .layer-concept {
+            font-size: 14px;
+            font-weight: bold;
+        }
+
+        /* 地才层标识 */
+        .earth-indicator {
+            top: -60px;
+            left: 50%;
+            transform: translateX(-50%);
+            border-color: #96ceb4;
+            background: rgba(150, 206, 180, 0.95);
+        }
+
+        .earth-indicator .layer-name,
+        .earth-indicator .layer-concept {
+            color: #2d5a3d;
+        }
+
+        .earth-indicator .layer-desc {
+            color: #4a7c59;
+        }
+
+        /* 人才层标识 */
+        .human-indicator {
+            top: 50%;
+            left: -100px;
+            transform: translateY(-50%);
+            border-color: #4ecdc4;
+            background: rgba(78, 205, 196, 0.95);
+        }
+
+        .human-indicator .layer-name,
+        .human-indicator .layer-concept {
+            color: #2c5f5a;
+        }
+
+        .human-indicator .layer-desc {
+            color: #3a7b73;
+        }
+
+        /* 天才层标识 */
+        .heaven-indicator {
+            top: 50%;
+            right: -100px;
+            transform: translateY(-50%);
+            border-color: #ff6b6b;
+            background: rgba(255, 107, 107, 0.95);
+        }
+
+        .heaven-indicator .layer-name,
+        .heaven-indicator .layer-concept {
+            color: #8b2635;
+        }
+
+        .heaven-indicator .layer-desc {
+            color: #a63744;
+        }
+
+        /* 太极中心标识 */
+        .center-indicator {
+            bottom: -60px;
+            left: 50%;
+            transform: translateX(-50%);
+            border-color: #ffd700;
+            background: rgba(255, 215, 0, 0.95);
+        }
+
+        .center-indicator .layer-name,
+        .center-indicator .layer-concept {
+            color: #8b7500;
+        }
+
+        .center-indicator .layer-desc {
+            color: #a68900;
+        }
+
+        @media (max-width: 768px) {
+            .game-container {
+                flex-direction: column;
+                align-items: center;
+            }
+            
+            .bagua-container {
+                width: 400px;
+                height: 400px;
+            }
+            
+            .control-panel {
+                width: 100%;
+                max-width: 400px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>天机变 - 交互式八卦太极图</h1>
+        <p>根据天时地利人和状态，角色将在八卦图上移动到相应位置</p>
+    </div>
+
+    <div class="game-container">
+        <div class="bagua-container">
+            <div class="bagua-circle">
+                <!-- 扇形分割线 -->
+                <div class="sector-lines">
+                    <div class="sector-line"></div>
+                    <div class="sector-line"></div>
+                    <div class="sector-line"></div>
+                    <div class="sector-line"></div>
+                    <div class="sector-line"></div>
+                    <div class="sector-line"></div>
+                    <div class="sector-line"></div>
+                    <div class="sector-line"></div>
+                </div>
+
+                <!-- 三才层级标识 -->
+                <div class="layer-indicator earth-indicator">
+                    <div class="layer-name">地才层</div>
+                    <div class="layer-desc">基础修行</div>
+                    <div class="layer-concept">地利</div>
+                </div>
+                <div class="layer-indicator human-indicator">
+                    <div class="layer-name">人才层</div>
+                    <div class="layer-desc">社交互动</div>
+                    <div class="layer-concept">人和</div>
+                </div>
+                <div class="layer-indicator heaven-indicator">
+                    <div class="layer-name">天才层</div>
+                    <div class="layer-desc">高级修行</div>
+                    <div class="layer-concept">天时</div>
+                </div>
+                <div class="layer-indicator center-indicator">
+                    <div class="layer-name">太极</div>
+                    <div class="layer-desc">平衡统一</div>
+                    <div class="layer-concept">中和</div>
+                </div>
+
+                <!-- 地才层 - 最外层，代表地位（基础修行位置） -->
+                <div class="earth-layer">
+                    <!-- 地才八卦 - 按后天八卦方位排列，放在扇形区域内部，避免交叉线误解 -->
+                    <!-- 坎 - 正北 (0度) -->
+                    <div class="bagua-label earth kan">
+                        <div class="gua-symbol">☵</div>
+                        <div class="gua-name">坎</div>
+                        <div class="gua-attribute">水</div>
+                    </div>
+                    <!-- 艮 - 东北 (45度) -->
+                    <div class="bagua-label earth gen">
+                        <div class="gua-symbol">☶</div>
+                        <div class="gua-name">艮</div>
+                        <div class="gua-attribute">山</div>
+                    </div>
+                    <!-- 震 - 正东 (90度) -->
+                    <div class="bagua-label earth zhen">
+                        <div class="gua-symbol">☳</div>
+                        <div class="gua-name">震</div>
+                        <div class="gua-attribute">雷</div>
+                    </div>
+                    <!-- 巽 - 东南 (135度) -->
+                    <div class="bagua-label earth xun">
+                        <div class="gua-symbol">☴</div>
+                        <div class="gua-name">巽</div>
+                        <div class="gua-attribute">风</div>
+                    </div>
+                    <!-- 离 - 正南 (180度) -->
+                    <div class="bagua-label earth li">
+                        <div class="gua-symbol">☲</div>
+                        <div class="gua-name">离</div>
+                        <div class="gua-attribute">火</div>
+                    </div>
+                    <!-- 坤 - 西南 (225度) -->
+                    <div class="bagua-label earth kun">
+                        <div class="gua-symbol">☷</div>
+                        <div class="gua-name">坤</div>
+                        <div class="gua-attribute">地</div>
+                    </div>
+                    <!-- 兑 - 正西 (270度) -->
+                    <div class="bagua-label earth dui">
+                        <div class="gua-symbol">☱</div>
+                        <div class="gua-name">兑</div>
+                        <div class="gua-attribute">泽</div>
+                    </div>
+                    <!-- 乾 - 西北 (315度) -->
+                    <div class="bagua-label earth qian">
+                        <div class="gua-symbol">☰</div>
+                        <div class="gua-name">乾</div>
+                        <div class="gua-attribute">天</div>
+                    </div>
+                    
+                    <!-- 最外层明显的八卦方位标签 -->
+                    <div class="outer-bagua-label kan-outer">
+                        <div class="gua-symbol">☵</div>
+                        <div class="gua-name">坎水</div>
+                        <div class="gua-direction">正北</div>
+                    </div>
+                    <div class="outer-bagua-label gen-outer">
+                        <div class="gua-symbol">☶</div>
+                        <div class="gua-name">艮山</div>
+                        <div class="gua-direction">东北</div>
+                    </div>
+                    <div class="outer-bagua-label zhen-outer">
+                        <div class="gua-symbol">☳</div>
+                        <div class="gua-name">震雷</div>
+                        <div class="gua-direction">正东</div>
+                    </div>
+                    <div class="outer-bagua-label xun-outer">
+                        <div class="gua-symbol">☴</div>
+                        <div class="gua-name">巽风</div>
+                        <div class="gua-direction">东南</div>
+                    </div>
+                    <div class="outer-bagua-label li-outer">
+                        <div class="gua-symbol">☲</div>
+                        <div class="gua-name">离火</div>
+                        <div class="gua-direction">正南</div>
+                    </div>
+                    <div class="outer-bagua-label kun-outer">
+                        <div class="gua-symbol">☷</div>
+                        <div class="gua-name">坤地</div>
+                        <div class="gua-direction">西南</div>
+                    </div>
+                    <div class="outer-bagua-label dui-outer">
+                        <div class="gua-symbol">☱</div>
+                        <div class="gua-name">兑泽</div>
+                        <div class="gua-direction">正西</div>
+                    </div>
+                    <div class="outer-bagua-label qian-outer">
+                        <div class="gua-symbol">☰</div>
+                        <div class="gua-name">乾天</div>
+                        <div class="gua-direction">西北</div>
+                    </div>
+                </div>
+                
+                <!-- 人才层 - 中间层，代表人位（社交互动位置） -->
+                <div class="human-layer">
+                </div>
+                    
+                <!-- 天才层 - 内层，代表天位（高级修行位置） -->
+                <div class="heaven-layer">
+                </div>
+
+                <!-- 太极中心 - 游戏核心 -->
+                <div class="taiji-layer">
+                    <div class="taiji-center">
+                        <div class="yin-yang">
+                            <div class="yang"></div>
+                            <div class="yin"></div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- 角色棋子 -->
+                <div class="character" id="character">
+                    <div class="character-icon">♟</div>
+                    <div class="character-name">智者</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="control-panel">
+            <h3>状态控制面板</h3>
+            
+            <div class="status-section">
+                <h4>天时状态</h4>
+                <div class="status-buttons">
+                    <button class="status-btn tianshi-btn" data-status="tianshi" data-gua="qian">乾天</button>
+                    <button class="status-btn tianshi-btn" data-status="tianshi" data-gua="dui">兑泽</button>
+                    <button class="status-btn tianshi-btn" data-status="tianshi" data-gua="li">离火</button>
+                    <button class="status-btn tianshi-btn" data-status="tianshi" data-gua="zhen">震雷</button>
+                </div>
+            </div>
+
+            <div class="status-section">
+                <h4>人和状态</h4>
+                <div class="status-buttons">
+                    <button class="status-btn renhe-btn" data-status="renhe" data-gua="xun">巽风</button>
+                    <button class="status-btn renhe-btn" data-status="renhe" data-gua="kan">坎水</button>
+                </div>
+            </div>
+
+            <div class="status-section">
+                <h4>地利状态</h4>
+                <div class="status-buttons">
+                    <button class="status-btn dili-btn" data-status="dili" data-gua="gen">艮山</button>
+                    <button class="status-btn dili-btn" data-status="dili" data-gua="kun">坤地</button>
+                </div>
+            </div>
+
+            <div class="current-status">
+                <h4>当前状态</h4>
+                <div class="status-display" id="currentStatus">中心太极</div>
+            </div>
+
+            <div class="legend">
+                <div class="legend-item">
+                    <div class="legend-color tianshi-color"></div>
+                    <span>天时：乾天、兑泽、离火、震雷</span>
+                </div>
+                <div class="legend-item">
+                    <div class="legend-color renhe-color"></div>
+                    <span>人和：巽风、坎水</span>
+                </div>
+                <div class="legend-item">
+                    <div class="legend-color dili-color"></div>
+                    <span>地利：艮山、坤地</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        class BaguaGame {
+            constructor() {
+                this.player = document.getElementById('character');
+                this.currentStatus = document.getElementById('currentStatus');
+                this.currentState = 'center';
+                this.currentLayer = 'center'; // 当前所在层级：earth, human, heaven, center
+                
+                // 定义三才层级的八卦位置坐标
+                this.positions = {
+                    center: { top: 50, left: 50 },
+                    
+                    // 地才层八卦位置（外圈）- 深入扇形中心
+                    earth: {
+                        kan: { top: 20, left: 50 },     // 坎 - 正北扇形中心
+                        gen: { top: 30, left: 75 },     // 艮 - 东北扇形中心
+                        zhen: { top: 50, left: 80 },    // 震 - 正东扇形中心
+                        xun: { top: 70, left: 75 },     // 巽 - 东南扇形中心
+                        li: { top: 80, left: 50 },      // 离 - 正南扇形中心
+                        kun: { top: 70, left: 25 },     // 坤 - 西南扇形中心
+                        dui: { top: 50, left: 20 },     // 兑 - 正西扇形中心
+                        qian: { top: 30, left: 25 }     // 乾 - 西北扇形中心
+                    },
+                    
+                    // 人才层八卦位置（中圈）
+                    human: {
+                        kan: { top: 30, left: 50 },     // 坎 - 正北人才区
+                        gen: { top: 40, left: 65 },     // 艮 - 东北人才区
+                        zhen: { top: 50, left: 70 },    // 震 - 正东人才区
+                        xun: { top: 60, left: 65 },     // 巽 - 东南人才区
+                        li: { top: 70, left: 50 },      // 离 - 正南人才区
+                        kun: { top: 60, left: 35 },     // 坤 - 西南人才区
+                        dui: { top: 50, left: 30 },     // 兑 - 正西人才区
+                        qian: { top: 40, left: 35 }     // 乾 - 西北人才区
+                    },
+                    
+                    // 天才层八卦位置（内圈）
+                    heaven: {
+                        kan: { top: 40, left: 50 },     // 坎 - 正北天才区
+                        gen: { top: 45, left: 58 },     // 艮 - 东北天才区
+                        zhen: { top: 50, left: 60 },    // 震 - 正东天才区
+                        xun: { top: 55, left: 58 },     // 巽 - 东南天才区
+                        li: { top: 60, left: 50 },      // 离 - 正南天才区
+                        kun: { top: 55, left: 42 },     // 坤 - 西南天才区
+                        dui: { top: 50, left: 40 },     // 兑 - 正西天才区
+                        qian: { top: 45, left: 42 }     // 乾 - 西北天才区
+                    }
+                };
+
+                // 状态描述 - 根据层级和八卦组合
+                this.statusDescriptions = {
+                    center: '中心太极',
+                    // 天才层（天时）
+                    'heaven-qian': '天才层 - 乾天（创造力修行）',
+                    'heaven-dui': '天才层 - 兑泽（沟通力修行）',
+                    'heaven-li': '天才层 - 离火（智慧力修行）',
+                    'heaven-zhen': '天才层 - 震雷（行动力修行）',
+                    'heaven-xun': '天才层 - 巽风（适应力修行）',
+                    'heaven-kan': '天才层 - 坎水（坚韧力修行）',
+                    'heaven-gen': '天才层 - 艮山（稳定力修行）',
+                    'heaven-kun': '天才层 - 坤地（包容力修行）',
+                    // 人才层（人和）
+                    'human-qian': '人才层 - 乾天（领导社交）',
+                    'human-dui': '人才层 - 兑泽（交流社交）',
+                    'human-li': '人才层 - 离火（智慧社交）',
+                    'human-zhen': '人才层 - 震雷（活力社交）',
+                    'human-xun': '人才层 - 巽风（和谐社交）',
+                    'human-kan': '人才层 - 坎水（深度社交）',
+                    'human-gen': '人才层 - 艮山（稳重社交）',
+                    'human-kun': '人才层 - 坤地（包容社交）',
+                    // 地才层（地利）
+                    'earth-qian': '地才层 - 乾天（基础修行）',
+                    'earth-dui': '地才层 - 兑泽（基础修行）',
+                    'earth-li': '地才层 - 离火（基础修行）',
+                    'earth-zhen': '地才层 - 震雷（基础修行）',
+                    'earth-xun': '地才层 - 巽风（基础修行）',
+                    'earth-kan': '地才层 - 坎水（基础修行）',
+                    'earth-gen': '地才层 - 艮山（基础修行）',
+                    'earth-kun': '地才层 - 坤地（基础修行）'
+                };
+
+                // 八卦与层级的映射关系
+                this.guaLayerMapping = {
+                    // 天时八卦 -> 天才层
+                    qian: 'heaven', dui: 'heaven', li: 'heaven', zhen: 'heaven',
+                    // 人和八卦 -> 人才层  
+                    xun: 'human', kan: 'human',
+                    // 地利八卦 -> 地才层
+                    gen: 'earth', kun: 'earth'
+                };
+
+                this.initializeEvents();
+                this.movePlayerTo('center');
+            }
+
+            initializeEvents() {
+                // 为所有状态按钮添加点击事件
+                document.querySelectorAll('.status-btn').forEach(btn => {
+                    btn.addEventListener('click', (e) => {
+                        const gua = e.target.dataset.gua;
+                        const status = e.target.dataset.status;
+                        this.selectStatus(gua, status, e.target);
+                    });
+                });
+
+                // 点击太极中心回到中心
+                document.querySelector('.taiji-center').addEventListener('click', () => {
+                    this.selectStatus('center', 'center', null);
+                });
+
+                // 为八卦标签添加点击事件，支持层级切换
+                document.querySelectorAll('.bagua-label').forEach(label => {
+                    label.addEventListener('click', (e) => {
+                        const gua = e.target.textContent.trim();
+                        const guaMap = {
+                            '坎': 'kan', '艮': 'gen', '震': 'zhen', '巽': 'xun',
+                            '离': 'li', '坤': 'kun', '兑': 'dui', '乾': 'qian'
+                        };
+                        const guaKey = guaMap[gua];
+                        if (guaKey) {
+                            // 循环切换层级：地才 -> 人才 -> 天才 -> 地才
+                            let targetLayer = 'earth';
+                            if (this.currentLayer === 'earth' && this.currentState === guaKey) {
+                                targetLayer = 'human';
+                            } else if (this.currentLayer === 'human' && this.currentState === guaKey) {
+                                targetLayer = 'heaven';
+                            } else if (this.currentLayer === 'heaven' && this.currentState === guaKey) {
+                                targetLayer = 'earth';
+                            }
+                            this.movePlayerToLayer(guaKey, targetLayer);
+                        }
+                    });
+                });
+
+                // 添加层级标识点击事件
+            document.querySelector('.earth-indicator').addEventListener('click', () => {
+                this.currentLayer = 'earth';
+                this.movePlayerToLayer('earth', 'kun');
+                this.updateLayerIndicator();
+            });
+
+            document.querySelector('.human-indicator').addEventListener('click', () => {
+                this.currentLayer = 'human';
+                this.movePlayerToLayer('human', 'kan');
+                this.updateLayerIndicator();
+            });
+
+            document.querySelector('.heaven-indicator').addEventListener('click', () => {
+                this.currentLayer = 'heaven';
+                this.movePlayerToLayer('heaven', 'qian');
+                this.updateLayerIndicator();
+            });
+
+            document.querySelector('.center-indicator').addEventListener('click', () => {
+                this.movePlayerTo('center');
+            });
+            }
+
+            selectStatus(gua, status, button) {
+                // 移除所有按钮的激活状态
+                document.querySelectorAll('.status-btn').forEach(btn => {
+                    btn.classList.remove('active');
+                });
+
+                // 激活当前按钮
+                if (button) {
+                    button.classList.add('active');
+                }
+
+                if (gua === 'center') {
+                    this.movePlayerTo('center');
+                } else {
+                    // 根据八卦类型确定层级
+                    const layer = this.guaLayerMapping[gua] || 'earth';
+                    this.movePlayerToLayer(gua, layer);
+                }
+            }
+
+            movePlayerTo(position) {
+                if (position === 'center') {
+                    const pos = this.positions.center;
+                    this.animatePlayerMove(pos);
+                    this.currentState = 'center';
+                    this.currentLayer = 'center';
+                    this.updateStatusDisplay('center');
+                }
+            }
+
+            movePlayerToLayer(gua, layer) {
+                const pos = this.positions[layer] && this.positions[layer][gua];
+                if (!pos) return;
+
+                this.animatePlayerMove(pos);
+                this.currentState = gua;
+                this.currentLayer = layer;
+                this.updateStatusDisplay(`${layer}-${gua}`);
+            }
+
+            animatePlayerMove(pos) {
+                // 添加移动动画类
+                this.player.classList.add('moving');
+                
+                // 设置新位置
+                this.player.style.top = pos.top + '%';
+                this.player.style.left = pos.left + '%';
+                
+                // 移除动画类
+                setTimeout(() => {
+                    this.player.classList.remove('moving');
+                }, 800);
+            }
+
+            updateStatusDisplay(statusKey) {
+                const description = this.statusDescriptions[statusKey] || '未知状态';
+                this.currentStatus.textContent = description;
+                
+                // 根据层级类型改变显示颜色
+                this.currentStatus.className = 'status-display';
+                if (statusKey === 'center') {
+                    this.currentStatus.style.color = '#ffd700'; // 太极金色
+                } else if (statusKey.startsWith('heaven-')) {
+                    this.currentStatus.style.color = '#ff6b6b'; // 天才层红色
+                } else if (statusKey.startsWith('human-')) {
+                    this.currentStatus.style.color = '#4ecdc4'; // 人才层青色
+                } else if (statusKey.startsWith('earth-')) {
+                    this.currentStatus.style.color = '#96ceb4'; // 地才层绿色
+                } else {
+                    this.currentStatus.style.color = '#666'; // 默认灰色
+                }
+                
+                // 添加层级指示器
+                this.updateLayerIndicator();
+            }
+
+            updateLayerIndicator() {
+                // 移除所有层级高亮
+                document.querySelectorAll('.earth-layer, .human-layer, .heaven-layer, .taiji-center').forEach(el => {
+                    el.classList.remove('current-layer');
+                });
+
+                // 高亮当前层级
+                if (this.currentLayer === 'center') {
+                    document.querySelector('.taiji-center').classList.add('current-layer');
+                } else if (this.currentLayer === 'earth') {
+                    document.querySelector('.earth-layer').classList.add('current-layer');
+                } else if (this.currentLayer === 'human') {
+                    document.querySelector('.human-layer').classList.add('current-layer');
+                } else if (this.currentLayer === 'heaven') {
+                    document.querySelector('.heaven-layer').classList.add('current-layer');
+                }
+            }
+        }
+
+        // 初始化游戏
+        document.addEventListener('DOMContentLoaded', () => {
+            new BaguaGame();
+        });
+    </script>
+</body>
+</html>

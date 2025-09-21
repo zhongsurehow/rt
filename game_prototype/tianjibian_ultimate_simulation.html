@@ -1,0 +1,2333 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>天机变 - 后天八卦</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 20px;
+            font-family: 'Arial', sans-serif;
+            background: 
+                radial-gradient(circle at 20% 80%, rgba(120, 119, 198, 0.3) 0%, transparent 50%),
+                radial-gradient(circle at 80% 20%, rgba(255, 119, 198, 0.3) 0%, transparent 50%),
+                radial-gradient(circle at 40% 40%, rgba(120, 219, 255, 0.2) 0%, transparent 50%),
+                linear-gradient(135deg, #667eea 0%, #764ba2 50%, #f093fb 100%);
+            min-height: 100vh;
+            position: relative;
+            overflow-x: hidden;
+        }
+
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: 
+                url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><defs><pattern id="grain" width="100" height="100" patternUnits="userSpaceOnUse"><circle cx="25" cy="25" r="1" fill="rgba(255,255,255,0.1)"/><circle cx="75" cy="75" r="1" fill="rgba(255,255,255,0.1)"/><circle cx="50" cy="10" r="0.5" fill="rgba(255,255,255,0.05)"/><circle cx="20" cy="80" r="0.5" fill="rgba(255,255,255,0.05)"/></pattern></defs><rect width="100" height="100" fill="url(%23grain)"/></svg>');
+            pointer-events: none;
+            z-index: -1;
+        }
+
+        .game-container {
+            display: grid;
+            grid-template-columns: 280px 1fr 280px;
+            grid-template-rows: auto 1fr auto;
+            grid-template-areas: 
+                "left-panel center right-panel"
+                "left-panel center right-panel"
+                "controls controls controls";
+            width: 100%;
+            height: 100vh;
+            background: 
+                linear-gradient(135deg, rgba(255, 255, 255, 0.95) 0%, rgba(248, 250, 252, 0.9) 100%);
+            color: #2c3e50;
+            padding: 0;
+            gap: 15px;
+            position: relative;
+        }
+
+        .game-container::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: 
+                radial-gradient(circle at 25% 25%, rgba(99, 102, 241, 0.1) 0%, transparent 50%),
+                radial-gradient(circle at 75% 75%, rgba(236, 72, 153, 0.1) 0%, transparent 50%);
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        .left-panel {
+            grid-area: left-panel;
+            background: 
+                linear-gradient(135deg, rgba(255, 255, 255, 0.9) 0%, rgba(248, 250, 252, 0.8) 100%);
+            border-radius: 20px;
+            padding: 25px;
+            margin: 15px;
+            box-shadow: 
+                0 20px 40px rgba(0, 0, 0, 0.1),
+                0 8px 16px rgba(0, 0, 0, 0.05),
+                inset 0 1px 0 rgba(255, 255, 255, 0.6);
+            backdrop-filter: blur(15px);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            position: relative;
+            z-index: 1;
+        }
+
+        .left-panel::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            border-radius: 20px;
+            background: linear-gradient(135deg, rgba(99, 102, 241, 0.05), rgba(236, 72, 153, 0.05));
+            z-index: -1;
+        }
+
+        .right-panel {
+            grid-area: right-panel;
+            background: 
+                linear-gradient(135deg, rgba(255, 255, 255, 0.9) 0%, rgba(248, 250, 252, 0.8) 100%);
+            border-radius: 20px;
+            padding: 25px;
+            margin: 15px;
+            box-shadow: 
+                0 20px 40px rgba(0, 0, 0, 0.1),
+                0 8px 16px rgba(0, 0, 0, 0.05),
+                inset 0 1px 0 rgba(255, 255, 255, 0.6);
+            backdrop-filter: blur(15px);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            position: relative;
+            z-index: 1;
+        }
+
+        .right-panel::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            border-radius: 20px;
+            background: linear-gradient(135deg, rgba(236, 72, 153, 0.05), rgba(99, 102, 241, 0.05));
+            z-index: -1;
+        }
+
+        .center-area {
+            grid-area: center;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            margin: 10px;
+        }
+
+        .bagua-container {
+            position: relative;
+            width: 540px;
+            height: 540px;
+            margin: 20px auto;
+        }
+
+        .bagua-map {
+            width: 100%;
+            height: 100%;
+            position: relative;
+            border-radius: 20px;
+            background: 
+                linear-gradient(135deg, rgba(245, 245, 220, 0.95) 0%, rgba(222, 184, 135, 0.95) 50%, rgba(210, 180, 140, 0.95) 100%),
+                radial-gradient(circle at 25% 25%, rgba(255, 255, 255, 0.3) 0%, transparent 50%),
+                radial-gradient(circle at 75% 75%, rgba(139, 69, 19, 0.1) 0%, transparent 50%);
+            box-shadow: 
+                0 15px 45px rgba(0, 0, 0, 0.2),
+                0 8px 25px rgba(0, 0, 0, 0.15),
+                inset 0 2px 4px rgba(255, 255, 255, 0.6),
+                inset 0 -2px 4px rgba(139, 69, 19, 0.2);
+            border: 4px solid rgba(139, 69, 19, 0.8);
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            grid-template-rows: repeat(3, 1fr);
+            gap: 12px;
+            padding: 24px;
+            backdrop-filter: blur(2px);
+        }
+
+        .bagua-position {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            border-radius: 15px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.4s ease;
+            border: 3px solid rgba(255, 255, 255, 0.9);
+            color: white;
+            text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.7);
+            box-shadow: 
+                0 6px 12px rgba(0, 0, 0, 0.3),
+                inset 0 2px 4px rgba(255, 255, 255, 0.3);
+            z-index: 3;
+            backdrop-filter: blur(5px);
+        }
+
+        .bagua-position::before {
+            content: attr(data-symbol);
+            font-size: 20px;
+            font-weight: 900;
+            margin-bottom: 2px;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.8);
+        }
+
+        /* 八卦位置背景颜色 - 优化版本 */
+        .bagua-position[data-position="0"] { 
+            background: linear-gradient(135deg, rgba(255, 107, 107, 0.85), rgba(255, 82, 82, 0.85)); 
+            border: 2px solid rgba(255, 107, 107, 0.4);
+            box-shadow: inset 0 2px 4px rgba(255, 255, 255, 0.2);
+        } /* 离-南 */
+        .bagua-position[data-position="1"] { 
+            background: linear-gradient(135deg, rgba(254, 202, 87, 0.85), rgba(255, 179, 0, 0.85)); 
+            border: 2px solid rgba(254, 202, 87, 0.4);
+            box-shadow: inset 0 2px 4px rgba(255, 255, 255, 0.2);
+        } /* 坤-西南 */
+        .bagua-position[data-position="2"] { 
+            background: linear-gradient(135deg, rgba(72, 219, 251, 0.85), rgba(41, 182, 246, 0.85)); 
+            border: 2px solid rgba(72, 219, 251, 0.4);
+            box-shadow: inset 0 2px 4px rgba(255, 255, 255, 0.2);
+        } /* 兑-西 */
+        .bagua-position[data-position="3"] { 
+            background: linear-gradient(135deg, rgba(255, 215, 0, 0.85), rgba(255, 193, 7, 0.85)); 
+            border: 2px solid rgba(255, 215, 0, 0.4);
+            box-shadow: inset 0 2px 4px rgba(255, 255, 255, 0.2);
+        } /* 乾-西北 */
+        .bagua-position[data-position="4"] { 
+            background: linear-gradient(135deg, rgba(55, 66, 250, 0.85), rgba(63, 81, 181, 0.85)); 
+            border: 2px solid rgba(55, 66, 250, 0.4);
+            box-shadow: inset 0 2px 4px rgba(255, 255, 255, 0.2);
+        } /* 坎-北 */
+        .bagua-position[data-position="5"] { 
+            background: linear-gradient(135deg, rgba(139, 69, 19, 0.85), rgba(121, 85, 72, 0.85)); 
+            border: 2px solid rgba(139, 69, 19, 0.4);
+            box-shadow: inset 0 2px 4px rgba(255, 255, 255, 0.2);
+        } /* 艮-东北 */
+        .bagua-position[data-position="6"] { 
+            background: linear-gradient(135deg, rgba(0, 210, 211, 0.85), rgba(0, 188, 212, 0.85)); 
+            border: 2px solid rgba(0, 210, 211, 0.4);
+            box-shadow: inset 0 2px 4px rgba(255, 255, 255, 0.2);
+        } /* 震-东 */
+        .bagua-position[data-position="7"] { 
+            background: linear-gradient(135deg, rgba(123, 237, 159, 0.85), rgba(76, 175, 80, 0.85)); 
+            border: 2px solid rgba(123, 237, 159, 0.4);
+            box-shadow: inset 0 2px 4px rgba(255, 255, 255, 0.2);
+        } /* 巽-东南 */
+
+        .bagua-position::after {
+            content: attr(data-direction);
+            font-size: 9px;
+            opacity: 0.95;
+            text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.8);
+        }
+
+        .bagua-position:hover {
+            transform: scale(1.15);
+            box-shadow: 
+                0 8px 16px rgba(0, 0, 0, 0.4),
+                0 0 25px rgba(255, 255, 255, 0.6),
+                inset 0 2px 4px rgba(255, 255, 255, 0.4);
+            border-color: rgba(255, 255, 255, 1);
+            z-index: 4;
+        }
+
+
+
+        .center-taiji {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            border-radius: 15px;
+            background: 
+                radial-gradient(circle at center, rgba(255, 255, 255, 0.95) 30%, rgba(240, 240, 240, 0.95) 70%),
+                linear-gradient(45deg, rgba(212, 175, 55, 0.1) 25%, transparent 25%),
+                linear-gradient(-45deg, rgba(212, 175, 55, 0.1) 25%, transparent 25%);
+            cursor: pointer;
+            transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+            box-shadow: 
+                0 12px 24px rgba(0, 0, 0, 0.2),
+                0 6px 12px rgba(0, 0, 0, 0.15),
+                inset 0 2px 4px rgba(255, 255, 255, 0.9),
+                inset 0 -2px 4px rgba(0, 0, 0, 0.1),
+                0 0 20px rgba(212, 175, 55, 0.3);
+            border: 4px solid #d4af37;
+            overflow: hidden;
+            grid-column: 2;
+            grid-row: 2;
+            backdrop-filter: blur(1px);
+        }
+
+        .center-taiji::before {
+            content: '';
+            position: absolute;
+            top: 8%;
+            left: 8%;
+            width: 84%;
+            height: 84%;
+            background: 
+                radial-gradient(circle at 50% 25%, rgba(255, 255, 255, 0.95) 23%, transparent 25%),
+                radial-gradient(circle at 50% 75%, rgba(0, 0, 0, 0.95) 23%, transparent 25%),
+                linear-gradient(90deg, rgba(0, 0, 0, 0.9) 50%, rgba(255, 255, 255, 0.9) 50%);
+            border-radius: 50%;
+            box-shadow: 
+                inset 0 2px 8px rgba(0, 0, 0, 0.3),
+                inset 0 -2px 8px rgba(255, 255, 255, 0.3),
+                0 0 15px rgba(0, 0, 0, 0.2);
+            animation: taijRotate 20s linear infinite;
+        }
+
+        @keyframes taijRotate {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+
+        /* 方位标签 */
+        .direction-labels {
+            position: absolute;
+            top: -30px;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 14px;
+            font-weight: bold;
+            color: #8B4513;
+            text-shadow: 1px 1px 2px rgba(255, 255, 255, 0.8);
+        }
+
+        .bagua-container::before {
+            content: '南';
+            position: absolute;
+            top: -35px;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 18px;
+            font-weight: 900;
+            color: #d63031;
+            text-shadow: 2px 2px 4px rgba(255, 255, 255, 0.9), 0 0 8px rgba(214, 48, 49, 0.6);
+            background: rgba(255, 255, 255, 0.9);
+            padding: 4px 8px;
+            border-radius: 8px;
+            border: 2px solid #d63031;
+        }
+
+        .bagua-container::after {
+            content: '北';
+            position: absolute;
+            bottom: -35px;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 18px;
+            font-weight: 900;
+            color: #0984e3;
+            text-shadow: 2px 2px 4px rgba(255, 255, 255, 0.9), 0 0 8px rgba(9, 132, 227, 0.6);
+            background: rgba(255, 255, 255, 0.9);
+            padding: 4px 8px;
+            border-radius: 8px;
+            border: 2px solid #0984e3;
+        }
+
+        .direction-label-west {
+            position: absolute;
+            left: -35px;
+            top: 50%;
+            transform: translateY(-50%);
+            font-size: 18px;
+            font-weight: 900;
+            color: #fdcb6e;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.7), 0 0 8px rgba(253, 203, 110, 0.6);
+            background: rgba(0, 0, 0, 0.8);
+            padding: 4px 8px;
+            border-radius: 8px;
+            border: 2px solid #fdcb6e;
+        }
+
+        .direction-label-east {
+            position: absolute;
+            right: -35px;
+            top: 50%;
+            transform: translateY(-50%);
+            font-size: 18px;
+            font-weight: 900;
+            color: #00b894;
+            text-shadow: 2px 2px 4px rgba(255, 255, 255, 0.9), 0 0 8px rgba(0, 184, 148, 0.6);
+            background: rgba(255, 255, 255, 0.9);
+            padding: 4px 8px;
+            border-radius: 8px;
+            border: 2px solid #00b894;
+        }
+
+        .center-taiji::after {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 70px;
+            height: 140px;
+            background: 
+                radial-gradient(circle at 50% 25%, #000 17.5%, transparent 17.5%),
+                radial-gradient(circle at 50% 75%, #fff 17.5%, transparent 17.5%),
+                linear-gradient(180deg, #fff 50%, #000 50%);
+            border-radius: 35px;
+        }
+
+        .center-taiji:hover {
+            transform: translate(-50%, -50%) scale(1.15) rotate(360deg);
+            box-shadow: 
+                0 0 50px rgba(212, 175, 55, 0.6),
+                inset 0 0 30px rgba(0, 0, 0, 0.2);
+        }
+
+        .player-piece {
+            position: absolute;
+            width: 35px;
+            height: 35px;
+            border-radius: 50%;
+            border: 3px solid #fff;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 14px;
+            color: #fff;
+            text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.7);
+            animation: playerPulse 2s infinite;
+            z-index: 15;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+        }
+
+        @keyframes playerPulse {
+            0%, 100% { transform: scale(1); box-shadow: 0 0 10px rgba(255, 255, 255, 0.5); }
+            50% { transform: scale(1.1); box-shadow: 0 0 20px rgba(255, 255, 255, 0.8); }
+        }
+
+        .player-piece.player1 { background: #e74c3c; }
+        .player-piece.player2 { background: #3498db; }
+        .player-piece.player3 { background: #2ecc71; }
+        .player-piece.player4 { background: #f39c12; }
+
+        .status-title {
+            font-size: 18px;
+            font-weight: bold;
+            margin-bottom: 15px;
+            color: #2c3e50;
+            text-align: center;
+            border-bottom: 2px solid #3498db;
+            padding-bottom: 10px;
+        }
+
+        .attribute {
+            display: flex;
+            justify-content: space-between;
+            margin: 8px 0;
+            padding: 8px;
+            background: rgba(255, 255, 255, 0.7);
+            border-radius: 8px;
+            transition: all 0.3s ease;
+        }
+
+        .attribute:hover {
+            background: rgba(255, 255, 255, 0.9);
+            transform: translateX(5px);
+        }
+
+        .attribute.highlight {
+            background: linear-gradient(135deg, #ffd700, #ffed4e);
+            animation: attributeGlow 1s ease-in-out;
+        }
+
+        @keyframes attributeGlow {
+            0%, 100% { box-shadow: 0 0 5px rgba(255, 215, 0, 0.5); }
+            50% { box-shadow: 0 0 20px rgba(255, 215, 0, 0.8); }
+        }
+
+        .controls {
+            grid-area: controls;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 20px;
+            padding: 25px;
+            background: 
+                linear-gradient(135deg, rgba(255, 255, 255, 0.95) 0%, rgba(248, 250, 252, 0.9) 100%);
+            border-radius: 20px;
+            margin: 15px;
+            box-shadow: 
+                0 20px 40px rgba(0, 0, 0, 0.1),
+                0 8px 16px rgba(0, 0, 0, 0.05),
+                inset 0 1px 0 rgba(255, 255, 255, 0.6);
+            backdrop-filter: blur(15px);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            position: relative;
+            z-index: 1;
+        }
+
+        .controls::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            border-radius: 20px;
+            background: linear-gradient(135deg, rgba(99, 102, 241, 0.03), rgba(236, 72, 153, 0.03));
+            z-index: -1;
+        }
+
+        .btn {
+            padding: 14px 28px;
+            border: none;
+            border-radius: 30px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            box-shadow: 
+                0 8px 25px rgba(0, 0, 0, 0.15),
+                0 4px 10px rgba(0, 0, 0, 0.1);
+            position: relative;
+            overflow: hidden;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+            transition: left 0.6s;
+        }
+
+        .btn:hover::before {
+            left: 100%;
+        }
+
+        .btn:hover {
+            transform: translateY(-3px) scale(1.05);
+            box-shadow: 
+                0 15px 35px rgba(0, 0, 0, 0.2),
+                0 8px 15px rgba(0, 0, 0, 0.15);
+        }
+
+        .btn:active {
+            transform: translateY(-1px) scale(1.02);
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            box-shadow: 
+                0 8px 25px rgba(102, 126, 234, 0.4),
+                0 4px 10px rgba(118, 75, 162, 0.3);
+        }
+
+        .btn-primary:hover {
+            box-shadow: 
+                0 15px 35px rgba(102, 126, 234, 0.5),
+                0 8px 15px rgba(118, 75, 162, 0.4);
+        }
+
+        .btn-success {
+            background: linear-gradient(135deg, #56ab2f 0%, #a8e6cf 100%);
+            color: white;
+            box-shadow: 
+                0 8px 25px rgba(86, 171, 47, 0.4),
+                0 4px 10px rgba(168, 230, 207, 0.3);
+        }
+
+        .btn-success:hover {
+            box-shadow: 
+                0 15px 35px rgba(86, 171, 47, 0.5),
+                0 8px 15px rgba(168, 230, 207, 0.4);
+        }
+
+        .btn-warning {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            color: white;
+            box-shadow: 
+                0 8px 25px rgba(240, 147, 251, 0.4),
+                0 4px 10px rgba(245, 87, 108, 0.3);
+        }
+
+        .btn-warning:hover {
+            box-shadow: 
+                0 15px 35px rgba(240, 147, 251, 0.5),
+                0 8px 15px rgba(245, 87, 108, 0.4);
+        }
+
+        .btn-info {
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+            color: white;
+            box-shadow: 
+                0 8px 25px rgba(79, 172, 254, 0.4),
+                0 4px 10px rgba(0, 242, 254, 0.3);
+        }
+
+        .btn-info:hover {
+            box-shadow: 
+                0 15px 35px rgba(79, 172, 254, 0.5),
+                0 8px 15px rgba(0, 242, 254, 0.4);
+        }
+
+        .demo-status {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: rgba(0, 0, 0, 0.8);
+            color: white;
+            padding: 15px;
+            border-radius: 10px;
+            font-size: 14px;
+            z-index: 1000;
+            display: none;
+        }
+
+        .demo-status.active {
+            display: block;
+            animation: slideIn 0.5s ease-out;
+        }
+
+        @keyframes slideIn {
+            from { transform: translateX(100%); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+
+        .turn-info {
+            text-align: center;
+            margin: 20px 0;
+            font-size: 16px;
+            font-weight: bold;
+            color: #2c3e50;
+        }
+
+        .cards-container {
+            margin-top: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .card {
+            position: relative;
+            background: linear-gradient(135deg, 
+                rgba(255, 255, 255, 0.95) 0%, 
+                rgba(248, 250, 252, 0.9) 50%, 
+                rgba(241, 245, 249, 0.85) 100%);
+            border: 2px solid transparent;
+            border-radius: 15px;
+            padding: 15px;
+            margin: 5px 0;
+            cursor: pointer;
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            box-shadow: 
+                0 4px 20px rgba(0, 0, 0, 0.08),
+                0 2px 8px rgba(0, 0, 0, 0.04),
+                inset 0 1px 0 rgba(255, 255, 255, 0.6);
+            backdrop-filter: blur(10px);
+            overflow: hidden;
+        }
+
+        .card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(135deg, 
+                rgba(99, 102, 241, 0.05) 0%, 
+                rgba(236, 72, 153, 0.05) 50%, 
+                rgba(251, 191, 36, 0.05) 100%);
+            border-radius: 15px;
+            z-index: -1;
+            transition: opacity 0.3s ease;
+            opacity: 0;
+        }
+
+        .card::after {
+            content: attr(data-element);
+            position: absolute;
+            top: 8px;
+            right: 12px;
+            font-size: 20px;
+            opacity: 0.6;
+            transition: all 0.3s ease;
+        }
+
+        .card:hover {
+            transform: translateY(-3px) scale(1.02);
+            box-shadow: 
+                0 12px 40px rgba(0, 0, 0, 0.15),
+                0 6px 20px rgba(0, 0, 0, 0.08),
+                inset 0 1px 0 rgba(255, 255, 255, 0.8);
+            border-color: rgba(99, 102, 241, 0.4);
+        }
+
+        .card:hover::before {
+            opacity: 1;
+        }
+
+        .card:hover::after {
+            transform: scale(1.2) rotate(5deg);
+            opacity: 0.8;
+        }
+
+        .card.selected {
+            border-color: rgba(34, 197, 94, 0.6);
+            background: linear-gradient(135deg, 
+                rgba(220, 252, 231, 0.95) 0%, 
+                rgba(187, 247, 208, 0.9) 50%, 
+                rgba(134, 239, 172, 0.85) 100%);
+            transform: translateY(-2px) scale(1.01);
+            box-shadow: 
+                0 8px 30px rgba(34, 197, 94, 0.2),
+                0 4px 15px rgba(34, 197, 94, 0.1),
+                inset 0 1px 0 rgba(255, 255, 255, 0.8);
+        }
+
+        .card.selected::before {
+            background: linear-gradient(135deg, 
+                rgba(34, 197, 94, 0.1) 0%, 
+                rgba(16, 185, 129, 0.08) 100%);
+            opacity: 1;
+        }
+
+        .card-name {
+            font-weight: 700;
+            font-size: 16px;
+            color: #1e293b;
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .card-name::before {
+            content: '🎴';
+            font-size: 18px;
+            animation: cardPulse 2s ease-in-out infinite;
+        }
+
+        .card-description {
+            font-size: 13px;
+            color: #64748b;
+            line-height: 1.4;
+            margin-bottom: 8px;
+        }
+
+        .card-cost {
+            position: absolute;
+            top: 8px;
+            left: 12px;
+            background: linear-gradient(135deg, #3b82f6, #1d4ed8);
+            color: white;
+            border-radius: 50%;
+            width: 24px;
+            height: 24px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+            font-weight: 700;
+            box-shadow: 0 2px 8px rgba(59, 130, 246, 0.3);
+        }
+
+        .card-element {
+            position: absolute;
+            top: 8px;
+            right: 12px;
+            background: rgba(0, 0, 0, 0.7);
+            color: white;
+            padding: 2px 8px;
+            border-radius: 12px;
+            font-size: 10px;
+            font-weight: bold;
+        }
+
+        .card-icon {
+            font-size: 24px;
+            text-align: center;
+            margin: 8px 0;
+            filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.1));
+        }
+
+        .card-effect {
+            font-size: 11px;
+            color: #64748b;
+            margin-top: 8px;
+            line-height: 1.3;
+            text-align: center;
+            font-weight: 500;
+        }
+
+        .synergy-indicator {
+            position: absolute;
+            top: 40px;
+            left: 12px;
+            font-size: 16px;
+            animation: pulse 1.5s infinite;
+            filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.3));
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); opacity: 1; }
+            50% { transform: scale(1.2); opacity: 0.7; }
+        }
+
+        /* 协同效果卡牌样式 */
+        .card.synergy-perfect {
+            box-shadow: 0 0 20px rgba(255, 215, 0, 0.6), 0 8px 32px rgba(0, 0, 0, 0.12);
+            border: 2px solid #FFD700;
+            transform: translateY(-2px);
+        }
+
+        .card.synergy-generate {
+            box-shadow: 0 0 20px rgba(144, 238, 144, 0.6), 0 8px 32px rgba(0, 0, 0, 0.12);
+            border: 2px solid #90EE90;
+            transform: translateY(-2px);
+        }
+
+        .card.synergy-support {
+            box-shadow: 0 0 20px rgba(135, 206, 235, 0.6), 0 8px 32px rgba(0, 0, 0, 0.12);
+            border: 2px solid #87CEEB;
+            transform: translateY(-2px);
+        }
+
+        /* 视觉反馈效果 */
+        .player-piece.moving {
+            animation: playerMove 0.8s ease-in-out;
+            z-index: 1000;
+        }
+
+        @keyframes playerMove {
+            0% { transform: translate(-50%, -50%) scale(1); }
+            50% { transform: translate(-50%, -50%) scale(1.2); }
+            100% { transform: translate(-50%, -50%) scale(1); }
+        }
+
+        .move-trail {
+            position: absolute;
+            width: 20px;
+            height: 20px;
+            background: radial-gradient(circle, rgba(74, 144, 226, 0.6), transparent);
+            border-radius: 50%;
+            pointer-events: none;
+            animation: trailFade 0.8s ease-out forwards;
+        }
+
+        @keyframes trailFade {
+            0% { opacity: 1; transform: scale(1); }
+            100% { opacity: 0; transform: scale(2); }
+        }
+
+        .current-position {
+            animation: positionHighlight 2s ease-in-out infinite;
+            box-shadow: 0 0 20px rgba(74, 144, 226, 0.8);
+        }
+
+        @keyframes positionHighlight {
+            0%, 100% { 
+                box-shadow: 0 0 20px rgba(74, 144, 226, 0.4);
+                transform: scale(1);
+            }
+            50% { 
+                box-shadow: 0 0 30px rgba(74, 144, 226, 0.8);
+                transform: scale(1.05);
+            }
+        }
+
+        .action-feedback {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: rgba(0, 0, 0, 0.8);
+            color: white;
+            padding: 12px 20px;
+            border-radius: 25px;
+            font-weight: bold;
+            font-size: 14px;
+            z-index: 10000;
+            animation: feedbackSlide 2s ease-out forwards;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+        }
+
+        @keyframes feedbackSlide {
+            0% { 
+                transform: translateX(100%);
+                opacity: 0;
+            }
+            10%, 90% { 
+                transform: translateX(0);
+                opacity: 1;
+            }
+            100% { 
+                transform: translateX(100%);
+                opacity: 0;
+            }
+        }
+
+        @keyframes cardPulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+        }
+
+        @keyframes cardGlow {
+            0%, 100% { box-shadow: 0 0 5px rgba(99, 102, 241, 0.3); }
+            50% { box-shadow: 0 0 20px rgba(99, 102, 241, 0.6); }
+        }
+
+        .card.playable {
+            animation: cardGlow 2s ease-in-out infinite;
+        }
+
+        /* 稀有度边框样式 */
+        .card.border-common {
+            border-color: rgba(156, 163, 175, 0.6);
+        }
+
+        .card.border-rare {
+            border-color: rgba(59, 130, 246, 0.6);
+            box-shadow: 
+                0 4px 20px rgba(59, 130, 246, 0.1),
+                0 2px 8px rgba(59, 130, 246, 0.05),
+                inset 0 1px 0 rgba(255, 255, 255, 0.6);
+        }
+
+        .card.border-epic {
+            border-color: rgba(147, 51, 234, 0.6);
+            box-shadow: 
+                0 4px 20px rgba(147, 51, 234, 0.15),
+                0 2px 8px rgba(147, 51, 234, 0.08),
+                inset 0 1px 0 rgba(255, 255, 255, 0.6);
+        }
+
+        .card.border-legendary {
+            border-color: rgba(251, 191, 36, 0.8);
+            box-shadow: 
+                0 4px 20px rgba(251, 191, 36, 0.2),
+                0 2px 8px rgba(251, 191, 36, 0.1),
+                inset 0 1px 0 rgba(255, 255, 255, 0.6);
+            background: linear-gradient(135deg, 
+                rgba(255, 248, 220, 0.95) 0%, 
+                rgba(254, 243, 199, 0.9) 50%, 
+                rgba(253, 230, 138, 0.85) 100%);
+        }
+
+        .card.border-legendary::before {
+            background: linear-gradient(135deg, 
+                rgba(251, 191, 36, 0.1) 0%, 
+                rgba(245, 158, 11, 0.08) 100%);
+            opacity: 1;
+        }
+
+        .log-container {
+            max-height: 200px;
+            overflow-y: auto;
+            background: rgba(248, 249, 250, 0.9);
+            border-radius: 10px;
+            padding: 10px;
+            margin-top: 20px;
+        }
+
+        .log-entry {
+            margin: 5px 0;
+            padding: 5px;
+            border-radius: 5px;
+            font-size: 12px;
+        }
+
+        .log-entry.system {
+            background: #e3f2fd;
+            color: #1976d2;
+        }
+
+        .log-entry.player {
+            background: #f3e5f5;
+            color: #7b1fa2;
+        }
+
+        .log-entry.action {
+            background: #e8f5e8;
+            color: #388e3c;
+        }
+
+        .log-entry.synergy {
+            background: linear-gradient(45deg, rgba(255, 215, 0, 0.2), rgba(255, 140, 0, 0.2));
+            color: #FF8C00;
+            font-weight: bold;
+            border-left: 3px solid #FFD700;
+            padding-left: 8px;
+            animation: synergyGlow 1s ease-in-out;
+        }
+
+        @keyframes synergyGlow {
+            0%, 100% { box-shadow: 0 0 5px rgba(255, 215, 0, 0.3); }
+            50% { box-shadow: 0 0 15px rgba(255, 215, 0, 0.6); }
+        }
+
+        /* 协同效果动画 */
+        .bagua-map.synergy-perfect {
+            animation: perfectSynergy 2s ease-in-out;
+        }
+
+        .bagua-map.synergy-generate {
+            animation: generateSynergy 2s ease-in-out;
+        }
+
+        .bagua-map.synergy-support {
+            animation: supportSynergy 2s ease-in-out;
+        }
+
+        @keyframes perfectSynergy {
+            0%, 100% { 
+                filter: brightness(1) saturate(1);
+                transform: scale(1);
+            }
+            25% { 
+                filter: brightness(1.3) saturate(1.5);
+                transform: scale(1.02);
+            }
+            50% { 
+                filter: brightness(1.5) saturate(2);
+                transform: scale(1.05);
+            }
+            75% { 
+                filter: brightness(1.3) saturate(1.5);
+                transform: scale(1.02);
+            }
+        }
+
+        @keyframes generateSynergy {
+            0%, 100% { 
+                filter: hue-rotate(0deg) brightness(1);
+            }
+            50% { 
+                filter: hue-rotate(30deg) brightness(1.2);
+            }
+        }
+
+        @keyframes supportSynergy {
+            0%, 100% { 
+                box-shadow: 0 0 20px rgba(0, 255, 0, 0);
+            }
+            50% { 
+                box-shadow: 0 0 30px rgba(0, 255, 0, 0.4);
+            }
+        }
+
+        .ai-players {
+            margin-top: 20px;
+        }
+
+        .ai-player {
+            background: rgba(255, 255, 255, 0.8);
+            border-radius: 10px;
+            padding: 10px;
+            margin: 10px 0;
+            border-left: 4px solid #3498db;
+        }
+
+        .ai-player.active {
+            border-left-color: #e74c3c;
+            background: rgba(231, 76, 60, 0.1);
+            animation: aiPlayerGlow 1s ease-in-out;
+        }
+
+        @keyframes aiPlayerGlow {
+            0%, 100% { box-shadow: 0 0 5px rgba(231, 76, 60, 0.3); }
+            50% { box-shadow: 0 0 15px rgba(231, 76, 60, 0.6); }
+        }
+
+        .ai-player h4 {
+            margin: 0 0 10px 0;
+            color: #2c3e50;
+        }
+
+        .ai-stats {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 5px;
+            font-size: 12px;
+        }
+
+        .ai-stat {
+            background: rgba(255, 255, 255, 0.7);
+            padding: 5px;
+            border-radius: 5px;
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+    <div class="game-container">
+        <div class="left-panel">
+            <div class="status-title">玩家状态</div>
+            <div class="attribute">
+                <span>位置:</span>
+                <span id="playerPosition">中央</span>
+            </div>
+            <div class="attribute">
+                <span>生命:</span>
+                <span id="playerHealth">100</span>
+            </div>
+            <div class="attribute">
+                <span>能量:</span>
+                <span id="playerEnergy">50</span>
+            </div>
+            <div class="attribute">
+                <span>阴阳:</span>
+                <span id="playerBalance">平衡</span>
+            </div>
+            <div class="attribute">
+                <span>气值:</span>
+                <span id="playerQi">30</span>
+            </div>
+            <div class="attribute">
+                <span>行动点:</span>
+                <span id="playerActions">3</span>
+            </div>
+
+            <div class="cards-container">
+                <div class="status-title">手牌</div>
+                <div id="playerCards" class="cards-container">
+                    <div class="card playable" data-element="🏔️" onclick="selectCard(0)">
+                        <div class="card-cost">2</div>
+                        <div class="card-name">乾为天</div>
+                        <div class="card-description">天行健，君子以自强不息。大幅提升气值和领导力。</div>
+                    </div>
+                    <div class="card playable" data-element="🌍" onclick="selectCard(1)">
+                        <div class="card-cost">1</div>
+                        <div class="card-name">坤为地</div>
+                        <div class="card-description">地势坤，君子以厚德载物。恢复生命并增强防御。</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="center-area">
+            <div class="turn-info">
+                <div>回合: <span id="turnCounter">1</span></div>
+                <div>当前玩家: <span id="currentPlayer">玩家1</span></div>
+            </div>
+
+            <div class="bagua-container">
+                <div class="direction-label-west">西</div>
+                <div class="direction-label-east">东</div>
+                <div class="bagua-map">
+                    <!-- 第一行：巽(东南) 离(南) 坤(西南) -->
+                    <div class="bagua-position" data-position="7" data-symbol="☴" data-direction="东南" onclick="moveToPosition(7)" title="巽卦 - 木 - 东南方">
+                        <div>巽</div>
+                        <div>木</div>
+                    </div>
+                    <div class="bagua-position" data-position="0" data-symbol="☲" data-direction="南" onclick="moveToPosition(0)" title="离卦 - 火 - 南方">
+                        <div>离</div>
+                        <div>火</div>
+                    </div>
+                    <div class="bagua-position" data-position="1" data-symbol="☷" data-direction="西南" onclick="moveToPosition(1)" title="坤卦 - 土 - 西南方">
+                        <div>坤</div>
+                        <div>土</div>
+                    </div>
+                    
+                    <!-- 第二行：震(东) 中心 兑(西) -->
+                    <div class="bagua-position" data-position="6" data-symbol="☳" data-direction="东" onclick="moveToPosition(6)" title="震卦 - 木 - 东方">
+                        <div>震</div>
+                        <div>木</div>
+                    </div>
+                    <div class="center-taiji" onclick="moveToCenter()"></div>
+                    <div class="bagua-position" data-position="2" data-symbol="☱" data-direction="西" onclick="moveToPosition(2)" title="兑卦 - 金 - 西方">
+                        <div>兑</div>
+                        <div>金</div>
+                    </div>
+                    
+                    <!-- 第三行：艮(东北) 坎(北) 乾(西北) -->
+                    <div class="bagua-position" data-position="5" data-symbol="☶" data-direction="东北" onclick="moveToPosition(5)" title="艮卦 - 土 - 东北方">
+                        <div>艮</div>
+                        <div>土</div>
+                    </div>
+                    <div class="bagua-position" data-position="4" data-symbol="☵" data-direction="北" onclick="moveToPosition(4)" title="坎卦 - 水 - 北方">
+                        <div>坎</div>
+                        <div>水</div>
+                    </div>
+                    <div class="bagua-position" data-position="3" data-symbol="☰" data-direction="西北" onclick="moveToPosition(3)" title="乾卦 - 金 - 西北方">
+                        <div>乾</div>
+                        <div>金</div>
+                    </div>
+                    
+                    <div class="player-piece player1" id="player1Piece" style="top: 50%; left: 50%; transform: translate(-50%, -50%);">1</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="right-panel">
+            <div class="status-title">AI 玩家</div>
+            <div class="ai-players" id="aiPlayers">
+                <!-- AI玩家状态将在这里动态生成 -->
+            </div>
+
+            <div class="log-container">
+                <div class="status-title">游戏日志</div>
+                <div id="gameLog">
+                    <div class="log-entry system">游戏开始</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="controls">
+            <button class="btn btn-primary" onclick="game.startAutoDemo()" id="demoBtn">开始自动演示</button>
+            <button class="btn btn-success" onclick="game.startFourPlayerDemo()" id="fourPlayerDemoBtn">四人演示</button>
+            <button class="btn btn-warning" onclick="game.startAISimulation()" id="aiBtn">AI模拟</button>
+            <button class="btn btn-info" onclick="endTurn()">结束回合</button>
+            <button class="btn btn-primary" onclick="clearLog()">清空日志</button>
+        </div>
+    </div>
+
+    <div class="demo-status" id="demoStatus">
+        <div id="demoMessage">演示进行中...</div>
+        <div id="demoStep">步骤: 1/6</div>
+    </div>
+
+    <script>
+        class Game {
+            constructor() {
+                this.currentPlayer = 1;
+                this.turnCounter = 1;
+                this.playerPosition = 'center';
+                this.playerStats = {
+                    health: 100,
+                    energy: 50,
+                    balance: 0, // -100到100，负数为阴，正数为阳
+                    qi: 30,
+                    actions: 3
+                };
+                this.selectedCard = null;
+                this.demoMode = false;
+                this.demoStep = 0;
+                this.demoTimer = null;
+                this.aiMode = false;
+                this.aiPlayers = [];
+                this.fourPlayerMode = false;
+
+                this.baguaData = {
+                    0: { name: '离', direction: '南', element: '火', symbol: '☲', effect: '增强阳气，提升攻击力', color: '#ff6b6b' },
+                    1: { name: '坤', direction: '西南', element: '土', symbol: '☷', effect: '稳定气值，增强防御', color: '#feca57' },
+                    2: { name: '兑', direction: '西', element: '金', symbol: '☱', effect: '平衡阴阳，恢复能量', color: '#48dbfb' },
+                    3: { name: '乾', direction: '西北', element: '金', symbol: '☰', effect: '大幅增强阳气和领导力', color: '#ffd700' },
+                    4: { name: '坎', direction: '北', element: '水', symbol: '☵', effect: '增强阴气，提升智慧', color: '#3742fa' },
+                    5: { name: '艮', direction: '东北', element: '土', symbol: '☶', effect: '稳固根基，增强耐力', color: '#8b4513' },
+                    6: { name: '震', direction: '东', element: '木', symbol: '☳', effect: '激发活力，增强行动力', color: '#00d2d3' },
+                    7: { name: '巽', direction: '东南', element: '木', symbol: '☴', effect: '柔和调节，增强适应性', color: '#7bed9f' }
+                };
+
+                this.cardDatabase = [
+                    { 
+                        id: 1, name: '乾为天', cost: 2, effect: '+20气值', type: '增益', element: '金',
+                        icon: '🏔️', description: '天行健，君子以自强不息。大幅提升气值和领导力。',
+                        rarity: 'legendary'
+                    },
+                    { 
+                        id: 2, name: '坤为地', cost: 1, effect: '+15生命', type: '治疗', element: '土',
+                        icon: '🌍', description: '地势坤，君子以厚德载物。恢复生命并增强防御。',
+                        rarity: 'common'
+                    },
+                    { 
+                        id: 3, name: '震为雷', cost: 3, effect: '+25攻击力', type: '攻击', element: '木',
+                        icon: '⚡', description: '震惊百里，不丧匕鬯。雷霆万钧，摧枯拉朽。',
+                        rarity: 'epic'
+                    },
+                    { 
+                        id: 4, name: '巽为风', cost: 2, effect: '+10敏捷', type: '增益', element: '木',
+                        icon: '🌪️', description: '巽风入微，无孔不入。提升敏捷和适应能力。',
+                        rarity: 'rare'
+                    },
+                    { 
+                        id: 5, name: '坎为水', cost: 2, effect: '+阴气平衡', type: '平衡', element: '水',
+                        icon: '🌊', description: '水流不息，柔能克刚。平衡阴阳，智慧如水。',
+                        rarity: 'rare'
+                    },
+                    { 
+                        id: 6, name: '离为火', cost: 3, effect: '+阳气激发', type: '激发', element: '火',
+                        icon: '🔥', description: '离火通明，照亮前路。激发阳气，燃烧斗志。',
+                        rarity: 'epic'
+                    },
+                    { 
+                        id: 7, name: '艮为山', cost: 1, effect: '+防御力', type: '防御', element: '土',
+                        icon: '⛰️', description: '艮山止静，稳如泰山。增强防御，固若金汤。',
+                        rarity: 'common'
+                    },
+                    { 
+                        id: 8, name: '兑为泽', cost: 2, effect: '恢复能量', type: '恢复', element: '金',
+                        icon: '💧', description: '兑泽润物，和悦致祥。恢复能量，心境平和。',
+                        rarity: 'rare'
+                    }
+                ];
+
+                this.initializeGame();
+            }
+
+            initializeGame() {
+                this.updateDisplay();
+                this.addLogEntry('system', '天机变游戏初始化完成');
+            }
+
+            // 自动演示功能
+            startAutoDemo() {
+                if (this.demoMode) {
+                    this.stopAutoDemo();
+                    return;
+                }
+
+                this.demoMode = true;
+                this.demoStep = 0;
+                this.fourPlayerMode = false;
+                document.getElementById('demoBtn').textContent = '停止演示';
+                document.getElementById('demoStatus').classList.add('active');
+                
+                this.addLogEntry('system', '开始自动演示模式');
+                this.runDemoStep();
+            }
+
+            stopAutoDemo() {
+                this.demoMode = false;
+                this.fourPlayerMode = false;
+                if (this.demoTimer) {
+                    clearTimeout(this.demoTimer);
+                    this.demoTimer = null;
+                }
+                document.getElementById('demoBtn').textContent = '开始自动演示';
+                document.getElementById('fourPlayerDemoBtn').textContent = '四人演示';
+                document.getElementById('demoStatus').classList.remove('active');
+                this.addLogEntry('system', '演示模式已停止');
+            }
+
+            runDemoStep() {
+                if (!this.demoMode) return;
+
+                const demoSteps = [
+                    () => {
+                        this.addLogEntry('demo', '步骤1: 观察当前位置和状态');
+                        this.highlightPlayerStats();
+                        document.getElementById('demoMessage').textContent = '观察玩家当前状态';
+                    },
+                    () => {
+                        this.addLogEntry('demo', '步骤2: 查看可用手牌');
+                        this.highlightCards();
+                        document.getElementById('demoMessage').textContent = '查看手牌选项';
+                    },
+                    () => {
+                        this.addLogEntry('demo', '步骤3: 移动到离位（南方火位）');
+                        this.moveToPosition(0);
+                        this.highlightPosition(0);
+                        document.getElementById('demoMessage').textContent = '移动到离位增强阳气';
+                    },
+                    () => {
+                        this.addLogEntry('demo', '步骤4: 使用卡牌"乾为天"');
+                        this.selectCard(0);
+                        this.playSelectedCard();
+                        document.getElementById('demoMessage').textContent = '使用卡牌增强能力';
+                    },
+                    () => {
+                        this.addLogEntry('demo', '步骤5: 观察阴阳平衡变化');
+                        this.updateStatsWithAnimation();
+                        document.getElementById('demoMessage').textContent = '观察状态变化';
+                    },
+                    () => {
+                        this.addLogEntry('demo', '步骤6: 结束回合');
+                        this.endTurn();
+                        document.getElementById('demoMessage').textContent = '回合结束，准备下一轮';
+                    }
+                ];
+
+                if (this.demoStep < demoSteps.length) {
+                    demoSteps[this.demoStep]();
+                    document.getElementById('demoStep').textContent = `步骤: ${this.demoStep + 1}/${demoSteps.length}`;
+                    this.demoStep++;
+                    
+                    this.demoTimer = setTimeout(() => {
+                        this.runDemoStep();
+                    }, 3000);
+                } else {
+                    this.addLogEntry('system', '自动演示完成');
+                    this.stopAutoDemo();
+                }
+            }
+
+            // 四人演示模式
+            startFourPlayerDemo() {
+                if (this.fourPlayerMode) {
+                    this.stopAutoDemo();
+                    return;
+                }
+
+                this.fourPlayerMode = true;
+                this.demoMode = true;
+                this.demoStep = 0;
+                document.getElementById('fourPlayerDemoBtn').textContent = '停止四人演示';
+                document.getElementById('demoStatus').classList.add('active');
+                
+                this.initializeFourPlayers();
+                this.addLogEntry('system', '开始四人演示模式');
+                this.runFourPlayerDemo();
+            }
+
+            initializeFourPlayers() {
+                // 创建四个玩家棋子
+                for (let i = 1; i <= 4; i++) {
+                    let piece = document.getElementById(`player${i}Piece`);
+                    if (!piece) {
+                        piece = document.createElement('div');
+                        piece.id = `player${i}Piece`;
+                        piece.className = `player-piece player${i}`;
+                        piece.textContent = i;
+                        document.querySelector('.bagua-map').appendChild(piece);
+                    }
+                    
+                    // 设置初始位置
+                    const positions = [
+                        { top: '50%', left: '50%' }, // 玩家1 - 中央
+                        { top: '20%', left: '50%' },  // 玩家2 - 离位
+                        { top: '50%', left: '20%' },  // 玩家3 - 震位
+                        { top: '80%', left: '50%' }   // 玩家4 - 坎位
+                    ];
+                    
+                    piece.style.top = positions[i-1].top;
+                    piece.style.left = positions[i-1].left;
+                    piece.style.transform = 'translate(-50%, -50%)';
+                }
+
+                // 创建AI玩家数据
+                this.aiPlayers = [];
+                for (let i = 1; i <= 4; i++) {
+                    this.aiPlayers.push({
+                        id: i,
+                        name: `玩家${i}`,
+                        position: i === 1 ? 'center' : [0, 6, 4][i-2],
+                        health: 100,
+                        energy: 50,
+                        qi: 30,
+                        balance: 0,
+                        actions: 3,
+                        cards: this.generateRandomCards(2)
+                    });
+                }
+                this.updateAIDisplay();
+            }
+
+            runFourPlayerDemo() {
+                if (!this.fourPlayerMode) return;
+
+                const currentPlayerIndex = this.demoStep % 4;
+                const currentPlayer = this.aiPlayers[currentPlayerIndex];
+                
+                this.addLogEntry('demo', `${currentPlayer.name}的回合开始`);
+                this.highlightCurrentPlayer(currentPlayer.id);
+                
+                // 模拟玩家行动
+                setTimeout(() => {
+                    this.simulatePlayerAction(currentPlayer);
+                }, 1000);
+
+                setTimeout(() => {
+                    this.demoStep++;
+                    if (this.demoStep < 16) { // 4轮演示
+                        this.runFourPlayerDemo();
+                    } else {
+                        this.addLogEntry('system', '四人演示完成');
+                        this.stopAutoDemo();
+                    }
+                }, 4000);
+            }
+
+            simulatePlayerAction(player) {
+                const actions = ['move', 'playCard', 'meditate'];
+                const action = actions[Math.floor(Math.random() * actions.length)];
+                
+                switch (action) {
+                    case 'move':
+                        const newPos = Math.floor(Math.random() * 8);
+                        this.movePlayerToPosition(player.id, newPos);
+                        this.addLogEntry('action', `${player.name}移动到${this.baguaData[newPos].name}位`);
+                        break;
+                    case 'playCard':
+                        if (player.cards.length > 0) {
+                            const card = player.cards[0];
+                            this.addLogEntry('action', `${player.name}使用卡牌：${card.name}`);
+                            this.applyCardEffect(player, card);
+                        }
+                        break;
+                    case 'meditate':
+                        player.qi += 10;
+                        player.energy += 5;
+                        this.addLogEntry('action', `${player.name}进行冥想，恢复气值和能量`);
+                        break;
+                }
+                
+                this.updateAIDisplay();
+            }
+
+            movePlayerToPosition(playerId, position) {
+                const piece = document.getElementById(`player${playerId}Piece`);
+                const positionElement = document.querySelector(`[data-position="${position}"]`);
+                
+                if (piece && positionElement) {
+                    const rect = positionElement.getBoundingClientRect();
+                    const containerRect = document.querySelector('.bagua-map').getBoundingClientRect();
+                    
+                    const relativeTop = ((rect.top - containerRect.top + rect.height/2) / containerRect.height) * 100;
+                    const relativeLeft = ((rect.left - containerRect.left + rect.width/2) / containerRect.width) * 100;
+                    
+                    piece.style.top = `${relativeTop}%`;
+                    piece.style.left = `${relativeLeft}%`;
+                    piece.style.transform = 'translate(-50%, -50%)';
+                    
+                    // 更新玩家数据
+                    if (this.aiPlayers[playerId-1]) {
+                        this.aiPlayers[playerId-1].position = position;
+                    }
+                }
+            }
+
+            highlightCurrentPlayer(playerId) {
+                // 移除所有高亮
+                document.querySelectorAll('.ai-player').forEach(el => el.classList.remove('active'));
+                document.querySelectorAll('.player-piece').forEach(el => el.style.animation = 'playerPulse 2s infinite');
+                
+                // 高亮当前玩家
+                const aiPlayerElement = document.querySelector(`[data-player-id="${playerId}"]`);
+                if (aiPlayerElement) {
+                    aiPlayerElement.classList.add('active');
+                }
+                
+                const piece = document.getElementById(`player${playerId}Piece`);
+                if (piece) {
+                    piece.style.animation = 'playerPulse 0.5s infinite';
+                }
+            }
+
+            // 辅助方法
+            highlightPlayerStats() {
+                document.querySelectorAll('.attribute').forEach(attr => {
+                    attr.classList.add('highlight');
+                    setTimeout(() => attr.classList.remove('highlight'), 2000);
+                });
+            }
+
+            highlightCards() {
+                document.querySelectorAll('.card').forEach(card => {
+                    card.style.animation = 'pulse 1s infinite';
+                    setTimeout(() => card.style.animation = '', 2000);
+                });
+            }
+
+            highlightPosition(position) {
+                const posElement = document.querySelector(`[data-position="${position}"]`);
+                if (posElement) {
+                    posElement.style.animation = 'pulse 1s infinite';
+                    setTimeout(() => posElement.style.animation = '', 2000);
+                }
+            }
+
+            updateStatsWithAnimation() {
+                this.playerStats.qi += 20;
+                this.playerStats.balance += 15;
+                this.updateDisplay();
+                this.highlightPlayerStats();
+            }
+
+            generateRandomCards(count) {
+                const cards = [];
+                for (let i = 0; i < count; i++) {
+                    const randomCard = this.cardDatabase[Math.floor(Math.random() * this.cardDatabase.length)];
+                    cards.push({...randomCard});
+                }
+                return cards;
+            }
+
+            applyCardEffect(player, card) {
+                switch (card.type) {
+                    case '增益':
+                        player.qi += 20;
+                        break;
+                    case '治疗':
+                        player.health += 15;
+                        break;
+                    case '攻击':
+                        player.energy += 10;
+                        break;
+                    case '平衡':
+                        player.balance = Math.max(-100, Math.min(100, player.balance - 20));
+                        break;
+                }
+                player.energy -= card.cost;
+            }
+
+            updateAIDisplay() {
+                const container = document.getElementById('aiPlayers');
+                container.innerHTML = '';
+                
+                this.aiPlayers.forEach(player => {
+                    const playerDiv = document.createElement('div');
+                    playerDiv.className = 'ai-player';
+                    playerDiv.setAttribute('data-player-id', player.id);
+                    
+                    const positionName = player.position === 'center' ? '中央' : this.baguaData[player.position]?.name || '未知';
+                    
+                    playerDiv.innerHTML = `
+                        <h4>${player.name}</h4>
+                        <div class="ai-stats">
+                            <div class="ai-stat">位置: ${positionName}</div>
+                            <div class="ai-stat">生命: ${player.health}</div>
+                            <div class="ai-stat">能量: ${player.energy}</div>
+                            <div class="ai-stat">气值: ${player.qi}</div>
+                            <div class="ai-stat">平衡: ${player.balance}</div>
+                            <div class="ai-stat">行动: ${player.actions}</div>
+                        </div>
+                    `;
+                    
+                    container.appendChild(playerDiv);
+                });
+            }
+
+            // AI模拟功能
+            startAISimulation() {
+                if (this.aiMode) {
+                    this.stopAISimulation();
+                    return;
+                }
+
+                this.aiMode = true;
+                document.getElementById('aiBtn').textContent = '停止AI模拟';
+                this.addLogEntry('system', '开始AI模拟模式');
+                
+                // 创建AI玩家
+                this.createAIPlayer();
+                this.runAITurn();
+            }
+
+            stopAISimulation() {
+                this.aiMode = false;
+                if (this.aiTimer) {
+                    clearTimeout(this.aiTimer);
+                    this.aiTimer = null;
+                }
+                document.getElementById('aiBtn').textContent = 'AI模拟';
+                this.addLogEntry('system', 'AI模拟已停止');
+            }
+
+            createAIPlayer() {
+                this.aiPlayer = {
+                    position: 'center',
+                    health: 100,
+                    energy: 50,
+                    qi: 30,
+                    balance: 0,
+                    actions: 3,
+                    strategy: 'balanced', // balanced, aggressive, defensive
+                    cards: this.generateRandomCards(3)
+                };
+            }
+
+            runAITurn() {
+                if (!this.aiMode) return;
+
+                this.addLogEntry('ai', 'AI正在思考...');
+                
+                setTimeout(() => {
+                    const action = this.calculateAIAction();
+                    this.executeAIAction(action);
+                    
+                    this.aiTimer = setTimeout(() => {
+                        this.runAITurn();
+                    }, 2000);
+                }, 1000);
+            }
+
+            calculateAIAction() {
+                const actions = [];
+                
+                // 评估移动
+                if (this.aiPlayer.actions > 0) {
+                    for (let i = 0; i < 8; i++) {
+                        actions.push({
+                            type: 'move',
+                            target: i,
+                            weight: this.calculateMoveWeight(i)
+                        });
+                    }
+                }
+                
+                // 评估使用卡牌
+                if (this.aiPlayer.cards.length > 0 && this.aiPlayer.energy >= this.aiPlayer.cards[0].cost) {
+                    actions.push({
+                        type: 'playCard',
+                        card: this.aiPlayer.cards[0],
+                        weight: this.calculateCardWeight(this.aiPlayer.cards[0])
+                    });
+                }
+                
+                // 评估冥想
+                if (this.aiPlayer.qi < 50 || this.aiPlayer.energy < 30) {
+                    actions.push({
+                        type: 'meditate',
+                        weight: this.calculateMeditateWeight()
+                    });
+                }
+                
+                // 选择最佳行动
+                if (actions.length === 0) {
+                    return { type: 'endTurn' };
+                }
+                
+                actions.sort((a, b) => b.weight - a.weight);
+                return actions[0];
+            }
+
+            calculateMoveWeight(position) {
+                const gua = this.baguaData[position];
+                let weight = 50;
+                
+                // 根据当前状态调整权重
+                if (this.aiPlayer.balance < -30 && gua.element === '火') {
+                    weight += 30; // 需要阳气时偏向火位
+                } else if (this.aiPlayer.balance > 30 && gua.element === '水') {
+                    weight += 30; // 需要阴气时偏向水位
+                }
+                
+                if (this.aiPlayer.qi < 40 && gua.element === '土') {
+                    weight += 20; // 气值低时偏向土位稳定
+                }
+                
+                return weight;
+            }
+
+            calculateCardWeight(card) {
+                let weight = 40;
+                
+                if (card.type === '治疗' && this.aiPlayer.health < 70) {
+                    weight += 40;
+                } else if (card.type === '增益' && this.aiPlayer.qi < 50) {
+                    weight += 30;
+                } else if (card.type === '平衡' && Math.abs(this.aiPlayer.balance) > 50) {
+                    weight += 35;
+                }
+                
+                return weight;
+            }
+
+            calculateMeditateWeight() {
+                let weight = 30;
+                
+                if (this.aiPlayer.qi < 30) weight += 25;
+                if (this.aiPlayer.energy < 25) weight += 20;
+                
+                return weight;
+            }
+
+            executeAIAction(action) {
+                switch (action.type) {
+                    case 'move':
+                        this.aiPlayer.position = action.target;
+                        this.aiPlayer.actions--;
+                        this.addLogEntry('ai', `AI移动到${this.baguaData[action.target].name}位`);
+                        this.applyGuaEffect(action.target);
+                        break;
+                        
+                    case 'playCard':
+                        this.aiPlayer.energy -= action.card.cost;
+                        this.aiPlayer.cards.shift();
+                        this.addLogEntry('ai', `AI使用卡牌：${action.card.name}`);
+                        this.applyCardEffectToAI(action.card);
+                        break;
+                        
+                    case 'meditate':
+                        this.aiPlayer.qi += 15;
+                        this.aiPlayer.energy += 10;
+                        this.aiPlayer.actions--;
+                        this.addLogEntry('ai', 'AI进行冥想，恢复气值和能量');
+                        break;
+                        
+                    case 'endTurn':
+                        this.aiPlayer.actions = 3;
+                        this.addLogEntry('ai', 'AI结束回合');
+                        break;
+                }
+                
+                this.updateAIDisplaySingle();
+            }
+
+            applyGuaEffect(position) {
+                const gua = this.baguaData[position];
+                
+                switch (gua.element) {
+                    case '火':
+                        this.aiPlayer.balance += 20;
+                        this.aiPlayer.energy += 5;
+                        break;
+                    case '水':
+                        this.aiPlayer.balance -= 20;
+                        this.aiPlayer.qi += 10;
+                        break;
+                    case '土':
+                        this.aiPlayer.qi += 15;
+                        this.aiPlayer.health += 5;
+                        break;
+                    case '金':
+                        this.aiPlayer.energy += 10;
+                        break;
+                    case '木':
+                        this.aiPlayer.actions += 1;
+                        break;
+                }
+                
+                // 限制数值范围
+                this.aiPlayer.balance = Math.max(-100, Math.min(100, this.aiPlayer.balance));
+                this.aiPlayer.health = Math.min(100, this.aiPlayer.health);
+                this.aiPlayer.qi = Math.min(100, this.aiPlayer.qi);
+                this.aiPlayer.energy = Math.min(100, this.aiPlayer.energy);
+            }
+
+            applyCardEffectToAI(card) {
+                switch (card.type) {
+                    case '增益':
+                        this.aiPlayer.qi += 20;
+                        break;
+                    case '治疗':
+                        this.aiPlayer.health += 15;
+                        break;
+                    case '攻击':
+                        this.aiPlayer.energy += 10;
+                        break;
+                    case '平衡':
+                        this.aiPlayer.balance = Math.max(-100, Math.min(100, this.aiPlayer.balance - 20));
+                        break;
+                }
+            }
+
+            updateAIDisplaySingle() {
+                // 更新单个AI玩家显示（用于AI模拟模式）
+                const container = document.getElementById('aiPlayers');
+                const positionName = this.aiPlayer.position === 'center' ? '中央' : this.baguaData[this.aiPlayer.position]?.name || '未知';
+                
+                container.innerHTML = `
+                    <div class="ai-player active">
+                        <h4>AI玩家</h4>
+                        <div class="ai-stats">
+                            <div class="ai-stat">位置: ${positionName}</div>
+                            <div class="ai-stat">生命: ${this.aiPlayer.health}</div>
+                            <div class="ai-stat">能量: ${this.aiPlayer.energy}</div>
+                            <div class="ai-stat">气值: ${this.aiPlayer.qi}</div>
+                            <div class="ai-stat">平衡: ${this.aiPlayer.balance}</div>
+                            <div class="ai-stat">行动: ${this.aiPlayer.actions}</div>
+                        </div>
+                    </div>
+                `;
+            }
+
+            // 游戏基础功能
+            moveToPosition(position) {
+                if (this.playerStats.actions <= 0) {
+                    this.addLogEntry('error', '没有足够的行动点');
+                    this.showActionFeedback('error');
+                    return;
+                }
+
+                // 添加移动动画效果
+                this.showMoveAnimation(position);
+                
+                this.playerPosition = position;
+                this.playerStats.actions--;
+                
+                const gua = this.baguaData[position];
+                this.addLogEntry('player', `移动到${gua.name}位（${gua.direction}）`);
+                this.addLogEntry('effect', gua.effect);
+                
+                // 应用八卦效果
+                this.applyPositionEffect(position);
+                this.updateDisplay();
+                this.updatePlayerPiecePosition(position);
+                
+                // 高亮当前位置
+                this.highlightCurrentPosition();
+                this.showActionFeedback('move');
+            }
+
+            moveToCenter() {
+                if (this.playerStats.actions <= 0) {
+                    this.addLogEntry('error', '没有足够的行动点');
+                    this.showActionFeedback('error');
+                    return;
+                }
+
+                this.showMoveAnimation('center');
+                
+                this.playerPosition = 'center';
+                this.playerStats.actions--;
+                this.addLogEntry('player', '移动到太极中心');
+                this.addLogEntry('effect', '在太极中心冥想，恢复阴阳平衡');
+                
+                // 太极中心效果
+                this.playerStats.balance = Math.max(-100, Math.min(100, this.playerStats.balance * 0.8));
+                this.playerStats.qi += 10;
+                
+                this.updateDisplay();
+                this.updatePlayerPiecePosition('center');
+                this.highlightCurrentPosition();
+                this.showActionFeedback('center');
+            }
+
+            updatePlayerPiecePosition(position) {
+                const piece = document.getElementById('player1Piece');
+                
+                if (position === 'center') {
+                    piece.style.top = '50%';
+                    piece.style.left = '50%';
+                    piece.style.transform = 'translate(-50%, -50%)';
+                } else {
+                    const positionElement = document.querySelector(`[data-position="${position}"]`);
+                    if (positionElement) {
+                        const rect = positionElement.getBoundingClientRect();
+                        const containerRect = document.querySelector('.bagua-map').getBoundingClientRect();
+                        
+                        const relativeTop = ((rect.top - containerRect.top + rect.height/2) / containerRect.height) * 100;
+                        const relativeLeft = ((rect.left - containerRect.left + rect.width/2) / containerRect.width) * 100;
+                        
+                        piece.style.top = `${relativeTop}%`;
+                        piece.style.left = `${relativeLeft}%`;
+                        piece.style.transform = 'translate(-50%, -50%)';
+                    }
+                }
+            }
+
+            applyPositionEffect(position) {
+                const gua = this.baguaData[position];
+                
+                switch (gua.element) {
+                    case '火':
+                        this.playerStats.balance += 25;
+                        this.playerStats.energy += 10;
+                        break;
+                    case '水':
+                        this.playerStats.balance -= 25;
+                        this.playerStats.qi += 15;
+                        break;
+                    case '土':
+                        this.playerStats.qi += 20;
+                        this.playerStats.health += 10;
+                        break;
+                    case '金':
+                        this.playerStats.energy += 15;
+                        this.playerStats.balance += 10;
+                        break;
+                    case '木':
+                        this.playerStats.actions += 1;
+                        this.playerStats.energy += 5;
+                        break;
+                }
+                
+                // 限制数值范围
+                this.playerStats.balance = Math.max(-100, Math.min(100, this.playerStats.balance));
+                this.playerStats.health = Math.min(100, this.playerStats.health);
+                this.playerStats.qi = Math.min(100, this.playerStats.qi);
+                this.playerStats.energy = Math.min(100, this.playerStats.energy);
+            }
+
+            selectCard(index) {
+                this.selectedCard = index;
+                document.querySelectorAll('.card').forEach((card, i) => {
+                    card.classList.toggle('selected', i === index);
+                });
+                this.addLogEntry('player', `选择了卡牌：${this.cardDatabase[index].name}`);
+            }
+
+            playSelectedCard() {
+                if (this.selectedCard === null) {
+                    this.addLogEntry('error', '请先选择一张卡牌');
+                    this.showActionFeedback('error');
+                    return;
+                }
+
+                const card = this.cardDatabase[this.selectedCard];
+                if (this.playerStats.energy < card.cost) {
+                    this.addLogEntry('error', '能量不足');
+                    this.showActionFeedback('error');
+                    return;
+                }
+
+                this.playerStats.energy -= card.cost;
+                this.addLogEntry('player', `使用卡牌：${card.name}`);
+                this.addLogEntry('effect', card.effect);
+                
+                // 应用卡牌效果
+                this.applyCardEffectToPlayer(card);
+                this.selectedCard = null;
+                document.querySelectorAll('.card').forEach(card => card.classList.remove('selected'));
+                this.updateDisplay();
+                this.showActionFeedback('card');
+            }
+
+            applyCardEffectToPlayer(card) {
+                // 基础卡牌效果
+                let baseEffect = this.getBaseCardEffect(card);
+                
+                // 检查位置协同效果
+                let positionBonus = this.calculatePositionSynergy(card);
+                
+                // 应用效果
+                this.playerStats.qi += baseEffect.qi;
+                this.playerStats.health += baseEffect.health;
+                this.playerStats.energy += baseEffect.energy;
+                this.playerStats.balance += baseEffect.balance;
+                
+                // 应用位置加成
+                if (positionBonus.active) {
+                    this.playerStats.qi += positionBonus.qi;
+                    this.playerStats.health += positionBonus.health;
+                    this.playerStats.energy += positionBonus.energy;
+                    this.playerStats.balance += positionBonus.balance;
+                    
+                    this.addLogEntry('synergy', `${positionBonus.message}`);
+                    this.showSynergyEffect(positionBonus.type);
+                }
+                
+                // 限制数值范围
+                this.playerStats.balance = Math.max(-100, Math.min(100, this.playerStats.balance));
+                this.playerStats.health = Math.min(100, this.playerStats.health);
+                this.playerStats.qi = Math.min(100, this.playerStats.qi);
+                this.playerStats.energy = Math.min(100, this.playerStats.energy);
+            }
+
+            getBaseCardEffect(card) {
+                const effects = {
+                    qi: 0, health: 0, energy: 0, balance: 0
+                };
+
+                switch (card.type) {
+                    case '增益':
+                        effects.qi = 20;
+                        break;
+                    case '治疗':
+                        effects.health = 15;
+                        break;
+                    case '攻击':
+                        effects.energy = 10;
+                        break;
+                    case '激发':
+                        effects.balance = 25;
+                        effects.energy = 15;
+                        break;
+                    case '平衡':
+                        effects.balance = -20;
+                        effects.qi = 10;
+                        break;
+                    case '防御':
+                        effects.health = 20;
+                        effects.qi = 5;
+                        break;
+                    case '恢复':
+                        effects.energy = 20;
+                        effects.health = 10;
+                        break;
+                }
+
+                return effects;
+            }
+
+            calculatePositionSynergy(card) {
+                const currentPosition = this.playerPosition;
+                if (currentPosition === 'center') {
+                    return { active: false };
+                }
+
+                const currentGua = this.baguaData[currentPosition];
+                const cardElement = card.element;
+                
+                // 检查元素协同
+                if (currentGua.element === cardElement) {
+                    return {
+                        active: true,
+                        type: 'perfect',
+                        qi: 15,
+                        health: 10,
+                        energy: 10,
+                        balance: currentGua.element === '火' || currentGua.element === '金' ? 15 : -15,
+                        message: `完美协同！${card.name}与${currentGua.name}卦产生强烈共鸣！`
+                    };
+                }
+
+                // 检查相生关系
+                const elementCycle = {
+                    '木': '火', '火': '土', '土': '金', '金': '水', '水': '木'
+                };
+                
+                if (elementCycle[cardElement] === currentGua.element) {
+                    return {
+                        active: true,
+                        type: 'generate',
+                        qi: 8,
+                        health: 5,
+                        energy: 5,
+                        balance: 8,
+                        message: `相生效应：${cardElement}生${currentGua.element}，效果增强！`
+                    };
+                }
+
+                if (elementCycle[currentGua.element] === cardElement) {
+                    return {
+                        active: true,
+                        type: 'support',
+                        qi: 5,
+                        health: 8,
+                        energy: 3,
+                        balance: 5,
+                        message: `相助效应：${currentGua.element}助${cardElement}，稳固根基！`
+                    };
+                }
+
+                return { active: false };
+            }
+
+            showSynergyEffect(type) {
+                const baguaMap = document.querySelector('.bagua-map');
+                if (!baguaMap) return;
+
+                baguaMap.classList.add(`synergy-${type}`);
+                setTimeout(() => {
+                    baguaMap.classList.remove(`synergy-${type}`);
+                }, 2000);
+            }
+
+            endTurn() {
+                this.playerStats.actions = 3;
+                this.turnCounter++;
+                this.addLogEntry('system', `第${this.turnCounter}回合开始`);
+                this.updateDisplay();
+            }
+
+            updateDisplay() {
+                document.getElementById('playerPosition').textContent = 
+                    this.playerPosition === 'center' ? '中央' : this.baguaData[this.playerPosition]?.name || '未知';
+                document.getElementById('playerHealth').textContent = this.playerStats.health;
+                document.getElementById('playerEnergy').textContent = this.playerStats.energy;
+                document.getElementById('playerQi').textContent = this.playerStats.qi;
+                document.getElementById('playerActions').textContent = this.playerStats.actions;
+                document.getElementById('turnCounter').textContent = this.turnCounter;
+                
+                // 更新阴阳平衡显示
+                let balanceText = '平衡';
+                if (this.playerStats.balance > 30) {
+                    balanceText = `阳盛(+${this.playerStats.balance})`;
+                } else if (this.playerStats.balance < -30) {
+                    balanceText = `阴盛(${this.playerStats.balance})`;
+                } else if (this.playerStats.balance !== 0) {
+                    balanceText = `${this.playerStats.balance > 0 ? '偏阳' : '偏阴'}(${this.playerStats.balance})`;
+                }
+                document.getElementById('playerBalance').textContent = balanceText;
+                
+                // 更新卡牌显示
+                this.updateCardDisplay();
+            }
+
+            updateCardDisplay() {
+                const playerCardsContainer = document.getElementById('playerCards');
+                if (!playerCardsContainer) return;
+                
+                // 清空现有卡牌
+                playerCardsContainer.innerHTML = '';
+                
+                // 显示前3张卡牌作为手牌
+                const handCards = this.cardDatabase.slice(0, 3);
+                
+                handCards.forEach((card, index) => {
+                    const cardElement = document.createElement('div');
+                    const isPlayable = this.playerStats.energy >= card.cost;
+                    const synergyInfo = this.getCardSynergyInfo(card);
+                    
+                    cardElement.className = `card ${isPlayable ? 'playable' : ''} ${synergyInfo.class}`;
+                    cardElement.setAttribute('data-element', card.element);
+                    cardElement.onclick = () => this.selectCard(index);
+                    cardElement.title = `${card.description}${synergyInfo.tooltip}`;
+                    
+                    // 根据稀有度设置边框颜色
+                    let rarityClass = '';
+                    switch(card.rarity) {
+                        case 'legendary': rarityClass = 'border-legendary'; break;
+                        case 'epic': rarityClass = 'border-epic'; break;
+                        case 'rare': rarityClass = 'border-rare'; break;
+                        default: rarityClass = 'border-common';
+                    }
+                    cardElement.classList.add(rarityClass);
+                    
+                    cardElement.innerHTML = `
+                        <div class="card-cost">${card.cost}</div>
+                        <div class="card-element">${card.element}</div>
+                        <div class="card-name">${card.name}</div>
+                        <div class="card-icon">${card.icon}</div>
+                        <div class="card-effect">${card.effect}</div>
+                        ${synergyInfo.indicator}
+                    `;
+                    
+                    playerCardsContainer.appendChild(cardElement);
+                });
+            }
+
+            getCardSynergyInfo(card) {
+                const synergy = this.calculatePositionSynergy(card);
+                
+                if (!synergy.active) {
+                    return {
+                        class: '',
+                        tooltip: '',
+                        indicator: ''
+                    };
+                }
+
+                const synergyTypes = {
+                    'perfect': { name: '完美协同', color: '#FFD700', icon: '✨' },
+                    'generate': { name: '相生效应', color: '#90EE90', icon: '🔄' },
+                    'support': { name: '相助效应', color: '#87CEEB', icon: '🤝' }
+                };
+
+                const synergyType = synergyTypes[synergy.type];
+                
+                return {
+                    class: `synergy-${synergy.type}`,
+                    tooltip: `\n\n${synergyType.icon} ${synergyType.name}：${synergy.message}`,
+                    indicator: `<div class="synergy-indicator" style="color: ${synergyType.color}">${synergyType.icon}</div>`
+                };
+            }
+
+            showMoveAnimation(targetPosition) {
+                const playerPiece = document.getElementById('player1Piece');
+                if (!playerPiece) return;
+
+                // 添加移动动画类
+                playerPiece.classList.add('moving');
+                
+                // 创建移动轨迹效果
+                const trail = document.createElement('div');
+                trail.className = 'move-trail';
+                trail.style.left = playerPiece.style.left;
+                trail.style.top = playerPiece.style.top;
+                document.querySelector('.bagua-map').appendChild(trail);
+                
+                setTimeout(() => {
+                    playerPiece.classList.remove('moving');
+                    if (trail.parentNode) {
+                        trail.parentNode.removeChild(trail);
+                    }
+                }, 800);
+            }
+
+            highlightCurrentPosition() {
+                // 清除之前的高亮
+                document.querySelectorAll('.bagua-position, .center-taiji').forEach(el => {
+                    el.classList.remove('current-position');
+                });
+
+                // 高亮当前位置
+                if (this.playerPosition === 'center') {
+                    document.querySelector('.center-taiji').classList.add('current-position');
+                } else {
+                    const currentPos = document.querySelector(`[data-position="${this.playerPosition}"]`);
+                    if (currentPos) {
+                        currentPos.classList.add('current-position');
+                    }
+                }
+            }
+
+            showActionFeedback(type) {
+                const feedbackTypes = {
+                    'error': { color: '#ff4444', icon: '❌', message: '行动失败' },
+                    'move': { color: '#4CAF50', icon: '🚶', message: '移动成功' },
+                    'center': { color: '#FFD700', icon: '🧘', message: '进入冥想' },
+                    'card': { color: '#2196F3', icon: '🎴', message: '卡牌使用' }
+                };
+
+                const feedback = feedbackTypes[type];
+                if (!feedback) return;
+
+                // 创建反馈元素
+                const feedbackEl = document.createElement('div');
+                feedbackEl.className = 'action-feedback';
+                feedbackEl.style.color = feedback.color;
+                feedbackEl.innerHTML = `${feedback.icon} ${feedback.message}`;
+                
+                document.body.appendChild(feedbackEl);
+                
+                setTimeout(() => {
+                    if (feedbackEl.parentNode) {
+                        feedbackEl.parentNode.removeChild(feedbackEl);
+                    }
+                }, 2000);
+            }
+
+            addLogEntry(type, message) {
+                const logContainer = document.getElementById('gameLog');
+                const entry = document.createElement('div');
+                entry.className = `log-entry ${type}`;
+                entry.textContent = `[${new Date().toLocaleTimeString()}] ${message}`;
+                
+                logContainer.appendChild(entry);
+                logContainer.scrollTop = logContainer.scrollHeight;
+                
+                // 限制日志条目数量
+                while (logContainer.children.length > 50) {
+                    logContainer.removeChild(logContainer.firstChild);
+                }
+            }
+        }
+
+        // 创建游戏实例
+        let game = new Game();
+
+        // 全局函数
+        function moveToPosition(position) {
+            game.moveToPosition(position);
+        }
+
+        function moveToCenter() {
+            game.moveToCenter();
+        }
+
+        function selectCard(index) {
+            game.selectCard(index);
+        }
+
+        function playCard() {
+            game.playSelectedCard();
+        }
+
+        function endTurn() {
+            game.endTurn();
+        }
+
+        function clearLog() {
+            const logContainer = document.getElementById('gameLog');
+            logContainer.innerHTML = '<div class="log-entry system">日志已清空</div>';
+        }
+    </script>
+</body>
+</html>

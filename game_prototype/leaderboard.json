@@ -1,0 +1,32 @@
+[
+  {
+    "name": "高手玩家",
+    "score": 2450,
+    "games": 50,
+    "win_rate": 78.0
+  },
+  {
+    "name": "智慧仙人",
+    "score": 2380,
+    "games": 45,
+    "win_rate": 82.2
+  },
+  {
+    "name": "易经大师",
+    "score": 2290,
+    "games": 38,
+    "win_rate": 76.3
+  },
+  {
+    "name": "天机学者",
+    "score": 2150,
+    "games": 42,
+    "win_rate": 71.4
+  },
+  {
+    "name": "新手玩家",
+    "score": 1890,
+    "games": 25,
+    "win_rate": 64.0
+  }
+]

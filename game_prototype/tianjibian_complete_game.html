@@ -1,0 +1,4235 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>天机变 - 完整四人对战</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Microsoft YaHei', 'SimHei', sans-serif;
+            background: linear-gradient(135deg, #1e3c72 0%, #2a5298 50%, #1e3c72 100%);
+            min-height: 100vh;
+            overflow-x: auto;
+            color: #333;
+        }
+
+        .game-layout {
+            display: grid;
+            grid-template-columns: 1fr;
+            grid-template-rows: 80px auto auto auto auto;
+            grid-template-areas: 
+                "header"
+                "player-info"
+                "game-area"
+                "right-panel"
+                "bottom-panel";
+            min-height: 100vh;
+            gap: 20px;
+            padding: 15px;
+            max-width: 100vw;
+        }
+
+        /* 顶部标题区域 */
+        .header {
+            grid-area: header;
+            background: linear-gradient(135deg, rgba(255,255,255,0.95), rgba(248,250,252,0.9));
+            border-radius: 15px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0 30px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+            backdrop-filter: blur(10px);
+        }
+
+        .game-title {
+            font-size: 28px;
+            font-weight: bold;
+            color: #2c3e50;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .game-status {
+            display: flex;
+            gap: 20px;
+            align-items: center;
+        }
+
+        .status-item {
+            text-align: center;
+        }
+
+        .status-label {
+            font-size: 12px;
+            color: #666;
+            margin-bottom: 2px;
+        }
+
+        .status-value {
+            font-size: 16px;
+            font-weight: bold;
+            color: #2c3e50;
+        }
+
+        /* 玩家信息区域 */
+        .player-info-area {
+            grid-area: player-info;
+            background: linear-gradient(135deg, rgba(255,255,255,0.95), rgba(248,250,252,0.9));
+            border-radius: 20px;
+            padding: 25px;
+            box-shadow: 0 6px 30px rgba(0,0,0,0.1);
+            backdrop-filter: blur(10px);
+            min-height: 400px;
+        }
+
+        .player-info-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+        }
+
+        .panel-title {
+            font-size: 18px;
+            font-weight: bold;
+            color: #2c3e50;
+            margin-bottom: 15px;
+            text-align: center;
+            border-bottom: 2px solid #3498db;
+            padding-bottom: 8px;
+        }
+
+        .player-info {
+            background: rgba(255,255,255,0.9);
+            border-radius: 15px;
+            padding: 18px;
+            border-left: 5px solid #3498db;
+            transition: all 0.3s ease;
+            box-shadow: 0 3px 15px rgba(0,0,0,0.1);
+            margin-bottom: 8px;
+        }
+
+        .player-info.active {
+            border-left-color: #e74c3c;
+            box-shadow: 0 6px 25px rgba(231,76,60,0.3);
+            transform: translateX(5px);
+        }
+
+        .player-name {
+            font-size: 16px;
+            font-weight: bold;
+            color: #2c3e50;
+            margin-bottom: 8px;
+        }
+
+        .player-stats {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 8px;
+            font-size: 12px;
+        }
+
+        .stat-item {
+            background: rgba(52,152,219,0.1);
+            padding: 4px 8px;
+            border-radius: 4px;
+            text-align: center;
+        }
+
+        /* 游戏主区域 */
+        .game-area {
+            grid-area: game-area;
+            background: linear-gradient(135deg, rgba(255,255,255,0.95), rgba(248,250,252,0.9));
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 6px 30px rgba(0,0,0,0.1);
+            backdrop-filter: blur(10px);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            min-height: 600px;
+        }
+
+        /* 八卦地图 */
+        .bagua-map {
+            width: min(90vw, calc(100% - 60px));
+            height: 500px;
+            max-width: 1000px;
+            position: relative;
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            grid-template-rows: repeat(3, 1fr);
+            gap: 15px;
+            padding: 30px;
+            background: 
+                radial-gradient(circle at center, rgba(255,215,0,0.1) 0%, transparent 70%),
+                linear-gradient(135deg, rgba(139,69,19,0.8) 0%, rgba(160,82,45,0.6) 100%);
+            border-radius: 25px;
+            box-shadow: 
+                0 15px 40px rgba(0,0,0,0.2),
+                inset 0 2px 0 rgba(255,255,255,0.3);
+            border: 4px solid rgba(255,215,0,0.4);
+            backdrop-filter: blur(3px);
+        }
+
+        /* 八卦位置 */
+        .bagua-position {
+            width: 100%;
+            height: 100%;
+            border-radius: 12px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+            border: 2px solid rgba(255,255,255,0.3);
+            box-shadow: inset 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        /* 各卦位的背景色 */
+        .bagua-position[data-position="qian"] { background: linear-gradient(135deg, rgba(255,215,0,0.85), rgba(255,193,7,0.7)); }
+        .bagua-position[data-position="dui"] { background: linear-gradient(135deg, rgba(255,255,255,0.85), rgba(248,249,250,0.7)); }
+        .bagua-position[data-position="li"] { background: linear-gradient(135deg, rgba(220,53,69,0.85), rgba(255,99,71,0.7)); }
+        .bagua-position[data-position="zhen"] { background: linear-gradient(135deg, rgba(40,167,69,0.85), rgba(34,139,34,0.7)); }
+        .bagua-position[data-position="xun"] { background: linear-gradient(135deg, rgba(144,238,144,0.85), rgba(152,251,152,0.7)); }
+        .bagua-position[data-position="kan"] { background: linear-gradient(135deg, rgba(0,123,255,0.85), rgba(30,144,255,0.7)); }
+        .bagua-position[data-position="gen"] { background: linear-gradient(135deg, rgba(139,69,19,0.85), rgba(160,82,45,0.7)); }
+        .bagua-position[data-position="kun"] { background: linear-gradient(135deg, rgba(255,193,7,0.85), rgba(255,215,0,0.7)); }
+
+        .bagua-position::after {
+            content: attr(data-name);
+            font-size: 14px;
+            font-weight: bold;
+            color: rgba(0,0,0,0.8);
+            text-shadow: 1px 1px 2px rgba(255,255,255,0.5);
+            margin-top: 5px;
+        }
+
+        .bagua-position:hover {
+            transform: translateY(-2px) scale(1.05);
+            box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+        }
+
+        /* 八卦符号样式 */
+        .bagua-symbol {
+            font-size: 24px;
+            font-weight: bold;
+            color: #2c3e50;
+            margin-bottom: 2px;
+        }
+
+        .bagua-name {
+            font-size: 14px;
+            font-weight: bold;
+            color: #34495e;
+            margin-bottom: 1px;
+        }
+
+        .bagua-element {
+            font-size: 10px;
+            color: #7f8c8d;
+            font-style: italic;
+        }
+
+        .center-text {
+            font-size: 16px;
+            font-weight: bold;
+            color: #2c3e50;
+            text-shadow: 1px 1px 2px rgba(0,0,0,0.1);
+        }
+
+        /* 八卦位置特殊颜色 */
+        .bagua-position[data-position="qian"] .bagua-symbol { color: #f39c12; } /* 乾-金 */
+        .bagua-position[data-position="kun"] .bagua-symbol { color: #8b4513; } /* 坤-土 */
+        .bagua-position[data-position="zhen"] .bagua-symbol { color: #2ecc71; } /* 震-木 */
+        .bagua-position[data-position="xun"] .bagua-symbol { color: #27ae60; } /* 巽-木 */
+        .bagua-position[data-position="kan"] .bagua-symbol { color: #3498db; } /* 坎-水 */
+        .bagua-position[data-position="li"] .bagua-symbol { color: #e74c3c; } /* 离-火 */
+        .bagua-position[data-position="gen"] .bagua-symbol { color: #95a5a6; } /* 艮-土 */
+        .bagua-position[data-position="dui"] .bagua-symbol { color: #f1c40f; } /* 兑-金 */
+
+        /* 太极图 - 传统设计优化版 */
+        .center-taiji {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 100px;
+            height: 100px;
+            border-radius: 50%;
+            background: 
+                linear-gradient(90deg, #1a1a1a 0%, #1a1a1a 50%, #f8f8f8 50%, #f8f8f8 100%);
+            box-shadow: 
+                0 0 20px rgba(0,0,0,0.3),
+                inset 0 0 8px rgba(0,0,0,0.1),
+                0 0 40px rgba(255,215,0,0.2);
+            border: 3px solid rgba(255,215,0,0.6);
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            backdrop-filter: blur(1px);
+            animation: taijRotate 120s linear infinite;
+            z-index: 5;
+            overflow: hidden;
+            position: relative;
+            opacity: 0.9;
+        }
+
+        /* 上半圆（阳鱼头部） */
+        .center-taiji::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 25%;
+            width: 50%;
+            height: 50%;
+            background: #000;
+            border-radius: 0 60px 60px 0;
+            transform-origin: 0 100%;
+        }
+
+        /* 下半圆（阴鱼头部） */
+        .center-taiji::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            right: 25%;
+            width: 50%;
+            height: 50%;
+            background: #fff;
+            border-radius: 60px 0 0 60px;
+            transform-origin: 100% 0;
+        }
+
+        .center-taiji:hover {
+            transform: translate(-50%, -50%) scale(1.1);
+            box-shadow: 
+                0 0 40px rgba(0,0,0,0.5),
+                inset 0 0 15px rgba(0,0,0,0.2),
+                0 0 80px rgba(255,215,0,0.4);
+        }
+
+        /* 阴阳鱼的眼睛 */
+        .taiji-eye-white {
+            position: absolute;
+            top: 30%;
+            left: 50%;
+            width: 16%;
+            height: 16%;
+            background: #f8f8f8;
+            border-radius: 50%;
+            transform: translateX(-50%);
+            z-index: 2;
+            box-shadow: 0 0 3px rgba(0,0,0,0.3);
+        }
+
+        .taiji-eye-black {
+            position: absolute;
+            bottom: 30%;
+            left: 50%;
+            width: 16%;
+            height: 16%;
+            background: #1a1a1a;
+            border-radius: 50%;
+            transform: translateX(-50%);
+            z-index: 2;
+            box-shadow: 0 0 3px rgba(255,255,255,0.3);
+        }
+
+        @keyframes taijRotate {
+            from { transform: translate(-50%, -50%) rotate(0deg); }
+            to { transform: translate(-50%, -50%) rotate(360deg); }
+        }
+
+        @keyframes taijPulse {
+            0%, 100% { opacity: 0.8; transform: translate(-50%, -50%) scale(1); }
+            50% { opacity: 1; transform: translate(-50%, -50%) scale(1.1); }
+        }
+
+        /* 方位标签 */
+        .bagua-container::before {
+            content: '南';
+            position: absolute;
+            top: -40px;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 20px;
+            font-weight: 900;
+            color: #d63031;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3), 0 0 10px rgba(214,48,49,0.5);
+            background: rgba(255,255,255,0.9);
+            padding: 8px 16px;
+            border-radius: 20px;
+            border: 2px solid rgba(214,48,49,0.3);
+        }
+
+        .bagua-container::after {
+            content: '北';
+            position: absolute;
+            bottom: -40px;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 20px;
+            font-weight: 900;
+            color: #0984e3;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3), 0 0 10px rgba(9,132,227,0.5);
+            background: rgba(255,255,255,0.9);
+            padding: 8px 16px;
+            border-radius: 20px;
+            border: 2px solid rgba(9,132,227,0.3);
+        }
+
+        .direction-label-west {
+            position: absolute;
+            left: -40px;
+            top: 50%;
+            transform: translateY(-50%);
+            font-size: 20px;
+            font-weight: 900;
+            color: #fdcb6e;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3), 0 0 10px rgba(253,203,110,0.5);
+            background: rgba(255,255,255,0.9);
+            padding: 8px 16px;
+            border-radius: 20px;
+            border: 2px solid rgba(253,203,110,0.3);
+        }
+
+        .direction-label-east {
+            position: absolute;
+            right: -40px;
+            top: 50%;
+            transform: translateY(-50%);
+            font-size: 20px;
+            font-weight: 900;
+            color: #00b894;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3), 0 0 10px rgba(0,184,148,0.5);
+            background: rgba(255,255,255,0.9);
+            padding: 8px 16px;
+            border-radius: 20px;
+            border: 2px solid rgba(0,184,148,0.3);
+        }
+
+        /* 玩家棋子 */
+        .player-piece {
+            position: absolute;
+            width: 35px;
+            height: 35px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 16px;
+            color: white;
+            text-shadow: 1px 1px 2px rgba(0,0,0,0.8);
+            transition: all 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+            z-index: 10;
+            cursor: pointer;
+            border: 3px solid rgba(255,255,255,0.3);
+            box-shadow: 0 2px 10px rgba(0,0,0,0.3);
+        }
+
+        .player-piece.player1 { 
+            background: linear-gradient(135deg, #e74c3c, #c0392b);
+            box-shadow: 0 2px 10px rgba(231, 76, 60, 0.4);
+        }
+        .player-piece.player2 { 
+            background: linear-gradient(135deg, #3498db, #2980b9);
+            box-shadow: 0 2px 10px rgba(52, 152, 219, 0.4);
+        }
+        .player-piece.player3 { 
+            background: linear-gradient(135deg, #2ecc71, #27ae60);
+            box-shadow: 0 2px 10px rgba(46, 204, 113, 0.4);
+        }
+        .player-piece.player4 { 
+            background: linear-gradient(135deg, #f39c12, #e67e22);
+            box-shadow: 0 2px 10px rgba(243, 156, 18, 0.4);
+        }
+
+        .player-piece:hover {
+            transform: scale(1.3) translateZ(0);
+            box-shadow: 0 6px 20px rgba(0,0,0,0.4);
+        }
+
+        .player-piece.moving {
+            animation: moveGlow 0.6s ease-in-out;
+            transform: scale(1.2);
+        }
+
+        @keyframes moveGlow {
+             0% { 
+                 box-shadow: 0 2px 10px rgba(0,0,0,0.3);
+                 transform: scale(1);
+             }
+             50% { 
+                 box-shadow: 0 8px 25px rgba(255,255,255,0.6);
+                 transform: scale(1.4);
+             }
+             100% { 
+                 box-shadow: 0 2px 10px rgba(0,0,0,0.3);
+                 transform: scale(1);
+             }
+         }
+
+         @keyframes fadeInOut {
+             0% { 
+                 opacity: 0;
+                 transform: translateX(-50%) translateY(-10px);
+             }
+             20% { 
+                 opacity: 1;
+                 transform: translateX(-50%) translateY(0);
+             }
+             80% { 
+                 opacity: 1;
+                 transform: translateX(-50%) translateY(0);
+             }
+             100% { 
+                 opacity: 0;
+                 transform: translateX(-50%) translateY(-10px);
+             }
+         }
+
+        /* 技能卡牌样式 */
+        .card-container {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 8px;
+            margin-bottom: 15px;
+        }
+
+        .skill-card {
+            background: linear-gradient(135deg, rgba(255,255,255,0.9), rgba(248,250,252,0.8));
+            border: 2px solid #3498db;
+            border-radius: 8px;
+            padding: 10px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .skill-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(52,152,219,0.3);
+            border-color: #2980b9;
+        }
+
+        .skill-card.selected {
+            border-color: #e74c3c;
+            background: linear-gradient(135deg, rgba(231,76,60,0.1), rgba(192,57,43,0.05));
+        }
+
+        .card-name {
+            font-size: 14px;
+            font-weight: bold;
+            color: #2c3e50;
+            margin-bottom: 4px;
+        }
+
+        .card-cost {
+            font-size: 10px;
+            color: #7f8c8d;
+        }
+
+        .skill-card[data-skill="move"] { border-left: 4px solid #2ecc71; }
+            .skill-card[data-skill="attack"] { border-left: 4px solid #e74c3c; }
+            .skill-card[data-skill="defend"] { border-left: 4px solid #3498db; }
+            .skill-card[data-skill="special"] { border-left: 4px solid #9b59b6; }
+
+            /* 卡牌剩余数量显示 */
+            .card-remaining {
+                font-size: 11px;
+                color: #666;
+                margin-top: 4px;
+                font-weight: normal;
+            }
+
+            /* 区域标题样式 */
+            .section-header {
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                margin-bottom: 15px;
+                padding: 15px 20px;
+                background: linear-gradient(135deg, #2c3e50, #34495e);
+                border-radius: 12px;
+                border: 2px solid #ffd700;
+                box-shadow: 0 4px 15px rgba(255, 215, 0, 0.2);
+            }
+
+            .section-header h3 {
+                margin: 0;
+                color: #ffd700;
+                font-size: 1.3em;
+                text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+            }
+
+            .card-info {
+                display: flex;
+                align-items: center;
+                gap: 20px;
+            }
+
+            .card-count {
+                color: #3498db;
+                font-weight: bold;
+                font-size: 1.1em;
+                background: rgba(52, 152, 219, 0.1);
+                padding: 8px 15px;
+                border-radius: 20px;
+                border: 1px solid #3498db;
+            }
+
+            .card-count-detail {
+                display: flex;
+                flex-direction: column;
+                gap: 4px;
+                text-align: center;
+                font-size: 0.9em;
+            }
+
+            .card-count-detail > div {
+                padding: 2px 8px;
+                border-radius: 12px;
+                background: rgba(255, 255, 255, 0.1);
+                transition: all 0.3s ease;
+            }
+
+            .card-count-detail > div:hover {
+                background: rgba(255, 255, 255, 0.2);
+                transform: scale(1.05);
+            }
+
+            .btn-sm {
+                padding: 10px 20px;
+                font-size: 1em;
+                border-radius: 25px;
+                border: none;
+                cursor: pointer;
+                transition: all 0.3s ease;
+                font-weight: bold;
+                box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+            }
+
+            .btn-info {
+                background: linear-gradient(135deg, #3498db, #2980b9);
+                color: white;
+                position: relative;
+                overflow: hidden;
+            }
+
+            .btn-info::before {
+                content: '';
+                position: absolute;
+                top: 0;
+                left: -100%;
+                width: 100%;
+                height: 100%;
+                background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+                transition: left 0.5s ease;
+            }
+
+            .btn-info:hover::before {
+                left: 100%;
+            }
+
+            .btn-info:hover {
+                background: linear-gradient(135deg, #2980b9, #3498db);
+                transform: translateY(-2px);
+                box-shadow: 0 6px 15px rgba(52, 152, 219, 0.4);
+            }
+
+            /* 卡牌在八卦地图上的显示效果 */
+            .card-on-map {
+                position: absolute;
+                width: 60px;
+                height: 80px;
+                background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                border-radius: 8px;
+                border: 2px solid #fff;
+                box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                justify-content: center;
+                color: white;
+                font-size: 12px;
+                font-weight: bold;
+                text-align: center;
+                z-index: 1000;
+                pointer-events: none;
+                transform: scale(0);
+                opacity: 0;
+                transition: all 0.3s ease;
+            }
+
+            .card-on-map.show {
+                transform: scale(1);
+                opacity: 1;
+            }
+
+            .card-on-map.hide {
+                transform: scale(0) rotate(180deg);
+                opacity: 0;
+            }
+
+            .card-on-map .card-icon {
+                font-size: 20px;
+                margin-bottom: 4px;
+            }
+
+            .card-on-map .card-name {
+                font-size: 10px;
+                line-height: 1;
+            }
+
+            /* 不同技能卡牌的颜色 */
+            .card-on-map[data-skill="move"] {
+                background: linear-gradient(135deg, #2ecc71 0%, #27ae60 100%);
+            }
+
+            .card-on-map[data-skill="attack"] {
+                background: linear-gradient(135deg, #e74c3c 0%, #c0392b 100%);
+            }
+
+            .card-on-map[data-skill="defend"] {
+                background: linear-gradient(135deg, #3498db 0%, #2980b9 100%);
+            }
+
+            .card-on-map[data-skill="special"] {
+                background: linear-gradient(135deg, #9b59b6 0%, #8e44ad 100%);
+            }
+
+            /* 卡牌使用时的光效 */
+            .card-effect {
+                position: absolute;
+                width: 100px;
+                height: 100px;
+                border-radius: 50%;
+                background: radial-gradient(circle, rgba(255,255,255,0.8) 0%, rgba(255,255,255,0) 70%);
+                pointer-events: none;
+                z-index: 999;
+                transform: scale(0);
+                opacity: 0;
+                animation: cardEffect 1s ease-out;
+            }
+
+            @keyframes cardEffect {
+                0% {
+                    transform: scale(0);
+                    opacity: 1;
+                }
+                50% {
+                    transform: scale(1.2);
+                    opacity: 0.8;
+                }
+                100% {
+                    transform: scale(2);
+                    opacity: 0;
+                }
+            }
+
+        /* 帮助信息样式 */
+        .help-info {
+            background: rgba(255,255,255,0.1);
+            border-radius: 8px;
+            padding: 12px;
+            margin-bottom: 15px;
+        }
+
+        .help-item {
+            margin-bottom: 10px;
+            font-size: 11px;
+            line-height: 1.3;
+        }
+
+        .help-item:last-child {
+            margin-bottom: 0;
+        }
+
+        .help-item strong {
+            color: #2c3e50;
+            display: block;
+            margin-bottom: 2px;
+        }
+
+        .help-item p {
+            color: #7f8c8d;
+            margin: 0;
+            padding-left: 8px;
+        }
+
+        /* 右侧控制面板 */
+        .right-panel {
+            grid-area: right-panel;
+            background: linear-gradient(135deg, rgba(255,255,255,0.95), rgba(248,250,252,0.9));
+            border-radius: 20px;
+            padding: 25px;
+            box-shadow: 0 6px 30px rgba(0,0,0,0.1);
+            backdrop-filter: blur(10px);
+            min-height: 400px;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .control-section {
+            margin-bottom: 25px;
+        }
+
+        .control-section h3 {
+            font-size: 16px;
+            color: #2c3e50;
+            margin-bottom: 10px;
+            border-bottom: 2px solid #3498db;
+            padding-bottom: 5px;
+        }
+
+        .btn {
+            width: 100%;
+            padding: 12px;
+            margin: 5px 0;
+            border: none;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-transform: none;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #3498db, #2980b9);
+            color: white;
+        }
+
+        .btn-success {
+            background: linear-gradient(135deg, #2ecc71, #27ae60);
+            color: white;
+        }
+
+        .btn-warning {
+            background: linear-gradient(135deg, #f39c12, #e67e22);
+            color: white;
+        }
+
+        .btn-danger {
+            background: linear-gradient(135deg, #e74c3c, #c0392b);
+            color: white;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+        }
+
+        /* 底部记录面板 */
+        .bottom-panel {
+            grid-area: bottom-panel;
+            background: linear-gradient(135deg, rgba(255,255,255,0.95), rgba(248,250,252,0.9));
+            border-radius: 20px;
+            padding: 25px;
+            box-shadow: 0 6px 30px rgba(0,0,0,0.1);
+            backdrop-filter: blur(10px);
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            min-height: 200px;
+        }
+
+        .player-log {
+            background: rgba(255,255,255,0.8);
+            border-radius: 15px;
+            padding: 20px;
+            border-top: 5px solid #3498db;
+            min-height: 120px;
+        }
+
+        .player-log.active {
+            border-top-color: #e74c3c;
+            box-shadow: 0 2px 10px rgba(231,76,60,0.2);
+        }
+
+        .log-title {
+            font-size: 14px;
+            font-weight: bold;
+            color: #2c3e50;
+            margin-bottom: 10px;
+            text-align: center;
+            background: linear-gradient(135deg, #f8f9fa, #e9ecef);
+            padding: 8px;
+            border-radius: 6px;
+            border: 1px solid #dee2e6;
+        }
+
+        .log-entry {
+            font-size: 12px;
+            color: #495057;
+            margin-bottom: 6px;
+            padding: 8px 12px;
+            background: rgba(52,152,219,0.08);
+            border-radius: 6px;
+            border-left: 3px solid #3498db;
+            transition: all 0.2s ease;
+            line-height: 1.4;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+        }
+
+        .log-entry:hover {
+            background: rgba(52,152,219,0.12);
+            transform: translateX(2px);
+            box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+        }
+
+        .log-entry.recent {
+            background: rgba(231,76,60,0.1);
+            border-left-color: #e74c3c;
+            color: #2c3e50;
+            font-weight: bold;
+            animation: highlight 0.5s ease-in-out;
+        }
+
+        /* 技能使用日志样式 */
+        .log-entry.skill {
+            background: rgba(155,89,182,0.1);
+            border-left-color: #9b59b6;
+            color: #6c3483;
+        }
+
+        .log-entry.skill .skill-name {
+            font-weight: bold;
+            color: #8e44ad;
+        }
+
+        .log-entry.skill .energy-cost {
+            color: #e67e22;
+            font-size: 11px;
+        }
+
+        .log-entry.skill .effects {
+            color: #27ae60;
+            font-size: 11px;
+        }
+
+        .log-entry.skill .bonuses {
+            color: #f39c12;
+            font-size: 11px;
+            font-style: italic;
+        }
+
+        /* 状态变化日志样式 */
+        .log-entry.status {
+            background: rgba(46,204,113,0.1);
+            border-left-color: #2ecc71;
+            color: #1e8449;
+        }
+
+        .log-entry.status.negative {
+            background: rgba(231,76,60,0.1);
+            border-left-color: #e74c3c;
+            color: #c0392b;
+        }
+
+        .log-entry.status .status-change {
+            font-weight: bold;
+        }
+
+        .log-entry.status .status-value {
+            font-family: 'Courier New', monospace;
+            background: rgba(0,0,0,0.05);
+            padding: 1px 4px;
+            border-radius: 3px;
+        }
+
+        /* 移动日志样式 */
+        .log-entry.movement {
+            background: rgba(52,152,219,0.1);
+            border-left-color: #3498db;
+            color: #2980b9;
+        }
+
+        .log-entry.movement .position {
+            font-weight: bold;
+            color: #1abc9c;
+        }
+
+        /* 战斗日志样式 */
+        .log-entry.combat {
+            background: rgba(231,76,60,0.1);
+            border-left-color: #e74c3c;
+            color: #c0392b;
+        }
+
+        .log-entry.combat .damage {
+            font-weight: bold;
+            color: #e74c3c;
+        }
+
+        .log-entry.combat .target {
+            color: #8e44ad;
+            font-weight: bold;
+        }
+
+        /* 系统消息样式 */
+        .log-entry.system {
+            background: rgba(149,165,166,0.1);
+            border-left-color: #95a5a6;
+            color: #7f8c8d;
+            font-style: italic;
+        }
+
+        /* 特殊效果 */
+        @keyframes highlight {
+            0% { background: rgba(255,193,7,0.3); }
+            50% { background: rgba(255,193,7,0.5); }
+            100% { background: rgba(231,76,60,0.1); }
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateX(-10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
+        .log-entry.new {
+            animation: slideIn 0.3s ease-out;
+        }
+
+        /* 日志图标 */
+        .log-entry::before {
+            content: '';
+            display: inline-block;
+            width: 12px;
+            height: 12px;
+            margin-right: 6px;
+            border-radius: 50%;
+            background: currentColor;
+            opacity: 0.6;
+        }
+
+        .log-entry.skill::before {
+            content: '⚡';
+            background: none;
+            font-size: 12px;
+        }
+
+        .log-entry.status::before {
+            content: '📊';
+            background: none;
+            font-size: 12px;
+        }
+
+        .log-entry.movement::before {
+            content: '🚶';
+            background: none;
+            font-size: 12px;
+        }
+
+        .log-entry.combat::before {
+            content: '⚔️';
+            background: none;
+            font-size: 12px;
+        }
+
+        .log-entry.system::before {
+            content: '🔧';
+            background: none;
+            font-size: 12px;
+        }
+
+        /* 响应式设计 */
+        @media (max-width: 1200px) {
+            .game-layout {
+                grid-template-columns: 250px 1fr 250px;
+            }
+            .bagua-map {
+                width: 400px;
+                height: 400px;
+            }
+            .center-taiji {
+                width: 100px;
+                height: 100px;
+            }
+        }
+
+        @media (max-width: 900px) {
+            .game-layout {
+                grid-template-columns: 1fr;
+                grid-template-rows: auto auto 1fr auto;
+                grid-template-areas: 
+                    "header"
+                    "left-panel"
+                    "game-area"
+                    "right-panel"
+                    "bottom-panel";
+            }
+            .bagua-map {
+                width: 350px;
+                height: 350px;
+            }
+        }
+
+        /* 胜利动画效果 */
+        @keyframes victoryPulse {
+            0% { transform: scale(1); box-shadow: 0 4px 20px rgba(0,0,0,0.1); }
+            25% { transform: scale(1.02); box-shadow: 0 8px 30px rgba(52, 152, 219, 0.3); }
+            50% { transform: scale(1.05); box-shadow: 0 12px 40px rgba(231, 76, 60, 0.3); }
+            75% { transform: scale(1.02); box-shadow: 0 8px 30px rgba(46, 204, 113, 0.3); }
+            100% { transform: scale(1); box-shadow: 0 4px 20px rgba(0,0,0,0.1); }
+        }
+
+        @keyframes firework {
+            0% {
+                transform: scale(1);
+                opacity: 1;
+                box-shadow: 0 0 0 0 currentColor;
+            }
+            50% {
+                transform: scale(3);
+                opacity: 0.8;
+                box-shadow: 0 0 20px 10px currentColor;
+            }
+            100% {
+                transform: scale(5);
+                opacity: 0;
+                box-shadow: 0 0 30px 15px transparent;
+            }
+        }
+
+        /* 模态窗口样式 */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.8);
+            backdrop-filter: blur(5px);
+        }
+
+        .modal-content {
+            background: linear-gradient(135deg, #1a1a2e, #16213e);
+            margin: 2% auto;
+            padding: 0;
+            border: 2px solid #ffd700;
+            border-radius: 15px;
+            width: 90%;
+            max-width: 1200px;
+            max-height: 90vh;
+            overflow-y: auto;
+            box-shadow: 0 10px 30px rgba(255, 215, 0, 0.3);
+        }
+
+        .modal-header {
+            background: linear-gradient(135deg, #ffd700, #ffed4e);
+            color: #1a1a2e;
+            padding: 20px;
+            border-radius: 13px 13px 0 0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .modal-header h2 {
+            margin: 0;
+            font-size: 1.8em;
+            font-weight: bold;
+        }
+
+        .close {
+            color: #1a1a2e;
+            font-size: 28px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .close:hover {
+            color: #e74c3c;
+            transform: scale(1.2);
+        }
+        
+        .header-buttons {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .btn-warning {
+            background: linear-gradient(135deg, #f39c12, #e67e22);
+            color: white;
+            border: none;
+            font-size: 12px;
+        }
+        
+        .btn-warning:hover {
+            background: linear-gradient(135deg, #e67e22, #d35400);
+            transform: translateY(-1px);
+        }
+
+        .modal-body {
+            padding: 20px;
+        }
+
+        .gallery-tabs {
+            display: flex;
+            justify-content: center;
+            margin-bottom: 20px;
+            border-bottom: 2px solid #ffd700;
+        }
+
+        .tab-btn {
+            background: transparent;
+            border: none;
+            color: #ffd700;
+            padding: 10px 20px;
+            margin: 0 5px;
+            cursor: pointer;
+            font-size: 1.1em;
+            border-radius: 10px 10px 0 0;
+            transition: all 0.3s ease;
+        }
+
+        .tab-btn.active {
+            background: linear-gradient(135deg, #ffd700, #ffed4e);
+            color: #1a1a2e;
+            font-weight: bold;
+        }
+
+        .tab-btn:hover:not(.active) {
+            background: rgba(255, 215, 0, 0.2);
+        }
+
+        .gallery-tab-content {
+            display: none;
+        }
+
+        .gallery-tab-content.active {
+            display: block;
+        }
+
+        .gallery-tab-content h3 {
+            color: #ffd700;
+            text-align: center;
+            margin-bottom: 20px;
+            font-size: 1.5em;
+        }
+
+        .gallery-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+            padding: 20px 0;
+        }
+
+        .gallery-card {
+            background: linear-gradient(135deg, #2c3e50, #34495e);
+            border: 2px solid;
+            border-radius: 15px;
+            padding: 20px;
+            text-align: center;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .gallery-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.1), transparent);
+            transition: left 0.5s ease;
+        }
+
+        .gallery-card:hover::before {
+            left: 100%;
+        }
+
+        .gallery-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.3);
+        }
+
+        .gallery-card.move {
+            border-color: #3498db;
+        }
+
+        .gallery-card.attack {
+            border-color: #e74c3c;
+        }
+
+        .gallery-card.defend {
+            border-color: #2ecc71;
+        }
+
+        .gallery-card.special {
+            border-color: #9b59b6;
+        }
+
+        .gallery-card.advanced {
+            border-color: #f39c12;
+        }
+
+        .gallery-card.legendary {
+            border-color: #ffd700;
+            background: linear-gradient(135deg, #2c3e50, #34495e, #2c3e50);
+        }
+        
+        .gallery-card.hexagram {
+            border-color: #f39c12;
+            background: linear-gradient(135deg, #f39c12, #e67e22);
+        }
+        
+        .gallery-card.hexagram.qian {
+            border-color: #ffd700;
+            background: linear-gradient(135deg, #ffd700, #ffb347);
+        }
+        
+        .gallery-card.hexagram.kun {
+            border-color: #8b4513;
+            background: linear-gradient(135deg, #8b4513, #a0522d);
+        }
+        
+        .gallery-card.hexagram.complex {
+            border-color: #ff6b6b;
+            background: linear-gradient(135deg, #ff6b6b, #ee5a52);
+        }
+        
+        .hexagram-info {
+            background: rgba(243, 156, 18, 0.1);
+            border: 1px solid #f39c12;
+            border-radius: 8px;
+            padding: 15px;
+            margin-bottom: 20px;
+            color: #f39c12;
+        }
+        
+        .hexagram-note {
+            background: rgba(52, 152, 219, 0.1);
+            border: 1px solid #3498db;
+            border-radius: 8px;
+            padding: 15px;
+            margin-top: 20px;
+            color: #3498db;
+            font-style: italic;
+        }
+
+        .card-icon {
+            font-size: 3em;
+            margin-bottom: 10px;
+        }
+
+        .card-title {
+            font-size: 1.3em;
+            font-weight: bold;
+            color: #ffd700;
+            margin-bottom: 15px;
+        }
+
+        .card-description {
+            color: #ecf0f1;
+            text-align: left;
+            line-height: 1.6;
+        }
+
+        .card-description p {
+            margin: 8px 0;
+        }
+
+        .card-description strong {
+            color: #ffd700;
+        }
+
+        @media (max-width: 768px) {
+            .modal-content {
+                width: 95%;
+                margin: 5% auto;
+            }
+
+            .gallery-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .gallery-tabs {
+                flex-direction: column;
+            }
+
+            .tab-btn {
+                margin: 2px 0;
+                border-radius: 10px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="game-layout">
+        <!-- 顶部标题区域 -->
+        <div class="header">
+            <div class="game-title">天机变 - 四人对战</div>
+            <div class="game-status">
+                <div class="status-item">
+                    <div class="status-label">当前回合</div>
+                    <div class="status-value" id="current-round">1</div>
+                </div>
+                <div class="status-item">
+                    <div class="status-label">当前玩家</div>
+                    <div class="status-value" id="current-player">玩家1</div>
+                </div>
+                <div class="status-item">
+                    <div class="status-label">当前季节</div>
+                    <div class="status-value" id="current-season">春</div>
+                </div>
+                <div class="status-item">
+                    <div class="status-label">五行主导</div>
+                    <div class="status-value" id="current-wuxing">木</div>
+                </div>
+                <div class="status-item">
+                    <div class="status-label">天干地支</div>
+                    <div class="status-value" id="current-ganzhi">甲子</div>
+                </div>
+                <div class="status-item">
+                    <div class="status-label">节气</div>
+                    <div class="status-value" id="current-jieqi">立春</div>
+                </div>
+                <div class="status-item">
+                    <div class="status-label">阴阳</div>
+                    <div class="status-value" id="current-yinyang">阳</div>
+                </div>
+                <div class="status-item">
+                    <div class="status-label">游戏状态</div>
+                    <div class="status-value" id="game-state">准备中</div>
+                </div>
+            </div>
+        </div>
+
+
+
+        <!-- 游戏主区域 -->
+        <div class="game-area">
+            <div class="bagua-container" style="position: relative;">
+                <!-- 八卦地图 -->
+                <div class="bagua-map">
+                    <!-- 第一行 -->
+                    <div class="bagua-position" data-position="xun" data-name="巽☴" onclick="moveToPosition('xun')">
+                        <div class="bagua-symbol">☴</div>
+                        <div class="bagua-name">巽</div>
+                        <div class="bagua-element">风</div>
+                    </div>
+                    <div class="bagua-position" data-position="li" data-name="离☲" onclick="moveToPosition('li')">
+                        <div class="bagua-symbol">☲</div>
+                        <div class="bagua-name">离</div>
+                        <div class="bagua-element">火</div>
+                    </div>
+                    <div class="bagua-position" data-position="kun" data-name="坤☷" onclick="moveToPosition('kun')">
+                        <div class="bagua-symbol">☷</div>
+                        <div class="bagua-name">坤</div>
+                        <div class="bagua-element">地</div>
+                    </div>
+                    
+                    <!-- 第二行 -->
+                    <div class="bagua-position" data-position="zhen" data-name="震☳" onclick="moveToPosition('zhen')">
+                        <div class="bagua-symbol">☳</div>
+                        <div class="bagua-name">震</div>
+                        <div class="bagua-element">雷</div>
+                    </div>
+                    <div class="bagua-position center-position" data-position="center" data-name="中心">
+                        <div class="center-text">太极</div>
+                    </div>
+                    <div class="bagua-position" data-position="dui" data-name="兑☱" onclick="moveToPosition('dui')">
+                        <div class="bagua-symbol">☱</div>
+                        <div class="bagua-name">兑</div>
+                        <div class="bagua-element">泽</div>
+                    </div>
+                    
+                    <!-- 第三行 -->
+                    <div class="bagua-position" data-position="gen" data-name="艮☶" onclick="moveToPosition('gen')">
+                        <div class="bagua-symbol">☶</div>
+                        <div class="bagua-name">艮</div>
+                        <div class="bagua-element">山</div>
+                    </div>
+                    <div class="bagua-position" data-position="kan" data-name="坎☵" onclick="moveToPosition('kan')">
+                        <div class="bagua-symbol">☵</div>
+                        <div class="bagua-name">坎</div>
+                        <div class="bagua-element">水</div>
+                    </div>
+                    <div class="bagua-position" data-position="qian" data-name="乾☰" onclick="moveToPosition('qian')">
+                        <div class="bagua-symbol">☰</div>
+                        <div class="bagua-name">乾</div>
+                        <div class="bagua-element">天</div>
+                    </div>
+                    
+                    <!-- 太极图 -->
+                    <div class="center-taiji" onclick="moveToCenter()">
+                        <div class="taiji-eye-white"></div>
+                        <div class="taiji-eye-black"></div>
+                    </div>
+                </div>
+                
+                <!-- 方位标签 -->
+                <div class="direction-label-west">西</div>
+                <div class="direction-label-east">东</div>
+                
+                <!-- 玩家棋子 -->
+                <div class="player-piece player1" id="player1-piece" style="top: 50%; left: 50%; transform: translate(-50%, -50%);">1</div>
+                <div class="player-piece player2" id="player2-piece" style="top: 20%; left: 80%; transform: translate(-50%, -50%);">2</div>
+                <div class="player-piece player3" id="player3-piece" style="top: 80%; left: 20%; transform: translate(-50%, -50%);">3</div>
+                <div class="player-piece player4" id="player4-piece" style="top: 50%; left: 20%; transform: translate(-50%, -50%);">4</div>
+            </div>
+        </div>
+
+        <!-- 右侧控制面板 -->
+        <div class="right-panel">
+            <div class="control-section">
+                <h3>游戏控制</h3>
+                <button class="btn btn-success" onclick="startFourPlayerDemo()" id="start-demo-btn">开始四人演示</button>
+                <button class="btn btn-primary" onclick="nextTurn()" id="next-turn-btn">下一回合</button>
+                <button class="btn btn-warning" onclick="pauseGame()" id="pause-btn">暂停游戏</button>
+                <button class="btn btn-danger" onclick="resetGame()" id="reset-btn">重置游戏</button>
+            </div>
+            
+            <div class="control-section">
+                <h3>演示设置</h3>
+                <button class="btn btn-primary" onclick="setAutoPlay(true)">自动演示</button>
+                <button class="btn btn-primary" onclick="setAutoPlay(false)">手动控制</button>
+                <button class="btn btn-primary" onclick="changeSpeed('fast')">快速演示</button>
+                <button class="btn btn-primary" onclick="changeSpeed('slow')">慢速演示</button>
+            </div>
+            
+            <div class="control-section">
+                <div class="section-header">
+                    <h3>技能卡牌</h3>
+                    <div class="card-info">
+                        <span id="remaining-cards" class="card-count">剩余: 20张</span>
+                        <button class="btn btn-info btn-sm" onclick="showCardGallery()">📚 卡牌图鉴</button>
+                    </div>
+                </div>
+                <div class="card-container">
+                    <div class="skill-card" data-skill="move" onclick="selectSkill('move')">
+                        <div class="card-name">移动</div>
+                        <div class="card-cost">消耗: 10能量</div>
+                        <div class="card-remaining" id="move-remaining">剩余: 5张</div>
+                    </div>
+                    <div class="skill-card" data-skill="attack" onclick="selectSkill('attack')">
+                        <div class="card-name">攻击</div>
+                        <div class="card-cost">消耗: 20能量</div>
+                        <div class="card-remaining" id="attack-remaining">剩余: 5张</div>
+                    </div>
+                    <div class="skill-card" data-skill="defend" onclick="selectSkill('defend')">
+                        <div class="card-name">防御</div>
+                        <div class="card-cost">消耗: 15能量</div>
+                        <div class="card-remaining" id="defend-remaining">剩余: 5张</div>
+                    </div>
+                    <div class="skill-card" data-skill="special" onclick="selectSkill('special')">
+                        <div class="card-name">特技</div>
+                        <div class="card-cost">消耗: 30能量</div>
+                        <div class="card-remaining" id="special-remaining">剩余: 5张</div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="control-section">
+                <h3>操作提示</h3>
+                <div class="help-info">
+                    <div class="help-item">
+                        <strong>🎯 如何游戏：</strong>
+                        <p>点击八卦位置移动角色</p>
+                    </div>
+                    <div class="help-item">
+                        <strong>🃏 技能卡牌：</strong>
+                        <p>选择技能卡牌使用不同能力</p>
+                    </div>
+                    <div class="help-item">
+                        <strong>⚡ 能量系统：</strong>
+                        <p>每个技能消耗不同能量</p>
+                    </div>
+                    <div class="help-item">
+                        <strong>🌸 传统元素：</strong>
+                        <p>观察季节、五行、天干地支变化</p>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="control-section">
+                <h3>游戏信息</h3>
+                <div style="font-size: 12px; color: #666; line-height: 1.4;">
+                    <p><strong>当前阶段:</strong> <span id="current-phase">准备阶段</span></p>
+                    <p><strong>总回合数:</strong> <span id="total-rounds">0</span></p>
+                    <p><strong>演示速度:</strong> <span id="demo-speed">正常</span></p>
+                    <p><strong>自动模式:</strong> <span id="auto-mode">关闭</span></p>
+                </div>
+            </div>
+        </div>
+
+        <!-- 玩家信息区域 -->
+        <div class="player-info-area">
+            <div class="panel-title">玩家信息</div>
+            <div class="player-info-grid">
+                <div class="player-info active" id="player1-info">
+                    <div class="player-name">玩家1 (人类)</div>
+                    <div class="player-stats">
+                        <div class="stat-item">生命: <span id="p1-health">100</span></div>
+                        <div class="stat-item">能量: <span id="p1-energy">50</span></div>
+                        <div class="stat-item">位置: <span id="p1-position">中心</span></div>
+                        <div class="stat-item">状态: <span id="p1-status">正常</span></div>
+                    </div>
+                </div>
+                <div class="player-info" id="player2-info">
+                    <div class="player-name">AI-智者</div>
+                    <div class="player-stats">
+                        <div class="stat-item">生命: <span id="p2-health">100</span></div>
+                        <div class="stat-item">能量: <span id="p2-energy">50</span></div>
+                        <div class="stat-item">位置: <span id="p2-position">乾</span></div>
+                        <div class="stat-item">状态: <span id="p2-status">正常</span></div>
+                    </div>
+                </div>
+                <div class="player-info" id="player3-info">
+                    <div class="player-name">AI-贤人</div>
+                    <div class="player-stats">
+                        <div class="stat-item">生命: <span id="p3-health">100</span></div>
+                        <div class="stat-item">能量: <span id="p3-energy">50</span></div>
+                        <div class="stat-item">位置: <span id="p3-position">坤</span></div>
+                        <div class="stat-item">状态: <span id="p3-status">正常</span></div>
+                    </div>
+                </div>
+                <div class="player-info" id="player4-info">
+                    <div class="player-name">AI-学者</div>
+                    <div class="player-stats">
+                        <div class="stat-item">生命: <span id="p4-health">100</span></div>
+                        <div class="stat-item">能量: <span id="p4-energy">50</span></div>
+                        <div class="stat-item">位置: <span id="p4-position">震</span></div>
+                        <div class="stat-item">状态: <span id="p4-status">正常</span></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 底部玩家记录面板 -->
+        <div class="bottom-panel">
+            <div class="player-log active" id="player1-log">
+                <div class="log-title">玩家1 操作记录</div>
+                <div class="log-entry recent">游戏开始，位于中心位置</div>
+                <div class="log-entry">等待其他玩家准备...</div>
+            </div>
+            <div class="player-log" id="player2-log">
+                <div class="log-title">玩家2 操作记录</div>
+                <div class="log-entry">AI智者已准备就绪</div>
+                <div class="log-entry">选择乾位作为起始位置</div>
+            </div>
+            <div class="player-log" id="player3-log">
+                <div class="log-title">玩家3 操作记录</div>
+                <div class="log-entry">AI贤人已准备就绪</div>
+                <div class="log-entry">选择坤位作为起始位置</div>
+            </div>
+            <div class="player-log" id="player4-log">
+                <div class="log-title">玩家4 操作记录</div>
+                <div class="log-entry">AI学者已准备就绪</div>
+                <div class="log-entry">选择震位作为起始位置</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 卡牌图鉴模态窗口 -->
+    <div id="cardGalleryModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>📚 卡牌图鉴</h2>
+                <div class="header-buttons">
+                    <button class="btn btn-sm btn-warning" onclick="resetCardInventory()" title="重置所有卡牌库存">
+                        🔄 重置库存
+                    </button>
+                    <span class="close" onclick="closeCardGallery()">&times;</span>
+                </div>
+            </div>
+            <div class="modal-body">
+                <div class="gallery-tabs">
+                    <button class="tab-btn active" onclick="showGalleryTab('basic')">基础卡牌</button>
+                    <button class="tab-btn" onclick="showGalleryTab('hexagram')">64卦卡牌</button>
+                    <button class="tab-btn" onclick="showGalleryTab('advanced')">高级卡牌</button>
+                    <button class="tab-btn" onclick="showGalleryTab('special')">特殊卡牌</button>
+                </div>
+                
+                <div id="basic-cards" class="gallery-tab-content active">
+                    <h3>基础技能卡牌</h3>
+                    <div class="gallery-grid">
+                        <div class="gallery-card move">
+                            <div class="card-icon">🚶</div>
+                            <div class="card-title">移动卡</div>
+                            <div class="card-description">
+                                <p><strong>消耗：</strong>10能量</p>
+                                <p><strong>效果：</strong>移动到相邻的八卦位置</p>
+                                <p><strong>说明：</strong>基础移动技能，可以在八卦阵中自由移动</p>
+                            </div>
+                        </div>
+                        
+                        <div class="gallery-card attack">
+                            <div class="card-icon">⚔️</div>
+                            <div class="card-title">攻击卡</div>
+                            <div class="card-description">
+                                <p><strong>消耗：</strong>20能量</p>
+                                <p><strong>效果：</strong>对目标造成伤害</p>
+                                <p><strong>说明：</strong>基础攻击技能，伤害受五行相克影响</p>
+                            </div>
+                        </div>
+                        
+                        <div class="gallery-card defend">
+                            <div class="card-icon">🛡️</div>
+                            <div class="card-title">防御卡</div>
+                            <div class="card-description">
+                                <p><strong>消耗：</strong>15能量</p>
+                                <p><strong>效果：</strong>提升防御力，减少受到的伤害</p>
+                                <p><strong>说明：</strong>基础防御技能，持续一回合</p>
+                            </div>
+                        </div>
+                        
+                        <div class="gallery-card special">
+                            <div class="card-icon">✨</div>
+                            <div class="card-title">特技卡</div>
+                            <div class="card-description">
+                                <p><strong>消耗：</strong>30能量</p>
+                                <p><strong>效果：</strong>根据当前位置触发特殊效果</p>
+                                <p><strong>说明：</strong>高级技能，效果随八卦位置变化</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div id="hexagram-cards" class="gallery-tab-content">
+                    <h3>64卦卡牌</h3>
+                    <div class="hexagram-info">
+                        <p>天机变游戏的核心卡牌系统，基于《易经》64卦设计，每卦都有独特的效果和战略价值。</p>
+                    </div>
+                    <div class="gallery-grid">
+                        <!-- 乾卦系列 -->
+                        <div class="gallery-card hexagram qian">
+                            <div class="card-icon">☰</div>
+                            <div class="card-title">乾卦 - 天</div>
+                            <div class="card-description">
+                                <p><strong>消耗：</strong>60能量</p>
+                                <p><strong>效果：</strong>大幅提升攻击力，获得"天威"状态</p>
+                                <p><strong>卦象：</strong>乾为天，刚健中正</p>
+                                <p><strong>说明：</strong>至刚至阳之卦，象征领导力和创造力</p>
+                            </div>
+                        </div>
+                        
+                        <div class="gallery-card hexagram kun">
+                            <div class="card-icon">☷</div>
+                            <div class="card-title">坤卦 - 地</div>
+                            <div class="card-description">
+                                <p><strong>消耗：</strong>50能量</p>
+                                <p><strong>效果：</strong>大幅提升防御力，获得"厚德"状态</p>
+                                <p><strong>卦象：</strong>坤为地，柔顺承载</p>
+                                <p><strong>说明：</strong>至柔至阴之卦，象征包容和承载</p>
+                            </div>
+                        </div>
+                        
+                        <div class="gallery-card hexagram zhen">
+                            <div class="card-icon">☳</div>
+                            <div class="card-title">震卦 - 雷</div>
+                            <div class="card-description">
+                                <p><strong>消耗：</strong>45能量</p>
+                                <p><strong>效果：</strong>震慑敌人，降低其行动力</p>
+                                <p><strong>卦象：</strong>震为雷，动而有威</p>
+                                <p><strong>说明：</strong>象征震动、觉醒和行动力</p>
+                            </div>
+                        </div>
+                        
+                        <div class="gallery-card hexagram xun">
+                            <div class="card-icon">☴</div>
+                            <div class="card-title">巽卦 - 风</div>
+                            <div class="card-description">
+                                <p><strong>消耗：</strong>40能量</p>
+                                <p><strong>效果：</strong>提升移动速度，可穿越障碍</p>
+                                <p><strong>卦象：</strong>巽为风，入而有序</p>
+                                <p><strong>说明：</strong>象征渗透、灵活和适应</p>
+                            </div>
+                        </div>
+                        
+                        <div class="gallery-card hexagram kan">
+                            <div class="card-icon">☵</div>
+                            <div class="card-title">坎卦 - 水</div>
+                            <div class="card-description">
+                                <p><strong>消耗：</strong>35能量</p>
+                                <p><strong>效果：</strong>治疗自身，清除负面状态</p>
+                                <p><strong>卦象：</strong>坎为水，险而有信</p>
+                                <p><strong>说明：</strong>象征智慧、流动和克服困难</p>
+                            </div>
+                        </div>
+                        
+                        <div class="gallery-card hexagram li">
+                            <div class="card-icon">☲</div>
+                            <div class="card-title">离卦 - 火</div>
+                            <div class="card-description">
+                                <p><strong>消耗：</strong>55能量</p>
+                                <p><strong>效果：</strong>造成火焰伤害，附加燃烧效果</p>
+                                <p><strong>卦象：</strong>离为火，明而有礼</p>
+                                <p><strong>说明：</strong>象征光明、热情和文明</p>
+                            </div>
+                        </div>
+                        
+                        <div class="gallery-card hexagram gen">
+                            <div class="card-icon">☶</div>
+                            <div class="card-title">艮卦 - 山</div>
+                            <div class="card-description">
+                                <p><strong>消耗：</strong>30能量</p>
+                                <p><strong>效果：</strong>进入防御状态，免疫下次攻击</p>
+                                <p><strong>卦象：</strong>艮为山，止而有时</p>
+                                <p><strong>说明：</strong>象征稳定、坚持和适时停止</p>
+                            </div>
+                        </div>
+                        
+                        <div class="gallery-card hexagram dui">
+                            <div class="card-icon">☱</div>
+                            <div class="card-title">兑卦 - 泽</div>
+                            <div class="card-description">
+                                <p><strong>消耗：</strong>25能量</p>
+                                <p><strong>效果：</strong>恢复能量，提升队友士气</p>
+                                <p><strong>卦象：</strong>兑为泽，悦而有节</p>
+                                <p><strong>说明：</strong>象征喜悦、交流和收获</p>
+                            </div>
+                        </div>
+                        
+                        <!-- 复合卦示例 -->
+                        <div class="gallery-card hexagram complex">
+                            <div class="card-icon">☰☷</div>
+                            <div class="card-title">泰卦 - 天地交</div>
+                            <div class="card-description">
+                                <p><strong>消耗：</strong>70能量</p>
+                                <p><strong>效果：</strong>天地和谐，全属性大幅提升</p>
+                                <p><strong>卦象：</strong>天地相交，通泰之象</p>
+                                <p><strong>说明：</strong>象征和谐、繁荣和平衡</p>
+                            </div>
+                        </div>
+                        
+                        <div class="gallery-card hexagram complex">
+                            <div class="card-icon">☷☰</div>
+                            <div class="card-title">否卦 - 天地否</div>
+                            <div class="card-description">
+                                <p><strong>消耗：</strong>20能量</p>
+                                <p><strong>效果：</strong>阻断敌人行动，造成混乱状态</p>
+                                <p><strong>卦象：</strong>天地不交，闭塞之象</p>
+                                <p><strong>说明：</strong>象征阻塞、困难和变革前的准备</p>
+                            </div>
+                        </div>
+                        
+                        <div class="gallery-card hexagram complex">
+                            <div class="card-icon">☳☵</div>
+                            <div class="card-title">屯卦 - 雷水屯</div>
+                            <div class="card-description">
+                                <p><strong>消耗：</strong>40能量</p>
+                                <p><strong>效果：</strong>积蓄力量，下回合效果翻倍</p>
+                                <p><strong>卦象：</strong>雷水相激，屯积之象</p>
+                                <p><strong>说明：</strong>象征积累、准备和等待时机</p>
+                            </div>
+                        </div>
+                        
+                        <div class="gallery-card hexagram complex">
+                            <div class="card-icon">☵☶</div>
+                            <div class="card-title">蒙卦 - 水山蒙</div>
+                            <div class="card-description">
+                                <p><strong>消耗：</strong>15能量</p>
+                                <p><strong>效果：</strong>学习敌人技能，获得其能力</p>
+                                <p><strong>卦象：</strong>水山相依，启蒙之象</p>
+                                <p><strong>说明：</strong>象征学习、启发和成长</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="hexagram-note">
+                        <p><strong>注意：</strong>这里只展示了部分代表性卦象。完整的64卦系统包含所有可能的卦象组合，每个都有独特的战略价值和使用时机。</p>
+                    </div>
+                </div>
+                
+                <div id="advanced-cards" class="gallery-tab-content">
+                    <h3>高级卡牌</h3>
+                    <div class="gallery-grid">
+                        <div class="gallery-card advanced">
+                            <div class="card-icon">🌟</div>
+                            <div class="card-title">道法卡</div>
+                            <div class="card-description">
+                                <p><strong>消耗：</strong>50能量</p>
+                                <p><strong>效果：</strong>施展强大的道法攻击</p>
+                                <p><strong>说明：</strong>威力巨大，但消耗很高</p>
+                            </div>
+                        </div>
+                        
+                        <div class="gallery-card advanced">
+                            <div class="card-icon">🔄</div>
+                            <div class="card-title">变卦卡</div>
+                            <div class="card-description">
+                                <p><strong>消耗：</strong>40能量</p>
+                                <p><strong>效果：</strong>改变当前的五行属性</p>
+                                <p><strong>说明：</strong>可以扭转战局的关键卡牌</p>
+                            </div>
+                        </div>
+                        
+                        <div class="gallery-card advanced">
+                            <div class="card-icon">⚡</div>
+                            <div class="card-title">聚气卡</div>
+                            <div class="card-description">
+                                <p><strong>消耗：</strong>0能量</p>
+                                <p><strong>效果：</strong>恢复30点能量</p>
+                                <p><strong>说明：</strong>关键时刻的能量补充</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div id="special-cards" class="gallery-tab-content">
+                    <h3>特殊卡牌</h3>
+                    <div class="gallery-grid">
+                        <div class="gallery-card legendary">
+                            <div class="card-icon">🐉</div>
+                            <div class="card-title">龙脉卡</div>
+                            <div class="card-description">
+                                <p><strong>消耗：</strong>100能量</p>
+                                <p><strong>效果：</strong>召唤龙脉之力，造成范围伤害</p>
+                                <p><strong>说明：</strong>传说级卡牌，威力无穷</p>
+                            </div>
+                        </div>
+                        
+                        <div class="gallery-card legendary">
+                            <div class="card-icon">🌙</div>
+                            <div class="card-title">阴阳卡</div>
+                            <div class="card-description">
+                                <p><strong>消耗：</strong>80能量</p>
+                                <p><strong>效果：</strong>切换阴阳状态，获得特殊加成</p>
+                                <p><strong>说明：</strong>稀有卡牌，改变游戏节奏</p>
+                            </div>
+                        </div>
+                        
+                        <div class="gallery-card legendary">
+                            <div class="card-icon">🎭</div>
+                            <div class="card-title">奇门卡</div>
+                            <div class="card-description">
+                                <p><strong>消耗：</strong>60能量</p>
+                                <p><strong>效果：</strong>随机触发奇门遁甲效果</p>
+                                <p><strong>说明：</strong>神秘卡牌，效果不可预测</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // 游戏状态管理
+        class TianJiBianGame {
+            constructor() {
+                this.currentPlayer = 1;
+                this.currentRound = 1;
+                this.gameState = 'ready';
+                this.autoPlay = false;
+                this.demoSpeed = 'normal';
+                this.isRunning = false;
+                this.currentSeason = 0; // 0=春, 1=夏, 2=秋, 3=冬
+                this.currentWuxing = 0; // 0=木, 1=火, 2=土, 3=金, 4=水
+                this.seasons = ['春', '夏', '秋', '冬'];
+                this.wuxingElements = ['木', '火', '土', '金', '水'];
+                this.wuxingColors = ['#2ecc71', '#e74c3c', '#f39c12', '#f1c40f', '#3498db'];
+                
+                // 天干地支系统
+                this.tiangan = ['甲', '乙', '丙', '丁', '戊', '己', '庚', '辛', '壬', '癸'];
+                this.dizhi = ['子', '丑', '寅', '卯', '辰', '巳', '午', '未', '申', '酉', '戌', '亥'];
+                this.currentGanzhiIndex = 0;
+                
+                // 二十四节气
+                this.jieqi = [
+                    '立春', '雨水', '惊蛰', '春分', '清明', '谷雨',
+                    '立夏', '小满', '芒种', '夏至', '小暑', '大暑',
+                    '立秋', '处暑', '白露', '秋分', '寒露', '霜降',
+                    '立冬', '小雪', '大雪', '冬至', '小寒', '大寒'
+                ];
+                this.currentJieqiIndex = 0;
+                
+                // 阴阳系统
+                this.yinyang = ['阳', '阴'];
+                this.currentYinYang = 0; // 0为阳，1为阴
+                
+                // 八卦方位影响
+                this.baguaEffects = {
+                    'qian': { 
+                        name: '乾', 
+                        element: '金', 
+                        effect: '增强领导力', 
+                        bonus: { health: 2, energy: 3 },
+                        guaci: '乾：元亨利贞',
+                        meaning: '天行健，君子以自强不息',
+                        symbol: '☰'
+                    },
+                    'kun': { 
+                        name: '坤', 
+                        element: '土', 
+                        effect: '增强包容力', 
+                        bonus: { health: 4, energy: 1 },
+                        guaci: '坤：元亨，利牝马之贞',
+                        meaning: '地势坤，君子以厚德载物',
+                        symbol: '☷'
+                    },
+                    'zhen': { 
+                        name: '震', 
+                        element: '木', 
+                        effect: '增强行动力', 
+                        bonus: { health: 1, energy: 4 },
+                        guaci: '震：亨，震来虩虩',
+                        meaning: '雷声震动，万物复苏',
+                        symbol: '☳'
+                    },
+                    'xun': { 
+                        name: '巽', 
+                        element: '木', 
+                        effect: '增强适应力', 
+                        bonus: { health: 2, energy: 3 },
+                        guaci: '巽：小亨，利有攸往',
+                        meaning: '风行天下，无所不入',
+                        symbol: '☴'
+                    },
+                    'kan': { 
+                        name: '坎', 
+                        element: '水', 
+                        effect: '增强智慧力', 
+                        bonus: { health: 1, energy: 5 },
+                        guaci: '坎：习坎，有孚',
+                        meaning: '水流不息，智慧如渊',
+                        symbol: '☵'
+                    },
+                    'li': { 
+                        name: '离', 
+                        element: '火', 
+                        effect: '增强洞察力', 
+                        bonus: { health: 3, energy: 2 },
+                        guaci: '离：利贞，亨',
+                        meaning: '火光明照，洞察万物',
+                        symbol: '☲'
+                    },
+                    'gen': { 
+                        name: '艮', 
+                        element: '土', 
+                        effect: '增强稳定力', 
+                        bonus: { health: 5, energy: 0 },
+                        guaci: '艮：艮其背，不获其身',
+                        meaning: '山止如磐，稳重不移',
+                        symbol: '☶'
+                    },
+                    'dui': { 
+                        name: '兑', 
+                        element: '金', 
+                        effect: '增强交流力', 
+                        bonus: { health: 2, energy: 3 },
+                        guaci: '兑：亨，利贞',
+                        meaning: '泽润万物，和悦交流',
+                        symbol: '☱'
+                    },
+                    'center': { 
+                        name: '中宫', 
+                        element: '土', 
+                        effect: '平衡调和', 
+                        bonus: { health: 3, energy: 3 },
+                        guaci: '太极：无极而太极',
+                        meaning: '阴阳调和，万物之源',
+                        symbol: '☯'
+                    }
+                };
+                
+                // 技能系统
+                this.selectedSkill = null;
+                this.skillCosts = { move: 10, attack: 20, defend: 15, special: 30 };
+                this.players = {
+                    1: { 
+                        name: '玩家1 (人类)', 
+                        type: 'human', 
+                        position: 'center', 
+                        health: 100, 
+                        energy: 50, 
+                        status: '正常',
+                        personality: {
+                            name: '平衡修行者',
+                            symbol: '🎮',
+                            traits: ['平衡', '适应', '全面'],
+                            description: '追求阴阳平衡的修行者'
+                        }
+                    },
+                    2: { 
+                        name: 'AI-智者', 
+                        type: 'ai', 
+                        position: 'qian', 
+                        health: 100, 
+                        energy: 50, 
+                        status: '正常',
+                        personality: {
+                            name: '天行智者',
+                            symbol: '🧠',
+                            traits: ['智慧', '领导', '刚健'],
+                            description: '天行健，君子以自强不息',
+                            preferredActions: ['高级技能', '攻击技能', '领导技能'],
+                            avoidActions: ['防御技能', '恢复技能'],
+                            riskTolerance: 0.8,
+                            aggressiveness: 0.9
+                        }
+                    },
+                    3: { 
+                        name: 'AI-贤人', 
+                        type: 'ai', 
+                        position: 'kun', 
+                        health: 100, 
+                        energy: 50, 
+                        status: '正常',
+                        personality: {
+                            name: '厚德贤者',
+                            symbol: '💚',
+                            traits: ['包容', '稳重', '守护'],
+                            description: '地势坤，君子以厚德载物',
+                            preferredActions: ['防御技能', '恢复技能', '辅助技能'],
+                            avoidActions: ['攻击技能', '冒险技能'],
+                            riskTolerance: 0.3,
+                            aggressiveness: 0.2
+                        }
+                    },
+                    4: { 
+                        name: 'AI-学者', 
+                        type: 'ai', 
+                        position: 'zhen', 
+                        health: 100, 
+                        energy: 50, 
+                        status: '正常',
+                        personality: {
+                            name: '雷动学者',
+                            symbol: '⚡',
+                            traits: ['敏捷', '创新', '突破'],
+                            description: '震为雷，动而有威',
+                            preferredActions: ['移动技能', '突击技能', '变化技能'],
+                            avoidActions: ['静态技能', '持续技能'],
+                            riskTolerance: 0.7,
+                            aggressiveness: 0.6
+                        }
+                    }
+                };
+                this.initializeGame();
+            }
+
+            initializeGame() {
+                // 初始化卡牌系统
+                CardInventory.init();
+                PlayerHands.init();
+                
+                // 立即更新所有玩家的信息显示
+                for (let i = 1; i <= 4; i++) {
+                    this.updatePlayerInfo(i);
+                }
+                this.updateDisplay();
+                this.logAction(1, '🎮 平衡修行者已准备就绪，手牌：' + PlayerHands.getHandSize('player1') + '张');
+                this.logAction(2, '🧠 智慧学者已准备就绪，手牌：' + PlayerHands.getHandSize('player2') + '张');
+                this.logAction(3, '💚 养生大师已准备就绪');
+                this.logAction(4, '⚡ 能量专家已准备就绪');
+                
+                // 显示卡牌库存信息
+                this.logAction(1, `📦 卡牌库存：剩余${CardInventory.getTotalRemaining()}张，已用${CardInventory.getTotalUsed()}张`);
+                
+                // 更新界面上的卡牌数量显示
+                updateCardCounts();
+            }
+
+            startFourPlayerDemo() {
+                if (this.isRunning) {
+                    this.pauseGame();
+                    return;
+                }
+                
+                this.isRunning = true;
+                this.gameState = 'playing';
+                this.updateDisplay();
+                this.logAction(this.currentPlayer, '四人演示开始！');
+                
+                document.getElementById('start-demo-btn').textContent = '停止演示';
+                document.getElementById('start-demo-btn').className = 'btn btn-danger';
+                
+                if (this.autoPlay) {
+                    this.runAutoDemo();
+                }
+            }
+
+            runAutoDemo() {
+                if (!this.isRunning) return;
+                
+                const speed = this.demoSpeed === 'fast' ? 1000 : this.demoSpeed === 'slow' ? 3000 : 2000;
+                
+                setTimeout(() => {
+                    this.nextTurn();
+                    if (this.isRunning && this.autoPlay) {
+                        this.runAutoDemo();
+                    }
+                }, speed);
+            }
+
+            nextTurn() {
+                if (!this.isRunning) return;
+                
+                // 执行当前玩家的行动
+                this.executePlayerAction(this.currentPlayer);
+                
+                // 切换到下一个玩家
+                this.currentPlayer = this.currentPlayer % 4 + 1;
+                
+                // 如果回到玩家1，增加回合数
+                if (this.currentPlayer === 1) {
+                    this.currentRound++;
+                    
+                    // 每3回合变化季节
+                    if (this.currentRound % 3 === 0) {
+                        this.currentSeason = (this.currentSeason + 1) % 4;
+                        this.logAction(0, `季节变化：${this.seasons[this.currentSeason]}`);
+                    }
+                    
+                    // 每2回合变化五行
+                    if (this.currentRound % 2 === 0) {
+                        this.currentWuxing = (this.currentWuxing + 1) % 5;
+                        this.logAction(0, `五行主导变化：${this.wuxingElements[this.currentWuxing]}`);
+                        this.updateWuxingDisplay();
+                    }
+                    
+                    // 每回合天干地支变化
+                    this.currentGanzhiIndex = (this.currentGanzhiIndex + 1) % 60;
+                    
+                    // 每4回合节气变化
+                    if (this.currentRound % 4 === 0) {
+                        this.currentJieqiIndex = (this.currentJieqiIndex + 1) % 24;
+                        this.logAction(0, `节气变化：${this.jieqi[this.currentJieqiIndex]}`);
+                    }
+                    
+                    // 每2回合阴阳变化
+                    if (this.currentRound % 2 === 0) {
+                        this.currentYinYang = (this.currentYinYang + 1) % 2;
+                        this.logAction(0, `阴阳转换：${this.yinyang[this.currentYinYang]}时`);
+                    }
+                }
+                
+                this.updateDisplay();
+                
+                // 检查游戏结束条件
+                const winner = this.checkVictoryConditions();
+                if (winner) {
+                    this.endGame(winner);
+                } else if (this.currentRound > 40) {
+                    // 超过40回合，按分数判断胜负（从20回合提升）
+                    this.endGame(this.determineWinnerByScore());
+                }
+            }
+
+            executePlayerAction(playerId) {
+                const player = this.players[playerId];
+                const personality = player.personality;
+                
+                // 基于性格特征的智能决策系统
+                let availableActions = [];
+                
+                // 根据AI性格特征选择行动偏好
+                if (playerId === 2) { // 天行智者 - 攻击型
+                    availableActions = [
+                        { name: '乾卦攻击', cost: 40, type: 'attack', effect: '强力攻击', priority: 0.9 },
+                        { name: '天雷无妄', cost: 50, type: 'special', effect: '雷霆万钧', priority: 0.8 },
+                        { name: '龙战于野', cost: 60, type: 'ultimate', effect: '终极技能', priority: 0.7 },
+                        { name: '君子自强', cost: 30, type: 'buff', effect: '自我强化', priority: 0.6 },
+                        { name: '基础调息', cost: 0, type: 'recover', effect: '恢复能量', priority: 0.2 }
+                    ];
+                } else if (playerId === 3) { // 厚德贤者 - 防御型
+                    availableActions = [
+                        { name: '坤德载物', cost: 35, type: 'defense', effect: '强化防御', priority: 0.9 },
+                        { name: '厚德治疗', cost: 25, type: 'heal', effect: '恢复生命', priority: 0.8 },
+                        { name: '大地庇护', cost: 45, type: 'shield', effect: '护盾技能', priority: 0.7 },
+                        { name: '包容万物', cost: 20, type: 'support', effect: '辅助技能', priority: 0.6 },
+                        { name: '基础调息', cost: 0, type: 'recover', effect: '恢复能量', priority: 0.5 }
+                    ];
+                } else if (playerId === 4) { // 雷动学者 - 敏捷型
+                    availableActions = [
+                        { name: '震雷疾行', cost: 30, type: 'move', effect: '快速移动', priority: 0.9 },
+                        { name: '雷电突击', cost: 35, type: 'rush', effect: '突击攻击', priority: 0.8 },
+                        { name: '万物复苏', cost: 40, type: 'change', effect: '状态变化', priority: 0.7 },
+                        { name: '震动八方', cost: 25, type: 'aoe', effect: '范围技能', priority: 0.6 },
+                        { name: '基础调息', cost: 0, type: 'recover', effect: '恢复能量', priority: 0.3 }
+                    ];
+                } else { // 玩家1 - 平衡型
+                    availableActions = [
+                        { name: '太极平衡', cost: 35, type: 'balance', effect: '平衡调和', priority: 0.7 },
+                        { name: '阴阳调和', cost: 30, type: 'harmony', effect: '状态调整', priority: 0.6 },
+                        { name: '中庸之道', cost: 25, type: 'moderate', effect: '稳健发展', priority: 0.5 },
+                        { name: '基础调息', cost: 0, type: 'recover', effect: '恢复能量', priority: 0.4 }
+                    ];
+                }
+                
+                // 智能决策：根据当前状态和性格特征选择最佳行动
+                let selectedAction = null;
+                
+                // 筛选可用行动（能量足够）
+                const affordableActions = availableActions.filter(action => player.energy >= action.cost);
+                
+                if (affordableActions.length === 0) {
+                    // 能量不足，使用基础调息
+                    selectedAction = { name: '基础调息', cost: 0, type: 'recover', effect: '恢复能量' };
+                } else {
+                    // 根据性格特征和当前状态进行智能选择
+                    if (personality && personality.riskTolerance) {
+                        // 高风险容忍度的AI更倾向于选择高消耗技能
+                        if (personality.riskTolerance > 0.7 && player.energy > 50) {
+                            selectedAction = affordableActions.find(action => action.cost > 40) || affordableActions[0];
+                        } else if (personality.riskTolerance < 0.4 && player.health < 60) {
+                            // 低风险容忍度且生命值低时优先恢复
+                            selectedAction = affordableActions.find(action => action.type === 'heal' || action.type === 'defense') || affordableActions[0];
+                        } else {
+                            // 根据优先级选择
+                            selectedAction = affordableActions.reduce((best, current) => 
+                                current.priority > best.priority ? current : best
+                            );
+                        }
+                    } else {
+                        // 默认选择第一个可用行动
+                        selectedAction = affordableActions[0];
+                    }
+                }
+                
+                // 为每个玩家定义不同的行为偏好和动作池（保持原有逻辑兼容性）
+                const playerActionPreferences = {
+                    1: { // 玩家1 - 平衡型
+                        actions: [
+                            { name: '修炼内功', healthGain: 5, energyGain: 3, energyCost: 0, type: 'cultivation' },
+                            { name: '参悟天机', healthGain: 3, energyGain: 5, energyCost: 3, type: 'wisdom' },
+                            { name: '调息养神', healthGain: 8, energyGain: 2, energyCost: 0, type: 'meditation' }
+                        ],
+                        personality: '平衡修行者'
+                    },
+                    2: { // AI智者 - 智慧型
+                        actions: [
+                            { name: '参悟天机', healthGain: 3, energyGain: 5, energyCost: 3, type: 'wisdom' },
+                            { name: '研读古籍', healthGain: 2, energyGain: 7, energyCost: 4, type: 'study' },
+                            { name: '推演卦象', healthGain: 1, energyGain: 9, energyCost: 6, type: 'divination' },
+                            { name: '冥想悟道', healthGain: 4, energyGain: 6, energyCost: 2, type: 'enlightenment' }
+                        ],
+                        personality: '智慧学者'
+                    },
+                    3: { // AI贤人 - 恢复型
+                        actions: [
+                            { name: '调息养神', healthGain: 8, energyGain: 2, energyCost: 0, type: 'meditation' },
+                            { name: '修炼内功', healthGain: 5, energyGain: 3, energyCost: 0, type: 'cultivation' },
+                            { name: '静心疗伤', healthGain: 12, energyGain: 1, energyCost: 0, type: 'healing' },
+                            { name: '太极养生', healthGain: 6, energyGain: 4, energyCost: 1, type: 'taiji' }
+                        ],
+                        personality: '养生大师'
+                    },
+                    4: { // AI学者 - 能量型
+                        actions: [
+                            { name: '练气化神', healthGain: 2, energyGain: 8, energyCost: 5, type: 'energy' },
+                            { name: '施展神通', healthGain: 1, energyGain: 12, energyCost: 8, type: 'magic' },
+                            { name: '聚气凝神', healthGain: 3, energyGain: 10, energyCost: 6, type: 'focus' },
+                            { name: '炼化真元', healthGain: 2, energyGain: 15, energyCost: 10, type: 'alchemy' }
+                        ],
+                        personality: '能量专家'
+                    }
+                };
+                
+                // 使用新的智能决策系统
+                const action = selectedAction ? {
+                    name: selectedAction.name,
+                    healthGain: selectedAction.type === 'heal' ? 15 : (selectedAction.type === 'defense' ? 5 : 3),
+                    energyGain: selectedAction.type === 'recover' ? 20 : 2,
+                    energyCost: selectedAction.cost,
+                    type: selectedAction.type,
+                    effect: selectedAction.effect
+                } : { name: '基础调息', healthGain: 3, energyGain: 20, energyCost: 0, type: 'basic' };
+                
+                // 为每个玩家添加个性化的行动前缀
+                const personalityPrefixes = {
+                    1: '🎮',
+                    2: '🧠',
+                    3: '💚',
+                    4: '⚡'
+                };
+                
+                const positions = ['qian', 'kun', 'zhen', 'xun', 'kan', 'li', 'gen', 'dui', 'center'];
+                
+                // 记录行动前的状态
+                const oldHealth = player.health;
+                const oldEnergy = player.energy;
+                const oldPosition = player.position;
+                
+                // 执行行动效果
+                if (player.energy >= action.energyCost) {
+                    player.health = Math.min(200, player.health + action.healthGain);
+                    player.energy = Math.min(150, player.energy + action.energyGain - action.energyCost);
+                    
+                    // 季节加成效果
+                    const seasonBonus = this.getSeasonBonus(action.name);
+                    
+                    // 八卦方位加成效果
+                    const baguaBonus = this.baguaEffects[player.position]?.bonus || { health: 0, energy: 0 };
+                    
+                    // 阴阳加成（阳时增强攻击性行动，阴时增强恢复性行动）
+                    const yinyangBonus = this.getYinYangBonus(action.name);
+                    
+                    const totalHealthGain = seasonBonus.health + baguaBonus.health + yinyangBonus.health;
+                    const totalEnergyGain = seasonBonus.energy + baguaBonus.energy + yinyangBonus.energy;
+                    
+                    if (totalHealthGain > 0 || totalEnergyGain > 0) {
+                        player.health = Math.min(200, player.health + totalHealthGain);
+                        player.energy = Math.min(150, player.energy + totalEnergyGain);
+                        
+                        // 记录加成信息
+                        const bonuses = [];
+                        if (seasonBonus.health > 0 || seasonBonus.energy > 0) {
+                            bonuses.push(`${this.seasons[this.currentSeason]}季加成`);
+                        }
+                        if (baguaBonus.health > 0 || baguaBonus.energy > 0) {
+                            bonuses.push(`${this.baguaEffects[player.position].name}位加成`);
+                        }
+                        if (yinyangBonus.health > 0 || yinyangBonus.energy > 0) {
+                            bonuses.push(`${this.yinyang[this.currentYinYang]}时加成`);
+                        }
+                        
+                        // 使用新的详细日志记录
+                        const effects = [`生命+${action.healthGain + totalHealthGain}`, `能量+${action.energyGain + totalEnergyGain}`];
+                        this.logSkillUsage(playerId, action.name, action.energyCost, effects, bonuses);
+                    } else {
+                        const effects = [`生命+${action.healthGain}`, `能量+${action.energyGain}`];
+                        this.logSkillUsage(playerId, action.name, action.energyCost, effects);
+                    }
+                    
+                    // 记录状态变化
+                    if (player.health !== oldHealth) {
+                        this.logStatusChange(playerId, 'health', oldHealth, player.health, action.name);
+                    }
+                    if (player.energy !== oldEnergy - action.energyCost + action.energyGain) {
+                        this.logStatusChange(playerId, 'energy', oldEnergy, player.energy, action.name);
+                    }
+                } else {
+                    // 能量不足，只能进行基础恢复
+                    const energyBefore = player.energy;
+                    player.energy = Math.min(150, player.energy + 2);
+                    this.logSkillUsage(playerId, '基础调息', 0, ['能量+2']);
+                    this.logStatusChange(playerId, 'energy', energyBefore, player.energy, '能量不足');
+                }
+                
+                // 基于性格特征的智能移动
+                const shouldMove = Math.random() < (personality.riskTolerance / 10); // 风险容忍度影响移动频率
+                
+                if (shouldMove) {
+                    // 根据性格选择偏好位置
+                    let preferredPositions = [];
+                    if (personality.name === '天行智者') {
+                        preferredPositions = ['qian', 'center']; // 偏好乾位和中宫
+                    } else if (personality.name === '厚德贤者') {
+                        preferredPositions = ['kun', 'gen']; // 偏好坤位和艮位
+                    } else if (personality.name === '雷动学者') {
+                        preferredPositions = ['zhen', 'xun']; // 偏好震位和巽位
+                    } else {
+                        preferredPositions = ['kan', 'li', 'dui']; // 平衡修行者偏好其他位置
+                    }
+                    
+                    const availablePositions = preferredPositions.filter(pos => pos !== player.position);
+                    if (availablePositions.length > 0) {
+                        const newPosition = availablePositions[Math.floor(Math.random() * availablePositions.length)];
+                        const effects = [`获得${this.baguaEffects[newPosition].name}位加成`];
+                        this.logMovementAction(playerId, player.position, newPosition, effects);
+                        player.position = newPosition;
+                        this.movePlayerPiece(playerId, newPosition);
+                    }
+                }
+                
+                // 基于性格特征的事件影响（模拟不同性格对环境的适应性）
+                const eventChance = Math.random();
+                if (eventChance < 0.3) { // 30%概率发生事件
+                    let eventType = '';
+                    let energyChange = 0;
+                    let healthChange = 0;
+                    
+                    // 根据性格特征确定事件类型和影响
+                    if (personality.riskTolerance > 7) {
+                        // 高风险容忍度：可能获得更大收益或损失
+                        eventType = '冒险事件';
+                        energyChange = Math.floor(Math.random() * 31) - 15; // -15到+15
+                        healthChange = Math.floor(Math.random() * 21) - 10; // -10到+10
+                    } else if (personality.riskTolerance < 4) {
+                        // 低风险容忍度：变化较小但更稳定
+                        eventType = '稳健事件';
+                        energyChange = Math.floor(Math.random() * 11) - 5; // -5到+5
+                        healthChange = Math.floor(Math.random() * 7) - 3; // -3到+3
+                    } else {
+                        // 中等风险容忍度：平衡的变化
+                        eventType = '平衡事件';
+                        energyChange = Math.floor(Math.random() * 21) - 10; // -10到+10
+                        healthChange = Math.floor(Math.random() * 11) - 5; // -5到+5
+                    }
+                    
+                    if (energyChange !== 0) {
+                        const oldEnergyRandom = player.energy;
+                        player.energy = Math.max(0, Math.min(150, player.energy + energyChange));
+                        if (player.energy !== oldEnergyRandom) {
+                            this.logStatusChange(playerId, 'energy', oldEnergyRandom, player.energy, eventType);
+                        }
+                    }
+                    
+                    if (healthChange !== 0) {
+                        const oldHealthRandom = player.health;
+                        player.health = Math.max(0, Math.min(200, player.health + healthChange));
+                        if (player.health !== oldHealthRandom) {
+                            this.logStatusChange(playerId, 'health', oldHealthRandom, player.health, eventType);
+                        }
+                    }
+                }
+                
+                this.updatePlayerInfo(playerId);
+            }
+
+            movePlayerPiece(playerId, position) {
+                const piece = document.getElementById(`player${playerId}-piece`);
+                if (!piece) return;
+                
+                // 修正的九宫格位置坐标，确保角色在格子内
+                const positions = {
+                    'center': { top: '50%', left: '50%' },
+                    'qian': { top: '75%', left: '75%' },    // 右下 - 乾
+                    'kun': { top: '25%', left: '75%' },     // 右上 - 坤  
+                    'zhen': { top: '50%', left: '25%' },    // 左中 - 震
+                    'xun': { top: '25%', left: '25%' },     // 左上 - 巽
+                    'kan': { top: '75%', left: '50%' },     // 下中 - 坎
+                    'li': { top: '25%', left: '50%' },      // 上中 - 离
+                    'gen': { top: '75%', left: '25%' },     // 左下 - 艮
+                    'dui': { top: '50%', left: '75%' }      // 右中 - 兑
+                };
+                
+                if (positions[position]) {
+                    // 添加移动动画类
+                    piece.classList.add('moving');
+                    
+                    // 设置新位置
+                    piece.style.top = positions[position].top;
+                    piece.style.left = positions[position].left;
+                    piece.style.transform = 'translate(-50%, -50%)';
+                    
+                    // 移除动画类
+                    setTimeout(() => {
+                        piece.classList.remove('moving');
+                    }, 600);
+                    
+                    // 添加位置变化的视觉提示
+                    const positionName = this.baguaEffects[position]?.name || position;
+                    this.showMoveEffect(piece, `移动到${positionName}`);
+                }
+            }
+
+            showMoveEffect(piece, text) {
+                // 创建移动提示文字
+                const moveText = document.createElement('div');
+                moveText.textContent = text;
+                moveText.style.cssText = `
+                    position: absolute;
+                    top: -40px;
+                    left: 50%;
+                    transform: translateX(-50%);
+                    background: rgba(0,0,0,0.8);
+                    color: white;
+                    padding: 4px 8px;
+                    border-radius: 4px;
+                    font-size: 12px;
+                    white-space: nowrap;
+                    z-index: 1000;
+                    animation: fadeInOut 2s ease-in-out;
+                `;
+                
+                piece.appendChild(moveText);
+                
+                // 2秒后移除提示
+                setTimeout(() => {
+                    if (moveText.parentNode) {
+                        moveText.parentNode.removeChild(moveText);
+                    }
+                }, 2000);
+            }
+
+            pauseGame() {
+                this.isRunning = !this.isRunning;
+                const btn = document.getElementById('start-demo-btn');
+                if (this.isRunning) {
+                    btn.textContent = '停止演示';
+                    btn.className = 'btn btn-danger';
+                    this.gameState = 'playing';
+                    if (this.autoPlay) {
+                        this.runAutoDemo();
+                    }
+                } else {
+                    btn.textContent = '继续演示';
+                    btn.className = 'btn btn-success';
+                    this.gameState = 'paused';
+                }
+                this.updateDisplay();
+            }
+
+            resetGame() {
+                this.isRunning = false;
+                this.currentPlayer = 1;
+                this.currentRound = 1;
+                this.gameState = 'ready';
+                
+                // 重置卡牌系统
+                CardInventory.reset();
+                PlayerHands.reset();
+                
+                // 重置玩家状态
+                Object.keys(this.players).forEach(id => {
+                    this.players[id].health = 100;
+                    this.players[id].energy = 50;
+                    this.players[id].status = '正常';
+                });
+                
+                // 重置玩家位置
+                this.movePlayerPiece(1, 'center');
+                this.movePlayerPiece(2, 'qian');
+                this.movePlayerPiece(3, 'kun');
+                this.movePlayerPiece(4, 'zhen');
+                
+                // 清空日志
+                for (let i = 1; i <= 4; i++) {
+                    const log = document.getElementById(`player${i}-log`);
+                    log.innerHTML = `<div class="log-title">${this.players[i].name} 操作记录</div>`;
+                }
+                
+                document.getElementById('start-demo-btn').textContent = '开始四人演示';
+                document.getElementById('start-demo-btn').className = 'btn btn-success';
+                
+                this.updateDisplay();
+                this.logAction(1, '游戏已重置');
+            }
+
+            setAutoPlay(auto) {
+                this.autoPlay = auto;
+                document.getElementById('auto-mode').textContent = auto ? '开启' : '关闭';
+                if (auto && this.isRunning) {
+                    this.runAutoDemo();
+                }
+            }
+
+            changeSpeed(speed) {
+                this.demoSpeed = speed;
+                const speedText = speed === 'fast' ? '快速' : speed === 'slow' ? '慢速' : '正常';
+                document.getElementById('demo-speed').textContent = speedText;
+            }
+
+            checkVictoryConditions() {
+                // 检查各种胜利条件（调整后的平衡阈值）
+                for (let playerId = 1; playerId <= 4; playerId++) {
+                    const player = this.players[playerId];
+                    
+                    // 生命值胜利：生命值达到250（从150提升）
+                    if (player.health >= 250) {
+                        return { player: player, reason: '生命值达到250点', type: '生命胜利' };
+                    }
+                    
+                    // 能量胜利：能量达到200（从100提升）
+                    if (player.energy >= 200) {
+                        return { player: player, reason: '能量达到200点', type: '能量胜利' };
+                    }
+                    
+                    // 道行胜利：道行达到180（从100提升）
+                    const daoXing = this.calculateDaoXing(playerId);
+                    if (daoXing >= 180) {
+                        return { player: player, reason: `道行达到${daoXing}点`, type: '道行胜利' };
+                    }
+                }
+                
+                // 检查淘汰胜利：只剩一个玩家生命值大于0
+                const alivePlayers = Object.values(this.players).filter(p => p.health > 0);
+                if (alivePlayers.length === 1) {
+                    return { player: alivePlayers[0], reason: '最后存活者', type: '生存胜利' };
+                }
+                
+                return null;
+            }
+            
+            calculateDaoXing(playerId) {
+                const player = this.players[playerId];
+                // 基于多个因素计算道行（优化后的平衡公式）
+                let daoXing = 0;
+                
+                // 基础道行（降低回合增长速度）
+                daoXing += Math.floor(this.currentRound * 0.8);
+                
+                // 生命值加成（降低影响）
+                daoXing += Math.floor(player.health / 20);
+                
+                // 能量加成（降低影响）
+                daoXing += Math.floor(player.energy / 10);
+                
+                // 位置加成（中心位置有额外道行，但降低数值）
+                if (player.position === 'center') {
+                    daoXing += 5;
+                }
+                
+                // 行动加成（基于玩家实际行动获得道行）
+                const actionBonus = this.calculateActionBonus(playerId);
+                daoXing += actionBonus;
+                
+                // 随机修行加成（减少随机性）
+                daoXing += Math.floor(Math.random() * 8);
+                
+                return Math.max(0, daoXing);
+            }
+            
+            calculateActionBonus(playerId) {
+                // 基于玩家行动计算道行加成
+                let bonus = 0;
+                const player = this.players[playerId];
+                
+                // 技能使用加成
+                if (player.lastAction && player.lastAction.includes('技能')) {
+                    bonus += 2;
+                }
+                
+                // 移动策略加成
+                if (player.lastAction && player.lastAction.includes('移动')) {
+                    bonus += 1;
+                }
+                
+                // 防御策略加成
+                if (player.lastAction && player.lastAction.includes('防御')) {
+                    bonus += 1;
+                }
+                
+                return bonus;
+            }
+            
+            determineWinnerByScore() {
+                let bestPlayer = null;
+                let bestScore = -1;
+                
+                for (let playerId = 1; playerId <= 4; playerId++) {
+                    const player = this.players[playerId];
+                    const score = this.calculatePlayerScore(playerId);
+                    
+                    if (score > bestScore) {
+                        bestScore = score;
+                        bestPlayer = { player: player, reason: `综合得分${bestScore}点最高`, type: '综合胜利', score: bestScore };
+                    }
+                }
+                
+                return bestPlayer;
+            }
+            
+            calculatePlayerScore(playerId) {
+                const player = this.players[playerId];
+                let score = 0;
+                
+                // 生命值得分
+                score += player.health;
+                
+                // 能量得分
+                score += player.energy * 2;
+                
+                // 道行得分
+                score += this.calculateDaoXing(playerId);
+                
+                // 位置得分
+                const positionScores = {
+                    'center': 20, 'qian': 15, 'kun': 15, 'zhen': 10, 
+                    'xun': 10, 'kan': 10, 'li': 10, 'gen': 5, 'dui': 5
+                };
+                score += positionScores[player.position] || 0;
+                
+                return score;
+            }
+
+            endGame(winner = null) {
+                this.isRunning = false;
+                this.gameState = 'finished';
+                this.updateDisplay();
+                
+                // 添加胜利动画效果
+                this.showVictoryAnimation();
+                
+                if (winner) {
+                    this.announceWinner(winner);
+                } else {
+                    this.logAction(0, '游戏结束！平局');
+                }
+                
+                document.getElementById('start-demo-btn').textContent = '游戏结束';
+                document.getElementById('start-demo-btn').className = 'btn btn-warning';
+                document.getElementById('start-demo-btn').disabled = true;
+                
+                setTimeout(() => {
+                    document.getElementById('start-demo-btn').disabled = false;
+                    document.getElementById('start-demo-btn').textContent = '开始新游戏';
+                    document.getElementById('start-demo-btn').className = 'btn btn-success';
+                }, 5000);
+            }
+
+            showVictoryAnimation() {
+                // 创建胜利动画效果
+                const gameBoard = document.querySelector('.game-board');
+                if (gameBoard) {
+                    gameBoard.style.animation = 'victoryPulse 2s ease-in-out';
+                    
+                    // 2秒后移除动画
+                    setTimeout(() => {
+                        gameBoard.style.animation = '';
+                    }, 2000);
+                }
+                
+                // 添加烟花效果
+                this.createFireworks();
+            }
+
+            createFireworks() {
+                const colors = ['#ff6b6b', '#4ecdc4', '#45b7d1', '#96ceb4', '#ffeaa7'];
+                
+                for (let i = 0; i < 5; i++) {
+                    setTimeout(() => {
+                        const firework = document.createElement('div');
+                        firework.style.position = 'fixed';
+                        firework.style.width = '4px';
+                        firework.style.height = '4px';
+                        firework.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
+                        firework.style.borderRadius = '50%';
+                        firework.style.left = Math.random() * window.innerWidth + 'px';
+                        firework.style.top = Math.random() * window.innerHeight + 'px';
+                        firework.style.pointerEvents = 'none';
+                        firework.style.zIndex = '9999';
+                        firework.style.animation = 'firework 1.5s ease-out forwards';
+                        
+                        document.body.appendChild(firework);
+                        
+                        setTimeout(() => {
+                            if (document.body.contains(firework)) {
+                                document.body.removeChild(firework);
+                            }
+                        }, 1500);
+                    }, i * 200);
+                }
+            }
+            
+            announceWinner(winner) {
+                const message = `🎉 ${winner.player.name} 获得胜利！`;
+                const reason = `🏆 胜利类型：${winner.type}`;
+                const detail = `📊 胜利原因：${winner.reason}`;
+                
+                this.logAction(0, message);
+                this.logAction(0, reason);
+                this.logAction(0, detail);
+                
+                // 在游戏状态中显示胜利信息
+                document.getElementById('game-state').textContent = `${winner.player.name} ${winner.type}获胜！`;
+                document.getElementById('game-state').style.color = '#e74c3c';
+                document.getElementById('game-state').style.fontWeight = 'bold';
+                
+                // 显示详细的胜利统计
+                this.showVictoryStats(winner);
+            }
+            
+            showVictoryStats(winner) {
+                const stats = [];
+                stats.push(`🏆 胜利者：${winner.player.name}`);
+                stats.push(`🎯 胜利类型：${winner.type}`);
+                stats.push(`📈 胜利原因：${winner.reason}`);
+                stats.push(`⏰ 游戏回合：${this.currentRound}`);
+                stats.push(`🌸 当前季节：${this.seasons[this.currentSeason]}`);
+                stats.push(`⚡ 当前五行：${this.wuxingElements[this.currentWuxing]}`);
+                
+                // 显示所有玩家的最终状态
+                stats.push(`\n📊 最终状态：`);
+                for (let playerId = 1; playerId <= 4; playerId++) {
+                    const player = this.players[playerId];
+                    const score = this.calculatePlayerScore(playerId);
+                    const daoXing = this.calculateDaoXing(playerId);
+                    stats.push(`${player.name}: 生命${player.health} 能量${player.energy} 道行${daoXing} 总分${score}`);
+                }
+                
+                // 在日志中显示详细统计
+                stats.forEach(stat => this.logAction(0, stat));
+            }
+
+            updateDisplay() {
+                document.getElementById('current-round').textContent = this.currentRound;
+                document.getElementById('current-player').textContent = this.players[this.currentPlayer].name;
+                
+                // 增强四季显示
+                const seasonElement = document.getElementById('current-season');
+                const seasonIcons = ['🌸', '☀️', '🍂', '❄️'];
+                const seasonColors = ['#2ecc71', '#f39c12', '#e67e22', '#3498db'];
+                seasonElement.innerHTML = `${seasonIcons[this.currentSeason]} ${this.seasons[this.currentSeason]}季`;
+                seasonElement.style.color = seasonColors[this.currentSeason];
+                seasonElement.style.fontWeight = 'bold';
+                seasonElement.style.textShadow = '1px 1px 2px rgba(0,0,0,0.3)';
+                
+                // 增强五行显示
+                const wuxingElement = document.getElementById('current-wuxing');
+                const wuxingIcons = ['🌳', '🔥', '🏔️', '⚡', '💧'];
+                const wuxingColors = ['#27ae60', '#e74c3c', '#f39c12', '#f1c40f', '#3498db'];
+                wuxingElement.innerHTML = `${wuxingIcons[this.currentWuxing]} ${this.wuxingElements[this.currentWuxing]}`;
+                wuxingElement.style.color = wuxingColors[this.currentWuxing];
+                wuxingElement.style.fontWeight = 'bold';
+                wuxingElement.style.textShadow = '1px 1px 2px rgba(0,0,0,0.3)';
+                document.getElementById('game-state').textContent = this.getGameStateText();
+                document.getElementById('current-phase').textContent = this.getPhaseText();
+                document.getElementById('total-rounds').textContent = this.currentRound - 1;
+                
+                // 更新天干地支和节气显示
+                const ganzhiText = this.tiangan[this.currentGanzhiIndex % 10] + this.dizhi[this.currentGanzhiIndex % 12];
+                const ganzhiElement = document.getElementById('current-ganzhi');
+                ganzhiElement.innerHTML = `📅 ${ganzhiText}`;
+                ganzhiElement.style.color = '#8e44ad';
+                ganzhiElement.style.fontWeight = 'bold';
+                
+                const jieqiElement = document.getElementById('current-jieqi');
+                jieqiElement.innerHTML = `🌙 ${this.jieqi[this.currentJieqiIndex]}`;
+                jieqiElement.style.color = '#34495e';
+                jieqiElement.style.fontWeight = 'bold';
+                
+                // 更新阴阳显示
+                const yinyangElement = document.getElementById('current-yinyang');
+                const yinyangIcons = ['☀️', '🌙'];
+                const yinyangColors = ['#f39c12', '#34495e'];
+                yinyangElement.innerHTML = `${yinyangIcons[this.currentYinYang]} ${this.yinyang[this.currentYinYang]}`;
+                yinyangElement.style.color = yinyangColors[this.currentYinYang];
+                yinyangElement.style.fontWeight = 'bold';
+                yinyangElement.style.textShadow = '1px 1px 2px rgba(0,0,0,0.3)';
+                
+                // 更新玩家信息面板的活跃状态
+                for (let i = 1; i <= 4; i++) {
+                    const info = document.getElementById(`player${i}-info`);
+                    const log = document.getElementById(`player${i}-log`);
+                    if (i === this.currentPlayer) {
+                        info.classList.add('active');
+                        log.classList.add('active');
+                    } else {
+                        info.classList.remove('active');
+                        log.classList.remove('active');
+                    }
+                    this.updatePlayerInfo(i);
+                }
+            }
+
+            updateWuxingDisplay() {
+                const wuxingElement = document.getElementById('current-wuxing');
+                wuxingElement.style.color = this.wuxingColors[this.currentWuxing];
+                wuxingElement.style.textShadow = `0 0 10px ${this.wuxingColors[this.currentWuxing]}`;
+            }
+
+            updatePlayerInfo(playerId) {
+                const player = this.players[playerId];
+                document.getElementById(`p${playerId}-health`).textContent = player.health;
+                document.getElementById(`p${playerId}-energy`).textContent = player.energy;
+                document.getElementById(`p${playerId}-position`).textContent = this.getPositionName(player.position);
+                document.getElementById(`p${playerId}-status`).textContent = player.status;
+            }
+
+            getPositionName(position) {
+                const names = {
+                    'center': '中心',
+                    'qian': '乾',
+                    'kun': '坤',
+                    'zhen': '震',
+                    'xun': '巽',
+                    'kan': '坎',
+                    'li': '离',
+                    'gen': '艮',
+                    'dui': '兑'
+                };
+                return names[position] || position;
+            }
+
+            getGameStateText() {
+                const states = {
+                    'ready': '准备中',
+                    'playing': '进行中',
+                    'paused': '已暂停',
+                    'finished': '已结束'
+                };
+                return states[this.gameState] || this.gameState;
+            }
+
+            getPhaseText() {
+                if (this.gameState === 'ready') return '准备阶段';
+                if (this.gameState === 'finished') return '结束阶段';
+                if (this.currentRound <= 3) return '开局阶段';
+                if (this.currentRound <= 7) return '中局阶段';
+                return '终局阶段';
+            }
+
+            getSeasonBonus(actionName) {
+                const seasonBonuses = {
+                    0: { // 春季 - 生机勃勃，恢复加成
+                        '修炼内功': { health: 3, energy: 1 },
+                        '调息养神': { health: 4, energy: 1 },
+                        '冥想悟道': { health: 2, energy: 2 }
+                    },
+                    1: { // 夏季 - 阳气旺盛，能量加成
+                        '练气化神': { health: 1, energy: 4 },
+                        '施展神通': { health: 0, energy: 5 },
+                        '参悟天机': { health: 1, energy: 3 }
+                    },
+                    2: { // 秋季 - 收获季节，平衡发展
+                        '参悟天机': { health: 2, energy: 3 },
+                        '冥想悟道': { health: 3, energy: 2 },
+                        '修炼内功': { health: 2, energy: 2 }
+                    },
+                    3: { // 冬季 - 蛰伏养精，内功加成
+                        '修炼内功': { health: 5, energy: 0 },
+                        '调息养神': { health: 6, energy: 0 },
+                        '冥想悟道': { health: 4, energy: 1 }
+                    }
+                };
+                
+                const currentSeasonBonuses = seasonBonuses[this.currentSeason] || {};
+                return currentSeasonBonuses[actionName] || { health: 0, energy: 0 };
+            }
+
+            getYinYangBonus(actionName) {
+                const yinyangBonuses = {
+                    0: { // 阳时 - 增强主动性行动
+                        '练气化神': { health: 1, energy: 2 },
+                        '施展神通': { health: 0, energy: 3 },
+                        '参悟天机': { health: 1, energy: 2 }
+                    },
+                    1: { // 阴时 - 增强恢复性行动
+                        '修炼内功': { health: 2, energy: 1 },
+                        '调息养神': { health: 3, energy: 1 },
+                        '冥想悟道': { health: 2, energy: 2 }
+                    }
+                };
+                
+                const currentYinYangBonuses = yinyangBonuses[this.currentYinYang] || {};
+                return currentYinYangBonuses[actionName] || { health: 0, energy: 0 };
+            }
+
+            logAction(playerId, action) {
+                // 只向指定玩家的日志中添加记录
+                if (playerId >= 1 && playerId <= 4) {
+                    this.addLogEntry(playerId, action, false);
+                } else if (playerId === 0) {
+                    // 系统消息只显示在当前玩家的记录中，避免重复
+                    this.addLogEntry(this.currentPlayer, action, true);
+                }
+            }
+
+            // 增强的战斗日志记录方法
+            logCombatAction(attackerId, targetId, skillName, damage, effects = []) {
+                const attacker = this.players[attackerId];
+                const target = targetId ? this.players[targetId] : null;
+                const attackerName = attacker ? attacker.name : `玩家${attackerId}`;
+                const targetName = target ? target.name : (targetId ? `玩家${targetId}` : '所有敌人');
+                
+                let message = `🗡️ ${attackerName} 对 ${targetName} 使用了【${skillName}】`;
+                
+                if (damage > 0) {
+                    message += `，造成 ${damage} 点伤害`;
+                }
+                
+                if (effects && effects.length > 0) {
+                    message += `，产生效果：${effects.join('、')}`;
+                }
+                
+                // 记录到所有玩家的日志中
+                this.logAction(0, message);
+                
+                // 如果有目标，记录目标的状态变化
+                if (target && damage > 0) {
+                    const healthAfter = target.health;
+                    this.logAction(0, `💔 ${targetName} 生命值：${healthAfter + damage} → ${healthAfter}`);
+                }
+            }
+
+            // 记录技能使用详情
+            logSkillUsage(playerId, skillName, energyCost, effects = [], bonuses = []) {
+                const player = this.players[playerId];
+                const playerName = player ? player.name : `玩家${playerId}`;
+                
+                // 个性化前缀
+                const personalityPrefixes = {
+                    1: '🎮',
+                    2: '🧠', 
+                    3: '💚',
+                    4: '⚡'
+                };
+                
+                const prefix = personalityPrefixes[playerId] || '✨';
+                let message = `${prefix} ${playerName} 使用技能【${skillName}】`;
+                
+                // 添加使用原因分析
+                const reason = this.getSkillUsageReason(player, skillName, energyCost);
+                if (reason) {
+                    message += ` (${reason})`;
+                }
+                
+                if (energyCost > 0) {
+                    message += `，消耗 ${energyCost} 能量`;
+                }
+                
+                if (effects && effects.length > 0) {
+                    message += `，产生效果：${effects.join('、')}`;
+                }
+                
+                if (bonuses && bonuses.length > 0) {
+                    message += `，获得加成：${bonuses.join('、')}`;
+                }
+                
+                // 记录到对应玩家的日志中
+                this.logAction(playerId, message);
+                
+                // 记录详细的能量变化原因
+                if (energyCost > 0 && player) {
+                    const energyBefore = player.energy + energyCost;
+                    const energyAfter = player.energy;
+                    this.logAction(playerId, `⚡ 能量变化：${energyBefore} → ${energyAfter} (技能消耗)`);
+                }
+            }
+
+            // 获取技能使用原因
+            getSkillUsageReason(player, skillName, energyCost) {
+                if (!player) return '';
+                
+                const reasons = [];
+                
+                // 分析生命值状况
+                if (player.health < 30) {
+                    reasons.push('生命值较低');
+                } else if (player.health > 80) {
+                    reasons.push('生命值充足');
+                }
+                
+                // 分析能量状况
+                if (player.energy < 20) {
+                    reasons.push('能量不足');
+                } else if (player.energy > 70) {
+                    reasons.push('能量充沛');
+                }
+                
+                // 分析技能类型
+                if (skillName.includes('恢复') || skillName.includes('调息')) {
+                    reasons.push('恢复状态');
+                } else if (skillName.includes('攻击') || skillName.includes('伤害')) {
+                    reasons.push('主动攻击');
+                } else if (skillName.includes('防御') || skillName.includes('护盾')) {
+                    reasons.push('防御策略');
+                }
+                
+                return reasons.length > 0 ? reasons.join('，') : '';
+            }
+
+            // 记录位置移动和效果
+            logMovementAction(playerId, fromPosition, toPosition, effects = []) {
+                const player = this.players[playerId];
+                const playerName = player ? player.name : `玩家${playerId}`;
+                const fromName = this.getPositionName(fromPosition);
+                const toName = this.getPositionName(toPosition);
+                
+                // 个性化前缀
+                const personalityPrefixes = {
+                    1: '🎮',
+                    2: '🧠', 
+                    3: '💚',
+                    4: '⚡'
+                };
+                
+                const prefix = personalityPrefixes[playerId] || '🚶';
+                let message = `${prefix} ${playerName} 从【${fromName}】移动到【${toName}】`;
+                
+                // 添加移动原因分析
+                const moveReason = this.getMovementReason(player, fromPosition, toPosition);
+                if (moveReason) {
+                    message += ` (${moveReason})`;
+                }
+                
+                if (effects && effects.length > 0) {
+                    message += `，触发效果：${effects.join('、')}`;
+                }
+                
+                // 记录到对应玩家的日志中
+                this.logAction(playerId, message);
+                
+                // 记录位置属性变化
+                this.logPositionBenefits(playerId, toPosition);
+            }
+
+            // 获取移动原因
+            getMovementReason(player, fromPos, toPos) {
+                if (!player) return '';
+                
+                const reasons = [];
+                
+                // 分析位置属性
+                const positionData = {
+                    'qian': { element: '金', direction: '西北', benefit: '领导力' },
+                    'kun': { element: '土', direction: '西南', benefit: '包容力' },
+                    'zhen': { element: '木', direction: '东', benefit: '行动力' },
+                    'xun': { element: '木', direction: '东南', benefit: '渗透力' },
+                    'kan': { element: '水', direction: '北', benefit: '智慧力' },
+                    'li': { element: '火', direction: '南', benefit: '洞察力' },
+                    'gen': { element: '土', direction: '东北', benefit: '稳定力' },
+                    'dui': { element: '金', direction: '西', benefit: '交流力' }
+                };
+                
+                const toData = positionData[toPos];
+                if (toData) {
+                    // 根据玩家状态分析移动原因
+                    if (player.health < 50 && toData.element === '土') {
+                        reasons.push('寻求稳定恢复');
+                    } else if (player.energy < 30 && toData.element === '水') {
+                        reasons.push('补充智慧能量');
+                    } else if (toData.element === '火') {
+                        reasons.push('增强洞察力');
+                    } else if (toData.element === '木') {
+                        reasons.push('提升行动力');
+                    } else if (toData.element === '金') {
+                        reasons.push('强化决策力');
+                    }
+                }
+                
+                return reasons.length > 0 ? reasons.join('，') : '战略调整';
+            }
+
+            // 记录位置收益
+            logPositionBenefits(playerId, position) {
+                const positionData = {
+                    'qian': { element: '金', direction: '西北', benefit: '领导力+2' },
+                    'kun': { element: '土', direction: '西南', benefit: '包容力+2' },
+                    'zhen': { element: '木', direction: '东', benefit: '行动力+2' },
+                    'xun': { element: '木', direction: '东南', benefit: '渗透力+2' },
+                    'kan': { element: '水', direction: '北', benefit: '智慧力+2' },
+                    'li': { element: '火', direction: '南', benefit: '洞察力+2' },
+                    'gen': { element: '土', direction: '东北', benefit: '稳定力+2' },
+                    'dui': { element: '金', direction: '西', benefit: '交流力+2' }
+                };
+                
+                const data = positionData[position];
+                if (data) {
+                    this.logAction(playerId, `📍 位置收益：${data.element}属性 ${data.direction}方位 获得${data.benefit}`);
+                }
+            }
+
+            // 记录状态变化
+            logStatusChange(playerId, statusType, oldValue, newValue, reason = '') {
+                const player = this.players[playerId];
+                const playerName = player ? player.name : `玩家${playerId}`;
+                
+                const statusIcons = {
+                    'health': '❤️',
+                    'energy': '⚡',
+                    'dao': '🌟',
+                    'position': '📍'
+                };
+                
+                const icon = statusIcons[statusType] || '📊';
+                const change = newValue - oldValue;
+                const changeText = change > 0 ? `+${change}` : `${change}`;
+                
+                let message = `${icon} ${playerName} ${this.getStatusName(statusType)}变化：${oldValue} → ${newValue} (${changeText})`;
+                
+                // 添加详细的变化原因
+                const detailedReason = this.getDetailedChangeReason(statusType, change, reason);
+                if (detailedReason) {
+                    message += ` - ${detailedReason}`;
+                }
+                
+                // 添加状态评估
+                const statusAssessment = this.getStatusAssessment(statusType, newValue);
+                if (statusAssessment) {
+                    message += ` [${statusAssessment}]`;
+                }
+                
+                // 记录到对应玩家的日志中
+                this.logAction(playerId, message);
+            }
+
+            // 获取详细的变化原因
+            getDetailedChangeReason(statusType, change, originalReason) {
+                const reasons = [];
+                
+                if (originalReason) {
+                    reasons.push(originalReason);
+                }
+                
+                // 根据状态类型和变化量添加具体原因
+                if (statusType === 'health') {
+                    if (change > 0) {
+                        reasons.push('恢复效果');
+                    } else if (change < 0) {
+                        reasons.push('受到伤害');
+                    }
+                } else if (statusType === 'energy') {
+                    if (change > 0) {
+                        reasons.push('能量补充');
+                    } else if (change < 0) {
+                        reasons.push('技能消耗');
+                    }
+                } else if (statusType === 'dao') {
+                    if (change > 0) {
+                        reasons.push('修为提升');
+                    }
+                }
+                
+                return reasons.join('，');
+            }
+
+            // 获取状态评估
+            getStatusAssessment(statusType, value) {
+                if (statusType === 'health') {
+                    if (value >= 80) return '状态良好';
+                    if (value >= 50) return '状态一般';
+                    if (value >= 20) return '状态较差';
+                    return '危险状态';
+                } else if (statusType === 'energy') {
+                    if (value >= 70) return '能量充沛';
+                    if (value >= 40) return '能量适中';
+                    if (value >= 15) return '能量不足';
+                    return '能量枯竭';
+                }
+                return '';
+            }
+
+            // 获取状态名称
+            getStatusName(statusType) {
+                const names = {
+                    'health': '生命值',
+                    'energy': '能量',
+                    'dao': '道行',
+                    'position': '位置'
+                };
+                return names[statusType] || statusType;
+            }
+
+            // 记录卡牌选择
+            logCardSelection(playerId, skillType, player) {
+                const playerName = player ? player.name : `玩家${playerId}`;
+                const skillName = this.getSkillName(skillType);
+                
+                // 个性化前缀
+                const personalityPrefixes = {
+                    1: '🎮',
+                    2: '🧠', 
+                    3: '💚',
+                    4: '⚡'
+                };
+                
+                const prefix = personalityPrefixes[playerId] || '🎴';
+                let message = `${prefix} ${playerName} 选择技能卡【${skillName}】`;
+                
+                // 分析选择原因
+                const selectionReason = this.getCardSelectionReason(player, skillType);
+                if (selectionReason) {
+                    message += ` (${selectionReason})`;
+                }
+                
+                // 添加卡牌属性信息
+                const cardInfo = this.getCardInfo(skillType);
+                if (cardInfo) {
+                    message += ` - ${cardInfo}`;
+                }
+                
+                // 记录到对应玩家的日志中
+                this.logAction(playerId, message);
+                
+                // 记录剩余卡牌数量
+                const remaining = cardInventory.getRemaining(skillType);
+                this.logAction(playerId, `📦 卡牌库存：${skillName}剩余 ${remaining} 张`);
+            }
+
+            // 获取卡牌选择原因
+            getCardSelectionReason(player, skillType) {
+                if (!player) return '';
+                
+                const reasons = [];
+                
+                // 根据玩家状态分析选择原因
+                if (skillType === 'move') {
+                    if (player.health < 50) {
+                        reasons.push('寻求有利位置');
+                    } else {
+                        reasons.push('战略布局');
+                    }
+                } else if (skillType === 'attack') {
+                    if (player.energy > 60) {
+                        reasons.push('能量充足，主动出击');
+                    } else {
+                        reasons.push('战术需要');
+                    }
+                } else if (skillType === 'defend') {
+                    if (player.health < 40) {
+                        reasons.push('生命值较低，防御优先');
+                    } else {
+                        reasons.push('稳健策略');
+                    }
+                } else if (skillType === 'special') {
+                    if (player.energy > 70) {
+                        reasons.push('能量充沛，使用特技');
+                    } else {
+                        reasons.push('关键时刻');
+                    }
+                }
+                
+                return reasons.join('，');
+            }
+
+            // 记录真实卡牌使用
+            logRealCardUsage(playerId, card, player) {
+                const playerName = player ? player.name : `玩家${playerId}`;
+                
+                // 个性化前缀
+                const personalityPrefixes = {
+                    1: '🎮',
+                    2: '🧠', 
+                    3: '💚',
+                    4: '⚡'
+                };
+                
+                const prefix = personalityPrefixes[playerId] || '🎴';
+                let message = `${prefix} ${playerName} 打出【${card.name}】`;
+                
+                // 添加卡牌效果信息
+                if (card.effect) {
+                    message += ` - ${card.effect}`;
+                }
+                
+                // 添加卦象信息
+                if (card.gua) {
+                    message += ` (${card.gua}卦)`;
+                }
+                
+                // 记录到对应玩家的日志中
+                this.logAction(playerId, message);
+                
+                // 记录手牌状态
+                const currentPlayerId = `player${playerId}`;
+                const handSize = PlayerHands.getHandSize(currentPlayerId);
+                this.logAction(playerId, `🃏 当前手牌：${handSize}张`);
+            }
+
+            // 更新卡牌库存显示
+            updateCardInventoryDisplay() {
+                // 更新总体库存信息
+                const totalRemaining = CardInventory.getTotalRemaining();
+                const totalUsed = CardInventory.getTotalUsed();
+                
+                // 在界面上显示库存信息（如果有相应的元素）
+                const inventoryElement = document.getElementById('card-inventory');
+                if (inventoryElement) {
+                    inventoryElement.innerHTML = `
+                        <div class="inventory-info">
+                            <h4>📦 卡牌库存</h4>
+                            <p>剩余：${totalRemaining}张</p>
+                            <p>已用：${totalUsed}张</p>
+                            <div class="type-breakdown">
+                                <span>移动：${CardInventory.getRemaining('move')}张</span>
+                                <span>攻击：${CardInventory.getRemaining('attack')}张</span>
+                                <span>防御：${CardInventory.getRemaining('defend')}张</span>
+                                <span>特技：${CardInventory.getRemaining('special')}张</span>
+                            </div>
+                        </div>
+                    `;
+                }
+                
+                // 记录到当前玩家日志
+                this.logAction(this.currentPlayer, `📊 库存更新：剩余${totalRemaining}张，已用${totalUsed}张`);
+                
+                // 更新界面上的卡牌数量显示
+                updateCardCounts();
+            }
+
+            // 获取卡牌信息
+            getCardInfo(skillType) {
+                const cardData = {
+                    'move': { cost: '10能量', effect: '位置移动+属性加成' },
+                    'attack': { cost: '20能量', effect: '造成伤害+战斗优势' },
+                    'defend': { cost: '15能量', effect: '防御提升+状态保护' },
+                    'special': { cost: '30能量', effect: '特殊效果+强力加成' }
+                };
+                
+                const data = cardData[skillType];
+                if (data) {
+                    return `消耗${data.cost}，${data.effect}`;
+                }
+                return '';
+            }
+
+            // 获取技能名称
+            getSkillName(skillType) {
+                const skillNames = {
+                    'move': '移动',
+                    'attack': '攻击',
+                    'defend': '防御',
+                    'special': '特技'
+                };
+                return skillNames[skillType] || skillType;
+            }
+
+            // 在八卦地图上显示卡牌
+            showCardOnMap(skillType, position, duration = 2000) {
+                const baguaContainer = document.querySelector('.bagua-container');
+                if (!baguaContainer) return;
+
+                // 创建卡牌元素
+                const cardElement = document.createElement('div');
+                cardElement.className = 'card-on-map';
+                cardElement.setAttribute('data-skill', skillType);
+
+                // 设置卡牌内容
+                const skillIcons = {
+                    'move': '🚶',
+                    'attack': '⚔️',
+                    'defend': '🛡️',
+                    'special': '✨'
+                };
+
+                const skillNames = {
+                    'move': '移动',
+                    'attack': '攻击',
+                    'defend': '防御',
+                    'special': '特技'
+                };
+
+                cardElement.innerHTML = `
+                    <div class="card-icon">${skillIcons[skillType] || '🎴'}</div>
+                    <div class="card-name">${skillNames[skillType] || '技能'}</div>
+                `;
+
+                // 获取目标位置的坐标
+                const targetPosition = this.getPositionElement(position);
+                if (!targetPosition) return;
+
+                const rect = targetPosition.getBoundingClientRect();
+                const containerRect = baguaContainer.getBoundingClientRect();
+
+                // 设置卡牌位置（相对于八卦容器）
+                cardElement.style.left = `${rect.left - containerRect.left + rect.width/2 - 30}px`;
+                cardElement.style.top = `${rect.top - containerRect.top + rect.height/2 - 40}px`;
+
+                // 添加到八卦容器
+                baguaContainer.appendChild(cardElement);
+
+                // 显示动画
+                setTimeout(() => {
+                    cardElement.classList.add('show');
+                }, 50);
+
+                // 添加光效
+                this.addCardEffect(position);
+
+                // 自动隐藏
+                setTimeout(() => {
+                    cardElement.classList.add('hide');
+                    setTimeout(() => {
+                        if (cardElement.parentNode) {
+                            cardElement.parentNode.removeChild(cardElement);
+                        }
+                    }, 300);
+                }, duration);
+            }
+
+            // 添加卡牌使用光效
+            addCardEffect(position) {
+                const baguaContainer = document.querySelector('.bagua-container');
+                const targetPosition = this.getPositionElement(position);
+                if (!baguaContainer || !targetPosition) return;
+
+                const effectElement = document.createElement('div');
+                effectElement.className = 'card-effect';
+
+                const rect = targetPosition.getBoundingClientRect();
+                const containerRect = baguaContainer.getBoundingClientRect();
+
+                effectElement.style.left = `${rect.left - containerRect.left + rect.width/2 - 50}px`;
+                effectElement.style.top = `${rect.top - containerRect.top + rect.height/2 - 50}px`;
+
+                baguaContainer.appendChild(effectElement);
+
+                // 动画结束后移除元素
+                setTimeout(() => {
+                    if (effectElement.parentNode) {
+                        effectElement.parentNode.removeChild(effectElement);
+                    }
+                }, 1000);
+            }
+
+            // 获取位置对应的DOM元素
+            getPositionElement(position) {
+                // 支持数字和字符串位置
+                const positionMap = {
+                    // 数字位置映射
+                    0: '.bagua-position[data-position="center"]', // 中心
+                    1: '.bagua-position[data-position="xun"]',    // 巽
+                    2: '.bagua-position[data-position="li"]',     // 离
+                    3: '.bagua-position[data-position="kun"]',    // 坤
+                    4: '.bagua-position[data-position="dui"]',    // 兑
+                    5: '.bagua-position[data-position="qian"]',   // 乾
+                    6: '.bagua-position[data-position="kan"]',    // 坎
+                    7: '.bagua-position[data-position="gen"]',    // 艮
+                    8: '.bagua-position[data-position="zhen"]',   // 震
+                    // 字符串位置映射
+                    'center': '.bagua-position[data-position="center"]',
+                    'xun': '.bagua-position[data-position="xun"]',
+                    'li': '.bagua-position[data-position="li"]',
+                    'kun': '.bagua-position[data-position="kun"]',
+                    'dui': '.bagua-position[data-position="dui"]',
+                    'qian': '.bagua-position[data-position="qian"]',
+                    'kan': '.bagua-position[data-position="kan"]',
+                    'gen': '.bagua-position[data-position="gen"]',
+                    'zhen': '.bagua-position[data-position="zhen"]'
+                };
+
+                const selector = positionMap[position];
+                return selector ? document.querySelector(selector) : null;
+            }
+
+            addLogEntry(playerId, action, isSystem = false, logType = 'default') {
+                const log = document.getElementById(`player${playerId}-log`);
+                const entry = document.createElement('div');
+                
+                // 确定日志类型
+                let entryType = 'default';
+                if (isSystem) {
+                    entryType = 'system';
+                } else if (action.includes('⚡') && (action.includes('使用') || action.includes('技能'))) {
+                    entryType = 'skill';
+                } else if (action.includes('❤️') || action.includes('⚡') || action.includes('📊')) {
+                    entryType = 'status';
+                    if (action.includes('→') && action.includes('-')) {
+                        entryType += ' negative';
+                    }
+                } else if (action.includes('🚶') || action.includes('移动')) {
+                    entryType = 'movement';
+                } else if (action.includes('⚔️') || action.includes('攻击') || action.includes('伤害')) {
+                    entryType = 'combat';
+                } else if (action.includes('🔧') || action.includes('系统')) {
+                    entryType = 'system';
+                }
+                
+                // 设置基础类名
+                entry.className = `log-entry ${entryType} recent new`;
+                
+                // 创建结构化内容
+                const timeSpan = document.createElement('span');
+                timeSpan.className = 'log-time';
+                timeSpan.textContent = new Date().toLocaleTimeString();
+                
+                const contentSpan = document.createElement('span');
+                contentSpan.className = 'log-content';
+                
+                // 根据类型格式化内容
+                if (entryType === 'skill') {
+                    this.formatSkillLog(contentSpan, action);
+                } else if (entryType.includes('status')) {
+                    this.formatStatusLog(contentSpan, action);
+                } else if (entryType === 'movement') {
+                    this.formatMovementLog(contentSpan, action);
+                } else if (entryType === 'combat') {
+                    this.formatCombatLog(contentSpan, action);
+                } else {
+                    contentSpan.textContent = action;
+                }
+                
+                entry.appendChild(timeSpan);
+                entry.appendChild(document.createTextNode(': '));
+                entry.appendChild(contentSpan);
+                
+                // 移除之前的recent类
+                const oldRecent = log.querySelector('.log-entry.recent');
+                if (oldRecent && oldRecent !== entry) {
+                    oldRecent.classList.remove('recent');
+                }
+                
+                log.appendChild(entry);
+                
+                // 添加动画效果
+                setTimeout(() => {
+                    entry.classList.remove('new');
+                }, 300);
+                
+                // 保持日志滚动到底部
+                log.scrollTop = log.scrollHeight;
+                
+                // 限制日志条目数量
+                const entries = log.querySelectorAll('.log-entry');
+                if (entries.length > 12) {
+                    entries[0].remove();
+                }
+            }
+
+            // 格式化技能日志
+            formatSkillLog(container, action) {
+                const parts = action.split('（');
+                if (parts.length > 1) {
+                    const skillPart = parts[0];
+                    const effectPart = parts[1].replace('）', '');
+                    
+                    const skillSpan = document.createElement('span');
+                    skillSpan.className = 'skill-name';
+                    skillSpan.textContent = skillPart;
+                    
+                    const effectSpan = document.createElement('span');
+                    effectSpan.className = 'effects';
+                    effectSpan.textContent = ` (${effectPart})`;
+                    
+                    container.appendChild(skillSpan);
+                    container.appendChild(effectSpan);
+                } else {
+                    container.textContent = action;
+                }
+            }
+
+            // 格式化状态日志
+            formatStatusLog(container, action) {
+                const parts = action.split('：');
+                if (parts.length > 1) {
+                    const namePart = parts[0];
+                    const valuePart = parts[1];
+                    
+                    const nameSpan = document.createElement('span');
+                    nameSpan.className = 'status-change';
+                    nameSpan.textContent = namePart + '：';
+                    
+                    const valueSpan = document.createElement('span');
+                    valueSpan.className = 'status-value';
+                    valueSpan.textContent = valuePart;
+                    
+                    container.appendChild(nameSpan);
+                    container.appendChild(valueSpan);
+                } else {
+                    container.textContent = action;
+                }
+            }
+
+            // 格式化移动日志
+            formatMovementLog(container, action) {
+                const positionRegex = /【([^】]+)】/g;
+                let formattedAction = action;
+                let match;
+                
+                while ((match = positionRegex.exec(action)) !== null) {
+                    const positionSpan = `<span class="position">${match[1]}</span>`;
+                    formattedAction = formattedAction.replace(match[0], positionSpan);
+                }
+                
+                container.innerHTML = formattedAction;
+            }
+
+            // 格式化战斗日志
+            formatCombatLog(container, action) {
+                // 查找伤害数值
+                const damageRegex = /(\d+)/g;
+                let formattedAction = action;
+                let match;
+                
+                while ((match = damageRegex.exec(action)) !== null) {
+                    const damageSpan = `<span class="damage">${match[1]}</span>`;
+                    formattedAction = formattedAction.replace(match[0], damageSpan);
+                }
+                
+                container.innerHTML = formattedAction;
+            }
+        }
+
+        // 全局函数
+        let game;
+
+        function startFourPlayerDemo() {
+            game.startFourPlayerDemo();
+        }
+
+        function nextTurn() {
+            game.nextTurn();
+        }
+
+        function pauseGame() {
+            game.pauseGame();
+        }
+
+        function resetGame() {
+            game.resetGame();
+        }
+
+        function setAutoPlay(auto) {
+            game.setAutoPlay(auto);
+        }
+
+        function changeSpeed(speed) {
+            game.changeSpeed(speed);
+        }
+
+        function moveToPosition(position) {
+            if (game.isRunning && game.currentPlayer === 1) {
+                const oldPosition = game.players[1].position;
+                game.players[1].position = position;
+                game.movePlayerPiece(1, position);
+                
+                // 使用增强的移动日志记录
+                const effects = [];
+                const baguaEffect = game.baguaEffects[position];
+                if (baguaEffect) {
+                    effects.push(`${baguaEffect.name}位加成`);
+                }
+                
+                game.logMovementAction(1, oldPosition, position, effects);
+                game.updatePlayerInfo(1);
+            }
+        }
+
+        function moveToCenter() {
+            moveToPosition('center');
+        }
+
+        // 真实卡牌选择函数
+        function selectSkill(skillType) {
+            if (!game || !game.isRunning) {
+                alert('游戏未开始！');
+                return;
+            }
+            
+            const currentPlayerId = `player${game.currentPlayer}`;
+            const playerHand = PlayerHands.getHand(currentPlayerId);
+            
+            // 查找玩家手牌中指定类型的卡牌
+            const availableCards = playerHand.filter(card => card.type === skillType);
+            
+            if (availableCards.length === 0) {
+                alert(`手牌中没有${getSkillName(skillType)}类型的卡牌！`);
+                return;
+            }
+            
+            // 如果有多张同类型卡牌，选择第一张（后续可以扩展为让玩家选择）
+            const selectedCard = availableCards[0];
+            const cardIndex = playerHand.indexOf(selectedCard);
+            
+            // 打出卡牌
+            const playedCard = PlayerHands.playCard(currentPlayerId, cardIndex);
+            
+            if (playedCard) {
+                // 移除之前选中的卡牌
+                document.querySelectorAll('.skill-card').forEach(card => {
+                    card.classList.remove('selected');
+                });
+                
+                // 选中当前卡牌
+                document.querySelector(`[data-skill="${skillType}"]`).classList.add('selected');
+                
+                game.selectedSkill = skillType;
+                game.selectedCard = playedCard;
+                
+                // 记录详细的卡牌使用信息
+                const currentPlayer = game.players[game.currentPlayer];
+                if (currentPlayer) {
+                    game.logRealCardUsage(game.currentPlayer, playedCard, currentPlayer);
+                    
+                    // 在八卦地图上显示选中的卡牌
+                    game.showCardOnMap(skillType, currentPlayer.position, 1500);
+                    
+                    // 抽一张新卡补充手牌
+                    const newCard = PlayerHands.drawCard(currentPlayerId);
+                    if (newCard) {
+                        game.logAction(game.currentPlayer, `🎴 抽取新卡：${newCard.name}`);
+                    }
+                    
+                    // 更新卡牌库存显示
+                    game.updateCardInventoryDisplay();
+                }
+            }
+        }
+
+        function getSkillName(skillType) {
+            const skillNames = {
+                move: '移动',
+                attack: '攻击',
+                defend: '防御',
+                special: '特技'
+            };
+            return skillNames[skillType] || skillType;
+        }
+
+        // 全局卡牌库存管理系统
+        const CardInventory = {
+            // 具体的卡牌数据 - 基于64卦系统
+            cardDatabase: {
+                move: [
+                    { id: 'qian_move', name: '乾·天行健', gua: '乾', effect: '移动+2格，获得5点能量', power: 3 },
+                    { id: 'kun_move', name: '坤·厚德载物', gua: '坤', effect: '移动+1格，获得10点生命', power: 2 },
+                    { id: 'zhen_move', name: '震·雷动九天', gua: '震', effect: '移动+3格，震慑敌人', power: 4 },
+                    { id: 'xun_move', name: '巽·风行草偃', gua: '巽', effect: '移动+2格，可穿越障碍', power: 3 },
+                    { id: 'kan_move', name: '坎·水流不息', gua: '坎', effect: '移动+2格，恢复5点能量', power: 3 },
+                    { id: 'li_move', name: '离·火光照耀', gua: '离', effect: '移动+1格，照亮周围', power: 2 },
+                    { id: 'gen_move', name: '艮·山止如岳', gua: '艮', effect: '移动+1格，获得防御加成', power: 2 },
+                    { id: 'dui_move', name: '兑·泽润万物', gua: '兑', effect: '移动+2格，治疗5点生命', power: 3 }
+                ],
+                attack: [
+                    { id: 'qian_attack', name: '乾·龙战于野', gua: '乾', effect: '造成25点伤害', power: 5 },
+                    { id: 'kun_attack', name: '坤·地裂山崩', gua: '坤', effect: '造成20点伤害，降低敌人防御', power: 4 },
+                    { id: 'zhen_attack', name: '震·雷霆万钧', gua: '震', effect: '造成30点伤害，有眩晕效果', power: 6 },
+                    { id: 'xun_attack', name: '巽·风卷残云', gua: '巽', effect: '造成15点伤害，连击2次', power: 4 },
+                    { id: 'kan_attack', name: '坎·水淹七军', gua: '坎', effect: '造成20点伤害，减速敌人', power: 4 },
+                    { id: 'li_attack', name: '离·烈火焚天', gua: '离', effect: '造成22点伤害，持续燃烧', power: 5 },
+                    { id: 'gen_attack', name: '艮·山崩地裂', gua: '艮', effect: '造成28点伤害，范围攻击', power: 5 },
+                    { id: 'dui_attack', name: '兑·泽国千里', gua: '兑', effect: '造成18点伤害，恢复自身生命', power: 4 }
+                ],
+                defend: [
+                    { id: 'qian_defend', name: '乾·金刚不坏', gua: '乾', effect: '获得20点护盾，反弹伤害', power: 4 },
+                    { id: 'kun_defend', name: '坤·大地之盾', gua: '坤', effect: '获得25点护盾，恢复生命', power: 5 },
+                    { id: 'zhen_defend', name: '震·雷电护体', gua: '震', effect: '获得15点护盾，电击攻击者', power: 3 },
+                    { id: 'xun_defend', name: '巽·风墙护身', gua: '巽', effect: '获得18点护盾，偏转攻击', power: 4 },
+                    { id: 'kan_defend', name: '坎·水镜防御', gua: '坎', effect: '获得20点护盾，吸收能量', power: 4 },
+                    { id: 'li_defend', name: '离·火焰屏障', gua: '离', effect: '获得16点护盾，灼烧攻击者', power: 3 },
+                    { id: 'gen_defend', name: '艮·山岳之固', gua: '艮', effect: '获得30点护盾，不可移动', power: 5 },
+                    { id: 'dui_defend', name: '兑·泽润护体', gua: '兑', effect: '获得22点护盾，持续治疗', power: 4 }
+                ],
+                special: [
+                    { id: 'qian_special', name: '乾·九五之尊', gua: '乾', effect: '全属性提升，获得王者光环', power: 6 },
+                    { id: 'kun_special', name: '坤·母仪天下', gua: '坤', effect: '治疗所有友军，获得护佑', power: 5 },
+                    { id: 'zhen_special', name: '震·惊天动地', gua: '震', effect: '范围震慑，重置技能冷却', power: 5 },
+                    { id: 'xun_special', name: '巽·无孔不入', gua: '巽', effect: '穿透所有防御，必中攻击', power: 4 },
+                    { id: 'kan_special', name: '坎·深不可测', gua: '坎', effect: '隐身3回合，下次攻击暴击', power: 4 },
+                    { id: 'li_special', name: '离·光明普照', gua: '离', effect: '照亮全场，驱散负面效果', power: 3 },
+                    { id: 'gen_special', name: '艮·稳如泰山', gua: '艮', effect: '免疫所有控制，获得坚韧', power: 4 },
+                    { id: 'dui_special', name: '兑·和谐共生', gua: '兑', effect: '与友军共享生命和能量', power: 5 }
+                ]
+            },
+            
+            // 卡牌池 - 存储所有可用的卡牌实例
+            cardPool: [],
+            
+            // 已使用的卡牌
+            usedCards: [],
+            
+            // 初始化卡牌池
+            init: function() {
+                this.cardPool = [];
+                this.usedCards = [];
+                
+                // 为每种类型创建8张不同的卡牌，每张卡牌重复8次（8×8=64张每类型）
+                Object.keys(this.cardDatabase).forEach(type => {
+                    for (let i = 0; i < 8; i++) { // 8种不同的卡牌
+                        for (let j = 0; j < 8; j++) { // 每种重复8次
+                            const cardTemplate = this.cardDatabase[type][i];
+                            const card = {
+                                ...cardTemplate,
+                                uniqueId: `${cardTemplate.id}_${i}_${j}`,
+                                type: type,
+                                index: this.cardPool.length
+                            };
+                            this.cardPool.push(card);
+                        }
+                    }
+                });
+                
+                // 洗牌
+                this.shuffleDeck();
+            },
+            
+            // 洗牌
+            shuffleDeck: function() {
+                for (let i = this.cardPool.length - 1; i > 0; i--) {
+                    const j = Math.floor(Math.random() * (i + 1));
+                    [this.cardPool[i], this.cardPool[j]] = [this.cardPool[j], this.cardPool[i]];
+                }
+            },
+            
+            // 发牌 - 从卡牌池中抽取指定数量的卡牌
+            dealCards: function(count) {
+                const dealtCards = [];
+                for (let i = 0; i < count && this.cardPool.length > 0; i++) {
+                    dealtCards.push(this.cardPool.pop());
+                }
+                return dealtCards;
+            },
+            
+            // 发指定类型的卡牌
+            dealCardOfType: function(type) {
+                const availableCards = this.cardPool.filter(card => card.type === type);
+                if (availableCards.length > 0) {
+                    const randomIndex = Math.floor(Math.random() * availableCards.length);
+                    const selectedCard = availableCards[randomIndex];
+                    
+                    // 从卡牌池中移除
+                    const poolIndex = this.cardPool.indexOf(selectedCard);
+                    if (poolIndex > -1) {
+                        this.cardPool.splice(poolIndex, 1);
+                        return selectedCard;
+                    }
+                }
+                return null;
+            },
+            
+            // 使用卡牌
+            useCard: function(card) {
+                this.usedCards.push(card);
+                return true;
+            },
+            
+            // 重置库存
+            reset: function() {
+                this.init();
+            },
+            
+            // 获取剩余数量（按类型）
+            getRemaining: function(type) {
+                return this.cardPool.filter(card => card.type === type).length;
+            },
+            
+            // 获取总剩余数量
+            getTotalRemaining: function() {
+                return this.cardPool.length;
+            },
+
+            // 获取已使用总数
+            getTotalUsed: function() {
+                return this.usedCards.length;
+            },
+
+            // 获取初始总数
+            getTotalInitial: function() {
+                return 256; // 64卦 × 4种类型
+            },
+            
+            // 按类型获取已使用卡牌数量
+            getUsedByType: function(type) {
+                return this.usedCards.filter(card => card.type === type).length;
+            }
+        };
+
+        // 玩家手牌管理系统
+        const PlayerHands = {
+            // 玩家手牌
+            hands: {
+                player1: [],
+                player2: []
+            },
+            
+            // 手牌上限
+            maxHandSize: 7,
+            
+            // 初始化手牌
+            init: function() {
+                this.hands.player1 = [];
+                this.hands.player2 = [];
+                
+                // 为每个玩家发初始手牌
+                this.dealInitialHands();
+            },
+            
+            // 发初始手牌
+            dealInitialHands: function() {
+                // 每个玩家发5张初始手牌
+                for (let i = 0; i < 5; i++) {
+                    const card1 = CardInventory.dealCards(1)[0];
+                    const card2 = CardInventory.dealCards(1)[0];
+                    
+                    if (card1) this.hands.player1.push(card1);
+                    if (card2) this.hands.player2.push(card2);
+                }
+            },
+            
+            // 抽牌
+            drawCard: function(playerId) {
+                if (this.hands[playerId].length >= this.maxHandSize) {
+                    return null; // 手牌已满
+                }
+                
+                const card = CardInventory.dealCards(1)[0];
+                if (card) {
+                    this.hands[playerId].push(card);
+                    return card;
+                }
+                return null;
+            },
+            
+            // 打出卡牌
+            playCard: function(playerId, cardIndex) {
+                if (cardIndex >= 0 && cardIndex < this.hands[playerId].length) {
+                    const card = this.hands[playerId].splice(cardIndex, 1)[0];
+                    CardInventory.useCard(card);
+                    return card;
+                }
+                return null;
+            },
+            
+            // 获取玩家手牌
+            getHand: function(playerId) {
+                return this.hands[playerId] || [];
+            },
+            
+            // 获取手牌数量
+            getHandSize: function(playerId) {
+                return this.hands[playerId] ? this.hands[playerId].length : 0;
+            },
+            
+            // 重置手牌
+            reset: function() {
+                this.init();
+            }
+        };
+
+        // 更新剩余牌数显示
+        function updateCardCounts() {
+            // 使用库存管理系统获取当前数据
+            const cardTypes = ['move', 'attack', 'defend', 'special'];
+            
+            // 更新各技能卡牌的剩余数量
+            cardTypes.forEach(skill => {
+                const remainingElement = document.querySelector(`[data-skill="${skill}"] .card-remaining`);
+                if (remainingElement) {
+                    const remaining = CardInventory.getRemaining(skill);
+                    remainingElement.textContent = `剩余: ${remaining}`;
+                    
+                    // 如果卡牌用完，添加视觉提示
+                    const cardElement = remainingElement.closest('.skill-card');
+                    if (remaining === 0) {
+                        cardElement.style.opacity = '0.5';
+                        cardElement.style.filter = 'grayscale(50%)';
+                    } else {
+                        cardElement.style.opacity = '1';
+                        cardElement.style.filter = 'none';
+                    }
+                }
+            });
+
+            // 更新总卡牌数
+            const totalCards = CardInventory.getTotalRemaining();
+            const totalElement = document.querySelector('.card-count');
+            if (totalElement) {
+                const usedCards = CardInventory.getTotalUsed();
+                const totalInitial = CardInventory.getTotalInitial();
+                totalElement.innerHTML = `
+                    <div class="card-count-detail">
+                        <div>📦 剩余: ${totalCards} 张</div>
+                        <div>🎴 已用: ${usedCards} 张</div>
+                        <div>📚 总计: ${totalInitial} 张 (64卦×4类型)</div>
+                    </div>
+                `;
+            }
+        }
+
+        // 显示卡牌图鉴
+        function showCardGallery() {
+            const modal = document.getElementById('cardGalleryModal');
+            if (modal) {
+                modal.style.display = 'block';
+                // 添加打开动画
+                setTimeout(() => {
+                    modal.style.opacity = '1';
+                }, 10);
+            }
+        }
+
+        // 关闭卡牌图鉴
+        function closeCardGallery() {
+            const modal = document.getElementById('cardGalleryModal');
+            if (modal) {
+                modal.style.opacity = '0';
+                setTimeout(() => {
+                    modal.style.display = 'none';
+                }, 300);
+            }
+        }
+        
+        // 重置卡牌库存
+        function resetCardInventory() {
+            if (confirm('确定要重置所有卡牌库存吗？这将恢复所有卡牌到初始数量。')) {
+                CardInventory.reset();
+                updateCardCounts();
+                
+                // 显示重置成功的提示
+                const notification = document.createElement('div');
+                notification.style.cssText = `
+                    position: fixed;
+                    top: 20px;
+                    right: 20px;
+                    background: linear-gradient(135deg, #27ae60, #2ecc71);
+                    color: white;
+                    padding: 15px 20px;
+                    border-radius: 8px;
+                    box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+                    z-index: 10000;
+                    font-weight: bold;
+                    animation: slideIn 0.3s ease-out;
+                `;
+                notification.textContent = '✅ 卡牌库存已重置！';
+                document.body.appendChild(notification);
+                
+                // 3秒后自动移除提示
+                setTimeout(() => {
+                    notification.style.animation = 'slideOut 0.3s ease-in';
+                    setTimeout(() => {
+                        if (notification.parentNode) {
+                            notification.parentNode.removeChild(notification);
+                        }
+                    }, 300);
+                }, 3000);
+            }
+        }
+
+        // 切换图鉴标签页
+        function showGalleryTab(tabName) {
+            // 隐藏所有标签页内容
+            const allTabs = document.querySelectorAll('.gallery-tab-content');
+            allTabs.forEach(tab => tab.classList.remove('active'));
+
+            // 移除所有按钮的激活状态
+            const allButtons = document.querySelectorAll('.tab-btn');
+            allButtons.forEach(btn => btn.classList.remove('active'));
+
+            // 显示选中的标签页
+            const targetTab = document.getElementById(`${tabName}-cards`);
+            if (targetTab) {
+                targetTab.classList.add('active');
+            }
+
+            // 激活对应的按钮
+            const targetButton = event.target;
+            if (targetButton) {
+                targetButton.classList.add('active');
+            }
+        }
+
+        // 点击模态窗口外部关闭
+        window.onclick = function(event) {
+            const modal = document.getElementById('cardGalleryModal');
+            if (event.target === modal) {
+                closeCardGallery();
+            }
+        }
+
+        // 初始化游戏
+        document.addEventListener('DOMContentLoaded', function() {
+            game = new TianJiBianGame();
+            // 初始化卡牌库存系统
+            CardInventory.init();
+            // 初始化卡牌计数显示
+            updateCardCounts();
+            
+            // 添加卡牌使用事件监听器
+            document.querySelectorAll('.skill-card').forEach(card => {
+                card.addEventListener('click', function() {
+                    const skillType = this.getAttribute('data-skill');
+                    if (skillType && CardInventory.useCard(skillType)) {
+                        updateCardCounts();
+                        // 这里可以添加卡牌使用的视觉反馈
+                        this.style.transform = 'scale(0.95)';
+                        setTimeout(() => {
+                            this.style.transform = 'scale(1)';
+                        }, 150);
+                    }
+                });
+            });
+        });
+    </script>
+</body>
+</html>
