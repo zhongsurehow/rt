@@ -8,14 +8,18 @@
 
 ## 🚀 快速开始
 
-### 立即体验
+### 立即体验 (Web 版本)
 ```bash
-# 进入游戏目录
-cd game_prototype
+# 1. 进入Web应用目录
+cd game_prototype/web_version
 
-# 运行游戏
-python main.py
+# 2. 安装依赖 (如果尚未安装)
+pip install -r requirements.txt
+
+# 3. 运行Web服务器
+uvicorn app:app --reload --port 9000
 ```
+然后，在浏览器中打开 `http://localhost:9000` 即可开始游戏。
 
 ### 新手指南
 - 📖 [15分钟快速入门](QUICK_START.md) - 快速上手游戏
@@ -51,48 +55,21 @@ python main.py
 ├── 📖 QUICK_START.md         # 15分钟快速入门
 ├── 📚 GAME_RULES.md          # 完整游戏规则
 ├── 🔧 DEVELOPMENT_GUIDE.md   # 开发者指南
-├── 🎯 YIJING_GUIDE.md        # 易经知识指南
 └── 🎮 game_prototype/        # 游戏核心代码
-    ├── main.py               # 游戏主入口
-    ├── 核心系统/
-    │   ├── game_state.py     # 游戏状态管理
-    │   ├── yijing_mechanics.py # 易经哲学机制
-    │   └── actions.py        # 基础游戏动作
-    ├── 增强系统/
-    │   ├── wisdom_system.py  # 🧠 智慧系统
-    │   ├── tutorial_system.py # 📚 教学系统
-    │   ├── achievement_system.py # 🏆 成就系统
-    │   └── enhanced_cards.py # 🃏 增强卡牌
-    └── 测试演示/
-        ├── interactive_demo.py # 交互式演示
-        └── test_*.py         # 各种测试文件
+    ├── core/                 # 核心引擎、接口和基础类型
+    │   ├── game_engine.py
+    │   └── interfaces.py
+    ├── web_version/          # FastAPI Web应用
+    │   ├── app.py            # 后端主程序
+    │   ├── static/           # 静态文件 (CSS, JS, JSON数据)
+    │   └── templates/        # 前端HTML模板 (Vue.js)
+    ├── models.py             # Pydantic数据模型
+    └── game_state.py         # 游戏状态类实现
 ```
 
 ## 🎮 游戏演示
 
-### 基础游戏
-```bash
-# 标准游戏模式
-python game_prototype/main.py
-
-# 交互式演示（推荐新手）
-python interactive_demo.py
-
-# 完整功能演示
-python complete_demo.py
-```
-
-### 测试验证
-```bash
-# 运行所有测试
-python test_game_features.py
-
-# 性能测试
-python test_optimized_game.py
-
-# 平衡性测试
-python game_prototype/test_enhanced_strategies.py
-```
+项目已重构为Web应用。请按照 **[快速开始](#-快速开始)** 部分的指引运行服务器，然后在浏览器中体验游戏。所有旧的命令行演示脚本均已移除。
 
 ## 📖 核心玩法
 
@@ -118,8 +95,8 @@ python game_prototype/test_enhanced_strategies.py
 ## 🔧 开发者信息
 
 ### 📋 系统要求
-- **Python**: 3.7+ 
-- **依赖**: 无外部依赖
+- **Python**: 3.11+
+- **依赖**: FastAPI, Uvicorn, Python-Multipart, Jinja2 (详见 `requirements.txt`)
 - **平台**: Windows/Linux/macOS
 
 ### 🛠️ 开发工具
