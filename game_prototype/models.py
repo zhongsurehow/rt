@@ -43,5 +43,5 @@ class GameState(BaseModel):
     ganzhi: str = "甲子"
     jieqi: str = "立春"
     discard_pile: List[str] = Field(default_factory=list)
-    game_log: List[str] = Field(default_factory=list)
+    logs: List[Dict[str, Any]] = Field(default_factory=list)
     status: str = "waiting_for_players"

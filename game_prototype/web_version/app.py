@@ -257,7 +257,7 @@ async def websocket_endpoint(websocket: WebSocket, game_id: str, player_id: str)
         "type": "player_joined",
         "player": player.model_dump(),
     })
-    
+
     await websocket.send_text(json.dumps(
         {"type": "game_state", "game_state": _serialize_game_state(engine.get_game_state())}
     ))
@@ -269,13 +269,46 @@ async def websocket_endpoint(websocket: WebSocket, game_id: str, player_id: str)
             
             action_type_str = message.get("action_type")
             action_data = message.get("data", {})
+
+            # Handle non-game-engine actions like chat
+            if action_type_str and action_type_str.lower() == 'chat':
+                chat_message = action_data.get("message", "")
+                if chat_message:
+                    logger.info(f"Player {player.name} sent chat: {chat_message}")
+                    chat_payload = {
+                        "type": "chat_message",
+                        "data": {
+                            "id": str(uuid.uuid4()),
+                            "player": player.name,
+                            "text": chat_message,
+                            "timestamp": datetime.utcnow().isoformat() + "Z" # Add Z for UTC
+                        }
+                    }
+                    await broadcast_to_game(game_id, chat_payload)
+                continue # Skip engine processing for chat
             
             try:
+                # Ensure action_type_str is not None before upper()
+                if not action_type_str:
+                    logger.warning("Received message without action_type")
+                    continue
                 action_type = ActionType[action_type_str.upper()]
                 action = TestAction(player_id, action_type, action_data)
 
                 result = engine.process_player_action(player_id, action)
                 logger.info(f"Action result: {result}")
+
+                # Add a log entry for the action
+                game_state = engine.get_game_state()
+                log_entry = {
+                    "id": str(uuid.uuid4()),
+                    "timestamp": datetime.utcnow().isoformat() + "Z",
+                    "player_name": player.name,
+                    "action": action_type_str,
+                    "data": action_data,
+                    "result": result.message if result else "No result"
+                }
+                game_state.logs.append(log_entry)
 
             except (KeyError, AttributeError):
                 logger.error(f"Invalid action type received: {action_type_str}")

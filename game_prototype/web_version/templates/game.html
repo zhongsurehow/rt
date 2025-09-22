@@ -1035,14 +1035,12 @@
                                 <div class="bagua-symbol">☰</div>
                                 <div class="bagua-name">乾</div>
                                 <div class="bagua-element">天</div>
-                                <!-- 玩家角色显示 -->
-                                <div v-for="player in getPlayersAtPosition('乾')" :key="player.id" 
-                                     class="player-avatar" 
+                                <div v-for="player in getPlayersAtPosition('qian')" :key="player.id"
+                                     class="player-avatar"
                                      :class="{ 'current-player-position': isCurrentPlayer(player) }"
                                      :style="getPlayerAvatarStyle(player)"
-                                     :title="player.name + ' - ' + player.personality.name">
-                                    [[ player.personality.symbol ]]
-                                    <div class="player-position-indicator">[[ player.name ]]</div>
+                                     :title="player.name">
+                                    [[ player.name.charAt(0) ]]
                                 </div>
                             </div>
                             
@@ -1054,14 +1052,12 @@
                                 <div class="bagua-symbol">☱</div>
                                 <div class="bagua-name">兑</div>
                                 <div class="bagua-element">泽</div>
-                                <!-- 玩家角色显示 -->
-                                <div v-for="player in getPlayersAtPosition('兑')" :key="player.id" 
-                                     class="player-avatar" 
+                                <div v-for="player in getPlayersAtPosition('dui')" :key="player.id"
+                                     class="player-avatar"
                                      :class="{ 'current-player-position': isCurrentPlayer(player) }"
                                      :style="getPlayerAvatarStyle(player)"
-                                     :title="player.name + ' - ' + player.personality.name">
-                                    [[ player.personality.symbol ]]
-                                    <div class="player-position-indicator">[[ player.name ]]</div>
+                                     :title="player.name">
+                                    [[ player.name.charAt(0) ]]
                                 </div>
                             </div>
                             
@@ -1073,14 +1069,12 @@
                                 <div class="bagua-symbol">☲</div>
                                 <div class="bagua-name">离</div>
                                 <div class="bagua-element">火</div>
-                                <!-- 玩家角色显示 -->
-                                <div v-for="player in getPlayersAtPosition('离')" :key="player.id" 
-                                     class="player-avatar" 
+                                <div v-for="player in getPlayersAtPosition('li')" :key="player.id"
+                                     class="player-avatar"
                                      :class="{ 'current-player-position': isCurrentPlayer(player) }"
                                      :style="getPlayerAvatarStyle(player)"
-                                     :title="player.name + ' - ' + player.personality.name">
-                                    [[ player.personality.symbol ]]
-                                    <div class="player-position-indicator">[[ player.name ]]</div>
+                                     :title="player.name">
+                                    [[ player.name.charAt(0) ]]
                                 </div>
                             </div>
                             
@@ -1092,14 +1086,12 @@
                                 <div class="bagua-symbol">☳</div>
                                 <div class="bagua-name">震</div>
                                 <div class="bagua-element">雷</div>
-                                <!-- 玩家角色显示 -->
-                                <div v-for="player in getPlayersAtPosition('震')" :key="player.id" 
-                                     class="player-avatar" 
+                                <div v-for="player in getPlayersAtPosition('zhen')" :key="player.id"
+                                     class="player-avatar"
                                      :class="{ 'current-player-position': isCurrentPlayer(player) }"
                                      :style="getPlayerAvatarStyle(player)"
-                                     :title="player.name + ' - ' + player.personality.name">
-                                    [[ player.personality.symbol ]]
-                                    <div class="player-position-indicator">[[ player.name ]]</div>
+                                     :title="player.name">
+                                    [[ player.name.charAt(0) ]]
                                 </div>
                             </div>
                             
@@ -1111,14 +1103,12 @@
                                 <div class="bagua-symbol">☴</div>
                                 <div class="bagua-name">巽</div>
                                 <div class="bagua-element">风</div>
-                                <!-- 玩家角色显示 -->
-                                <div v-for="player in getPlayersAtPosition('巽')" :key="player.id" 
-                                     class="player-avatar" 
+                                <div v-for="player in getPlayersAtPosition('xun')" :key="player.id"
+                                     class="player-avatar"
                                      :class="{ 'current-player-position': isCurrentPlayer(player) }"
                                      :style="getPlayerAvatarStyle(player)"
-                                     :title="player.name + ' - ' + player.personality.name">
-                                    [[ player.personality.symbol ]]
-                                    <div class="player-position-indicator">[[ player.name ]]</div>
+                                     :title="player.name">
+                                    [[ player.name.charAt(0) ]]
                                 </div>
                             </div>
                             
@@ -1130,14 +1120,12 @@
                                 <div class="bagua-symbol">☵</div>
                                 <div class="bagua-name">坎</div>
                                 <div class="bagua-element">水</div>
-                                <!-- 玩家角色显示 -->
-                                <div v-for="player in getPlayersAtPosition('坎')" :key="player.id" 
-                                     class="player-avatar" 
+                                <div v-for="player in getPlayersAtPosition('kan')" :key="player.id"
+                                     class="player-avatar"
                                      :class="{ 'current-player-position': isCurrentPlayer(player) }"
                                      :style="getPlayerAvatarStyle(player)"
-                                     :title="player.name + ' - ' + player.personality.name">
-                                    [[ player.personality.symbol ]]
-                                    <div class="player-position-indicator">[[ player.name ]]</div>
+                                     :title="player.name">
+                                    [[ player.name.charAt(0) ]]
                                 </div>
                             </div>
                             
@@ -1149,14 +1137,12 @@
                                 <div class="bagua-symbol">☶</div>
                                 <div class="bagua-name">艮</div>
                                 <div class="bagua-element">山</div>
-                                <!-- 玩家角色显示 -->
-                                <div v-for="player in getPlayersAtPosition('艮')" :key="player.id" 
-                                     class="player-avatar" 
+                                <div v-for="player in getPlayersAtPosition('gen')" :key="player.id"
+                                     class="player-avatar"
                                      :class="{ 'current-player-position': isCurrentPlayer(player) }"
                                      :style="getPlayerAvatarStyle(player)"
-                                     :title="player.name + ' - ' + player.personality.name">
-                                    [[ player.personality.symbol ]]
-                                    <div class="player-position-indicator">[[ player.name ]]</div>
+                                     :title="player.name">
+                                    [[ player.name.charAt(0) ]]
                                 </div>
                             </div>
                             
@@ -1168,14 +1154,12 @@
                                 <div class="bagua-symbol">☷</div>
                                 <div class="bagua-name">坤</div>
                                 <div class="bagua-element">地</div>
-                                <!-- 玩家角色显示 -->
-                                <div v-for="player in getPlayersAtPosition('坤')" :key="player.id" 
-                                     class="player-avatar" 
+                                <div v-for="player in getPlayersAtPosition('kun')" :key="player.id"
+                                     class="player-avatar"
                                      :class="{ 'current-player-position': isCurrentPlayer(player) }"
                                      :style="getPlayerAvatarStyle(player)"
-                                     :title="player.name + ' - ' + player.personality.name">
-                                    [[ player.personality.symbol ]]
-                                    <div class="player-position-indicator">[[ player.name ]]</div>
+                                     :title="player.name">
+                                    [[ player.name.charAt(0) ]]
                                 </div>
                             </div>
                         </div>
@@ -1529,10 +1513,21 @@
                 <div class="mb-6">
                     <h3 class="text-white font-semibold mb-4">游戏日志</h3>
                     <div class="bg-white/10 rounded-lg p-4 h-48 overflow-y-auto">
-                        <div v-for="(log, index) in gameLogs" :key="index" 
-                             :class="['mb-1 text-sm', log.important ? 'text-yellow-300' : 'text-white/80']">
-                            <span class="text-white/50 text-xs">[[ formatTime(log.timestamp) ]]</span>
-                            <span class="ml-2">[[ log.message ]]</span>
+                        <div v-for="log in gameLogs" :key="log.id" class="text-sm mb-2 pb-2 border-b border-white/10 last:border-b-0">
+                            <div class="flex justify-between items-center">
+                                <p class="text-white/90">
+                                    <span class="font-bold text-yellow-400">[[ log.player_name ]]</span>
+                                    <span class="text-blue-300 ml-2">[[ log.action.toLowerCase().replace('_', ' ') ]]</span>
+                                </p>
+                                <span class="text-white/50 text-xs">[[ new Date(log.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) ]]</span>
+                            </div>
+                            <div v-if="log.data && log.data.card_id" class="text-white/70 text-xs mt-1">
+                                卡牌: [[ getCardName(log.data.card_id) || log.data.card_id ]]
+                                <span v-if="log.data.position !== undefined">, 位置: [[ log.data.position ]]</span>
+                            </div>
+                            <div v-if="log.result" class="text-green-300 text-xs mt-1">
+                                结果: [[ log.result ]]
+                            </div>
                         </div>
                         <div v-if="!gameLogs || gameLogs.length === 0" 
                              class="text-white/50 text-center py-8">
@@ -1546,8 +1541,9 @@
                     <h3 class="text-white font-semibold mb-4">聊天</h3>
                     <div class="bg-white/10 rounded-lg p-4">
                         <div class="h-32 overflow-y-auto mb-3 space-y-2">
-                            <div v-for="message in chatMessages" :key="message.id" class="text-sm">
-                                <span class="text-white/70">[[ message.player ]]:</span>
+                            <div v-for="message in chatMessages" :key="message.id" class="text-sm leading-relaxed">
+                                <span class="text-white/50 text-xs mr-2">[[ new Date(message.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) ]]</span>
+                                <span class="font-medium text-yellow-300">[[ message.player ]]:</span>
                                 <span class="text-white ml-1">[[ message.text ]]</span>
                             </div>
                         </div>
@@ -1828,6 +1824,12 @@
                     confirmDialog: { title: '', message: '', onConfirm: null },
                     actionHint: '',
                     hintTimeout: null,
+
+                    // Chat & Logs
+                    chatMessages: [],
+                    newMessage: '',
+                    gameLogs: [],
+                    playerActionRecords: [],
                 };
             },
             computed: {
@@ -1918,6 +1920,8 @@
                             case 'game_update':
                                 this.gameState = message.game_state || message.data;
                                 this.isLoading = false;
+                                // Assuming logs are part of the game state now
+                                this.gameLogs = this.gameState.logs || [];
                                 break;
                             case 'player_joined':
                                 this.gameState = message.game_state;
@@ -1928,6 +1932,13 @@
                                 if(this.gameState.players[message.player_id]) {
                                     this.gameState.players[message.player_id].online = false;
                                 }
+                                break;
+                            case 'chat_message':
+                                this.chatMessages.push(message.data);
+                                this.$nextTick(() => {
+                                    const chatBox = this.$el.querySelector('.h-32.overflow-y-auto');
+                                    if (chatBox) chatBox.scrollTop = chatBox.scrollHeight;
+                                });
                                 break;
                             case 'error':
                                 this.showFeedback(`错误: ${message.detail}`, 'error');
@@ -1993,6 +2004,15 @@
                         this.showFeedback('结束回合指令已发送', 'info', 1500);
                     });
                 },
+                surrender() {
+                     this.showConfirm('投降', '你确定要投降吗？这将立即结束游戏。', () => {
+                        this.sendAction('surrender');
+                        this.showFeedback('你已投降', 'info');
+                    }, 'danger');
+                },
+                leaveGame() {
+                    window.location.href = '/';
+                },
                 // UI and Feedback methods
                 showFeedback(message, type = 'info', duration = 3000) {
                     this.feedbackMessage = message;
@@ -2000,8 +2020,8 @@
                     if (this.feedbackTimeout) clearTimeout(this.feedbackTimeout);
                     this.feedbackTimeout = setTimeout(() => { this.feedbackMessage = ''; }, duration);
                 },
-                showConfirm(title, message, onConfirm) {
-                    this.confirmDialog = { title, message, onConfirm };
+                showConfirm(title, message, onConfirm, type = 'normal') {
+                    this.confirmDialog = { title, message, onConfirm, type, icon: type === 'danger' ? '⚠️' : '❓' };
                     this.showConfirmDialog = true;
                 },
                 executeConfirm() {
@@ -2018,6 +2038,49 @@
                     if (this.hintTimeout) clearTimeout(this.hintTimeout);
                     this.hintTimeout = setTimeout(() => { this.actionHint = ''; }, duration);
                 },
+                sendMessage() {
+                    if (this.newMessage.trim() && this.websocket && this.websocket.readyState === WebSocket.OPEN) {
+                        this.sendAction('chat', { message: this.newMessage.trim() });
+                        this.newMessage = '';
+                    } else if (!this.websocket || this.websocket.readyState !== WebSocket.OPEN) {
+                        this.showFeedback('无法发送消息，连接已断开', 'error');
+                    }
+                },
+                // Helper methods for displaying data
+                getCurrentPlayerName() {
+                    if (!this.gameState || !this.gameState.current_player_id) return 'N/A';
+                    const player = this.gameState.players[this.gameState.current_player_id];
+                    return player ? player.name : '未知玩家';
+                },
+                getCurrentRound() {
+                    return this.gameState?.turn || 'N/A';
+                },
+                getCurrentSeason() {
+                    return this.gameState?.season || 'N/A';
+                },
+                getCurrentWuxing() {
+                    // This is an example, assuming it comes from game state
+                    return this.gameState?.dominant_element || 'N/A';
+                },
+                getCurrentGanzhi() {
+                    return this.gameState?.ganzhi || 'N/A';
+                },
+                getCurrentJieqi() {
+                    return this.gameState?.jieqi || 'N/A';
+                },
+                getCurrentYinyang() {
+                    return this.gameState?.yinyang_state || '平衡';
+                },
+                getCurrentGameState() {
+                    return this.gameState?.status || '未知';
+                },
+                getCardName(cardId) {
+                    if (!this.allCards || this.allCards.length === 0) {
+                        return cardId; // Return ID if cards are not loaded
+                    }
+                    const card = this.allCards.find(c => c.id === cardId);
+                    return card ? card.name : cardId;
+                }
             }
         });
         
