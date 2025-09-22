@@ -782,10 +782,11 @@
                             </div>
                             <div>
                                 <div class="text-white font-medium">
-                                    <span v-if="currentPlayer">[[ currentPlayer.name || '玩家' ]]</span>
+                                    <span v-if="activePlayer">[[ activePlayer.name || '玩家' ]]</span>
+                                    <span v-else>等待玩家...</span>
                                 </div>
                                 <div class="text-white/70 text-sm">
-                                    <span v-if="gameState && currentPlayer && currentPlayer.id === gameState.current_player">你的回合</span>
+                                    <span v-if="isMyTurn">你的回合</span>
                                     <span v-else>等待中</span>
                                 </div>
                             </div>
@@ -796,28 +797,28 @@
                             <div>
                                 <div class="flex justify-between text-sm mb-1">
                                     <span class="text-white/70">气</span>
-                                    <span v-if="currentPlayer">[[ currentPlayer.qi || 0 ]]/100</span>
+                                    <span v-if="activePlayer">[[ activePlayer.qi || 0 ]]/100</span>
                                 </div>
                                 <div class="w-full bg-white/20 rounded-full h-2">
-                                    <div class="bg-blue-400 h-2 rounded-full" :style="{width: (currentPlayer?.qi || 0) + '%'}"></div>
+                                    <div class="bg-blue-400 h-2 rounded-full" :style="{width: (activePlayer?.qi || 0) + '%'}"></div>
                                 </div>
                             </div>
                             <div>
                                 <div class="flex justify-between text-sm mb-1">
                                     <span class="text-white/70">道</span>
-                                    <span v-if="currentPlayer">[[ currentPlayer.dao || 0 ]]/100</span>
+                                    <span v-if="activePlayer">[[ activePlayer.dao || 0 ]]/100</span>
                                 </div>
                                 <div class="w-full bg-white/20 rounded-full h-2">
-                                    <div class="bg-purple-400 h-2 rounded-full" :style="{width: (currentPlayer?.dao || 0) + '%'}"></div>
+                                    <div class="bg-purple-400 h-2 rounded-full" :style="{width: (activePlayer?.dao || 0) + '%'}"></div>
                                 </div>
                             </div>
                             <div>
                                 <div class="flex justify-between text-sm mb-1">
                                     <span class="text-white/70">诚</span>
-                                    <span v-if="currentPlayer">[[ currentPlayer.sincerity || 0 ]]/100</span>
+                                    <span v-if="activePlayer">[[ activePlayer.sincerity || 0 ]]/100</span>
                                 </div>
                                 <div class="w-full bg-white/20 rounded-full h-2">
-                                    <div class="bg-yellow-400 h-2 rounded-full" :style="{width: (currentPlayer?.sincerity || 0) + '%'}"></div>
+                                    <div class="bg-yellow-400 h-2 rounded-full" :style="{width: (activePlayer?.sincerity || 0) + '%'}"></div>
                                 </div>
                             </div>
                         </div>
@@ -826,8 +827,8 @@
                         <div class="mt-4 p-3 bg-white/5 rounded-lg">
                             <div class="text-white/70 text-sm mb-2">阴阳平衡</div>
                             <div class="text-white text-sm">
-                                阴: <span v-if="currentPlayer">[[ currentPlayer.yin || 0 ]]</span><br>
-                                阳: <span v-if="currentPlayer">[[ currentPlayer.yang || 0 ]]</span>
+                                阴: <span v-if="activePlayer">[[ activePlayer.yin || 0 ]]</span><br>
+                                阳: <span v-if="activePlayer">[[ activePlayer.yang || 0 ]]</span>
                             </div>
                         </div>
 
@@ -838,31 +839,31 @@
                                 <div class="text-center">
                                     <div class="w-8 h-8 bg-green-500 rounded-full mx-auto mb-1"></div>
                                     <div class="text-white/70 text-xs">
-                                        <span v-if="currentPlayer && currentPlayer.elements">[[ currentPlayer.elements.wood || 0 ]]</span>
+                                        <span v-if="activePlayer && activePlayer.elements">[[ activePlayer.elements.wood || 0 ]]</span>
                                     </div>
                                 </div>
                                 <div class="text-center">
                                     <div class="w-8 h-8 bg-red-500 rounded-full mx-auto mb-1"></div>
                                     <div class="text-white/70 text-xs">
-                                        <span v-if="currentPlayer && currentPlayer.elements">[[ currentPlayer.elements.fire || 0 ]]</span>
+                                        <span v-if="activePlayer && activePlayer.elements">[[ activePlayer.elements.fire || 0 ]]</span>
                                     </div>
                                 </div>
                                 <div class="text-center">
                                     <div class="w-8 h-8 bg-yellow-500 rounded-full mx-auto mb-1"></div>
                                     <div class="text-white/70 text-xs">
-                                        <span v-if="currentPlayer && currentPlayer.elements">[[ currentPlayer.elements.earth || 0 ]]</span>
+                                        <span v-if="activePlayer && activePlayer.elements">[[ activePlayer.elements.earth || 0 ]]</span>
                                     </div>
                                 </div>
                                 <div class="text-center">
                                     <div class="w-8 h-8 bg-gray-400 rounded-full mx-auto mb-1"></div>
                                     <div class="text-white/70 text-xs">
-                                        <span v-if="currentPlayer && currentPlayer.elements">[[ currentPlayer.elements.metal || 0 ]]</span>
+                                        <span v-if="activePlayer && activePlayer.elements">[[ activePlayer.elements.metal || 0 ]]</span>
                                     </div>
                                 </div>
                                 <div class="text-center">
                                     <div class="w-8 h-8 bg-blue-500 rounded-full mx-auto mb-1"></div>
                                     <div class="text-white/70 text-xs">
-                                        <span v-if="currentPlayer && currentPlayer.elements">[[ currentPlayer.elements.water || 0 ]]</span>
+                                        <span v-if="activePlayer && activePlayer.elements">[[ activePlayer.elements.water || 0 ]]</span>
                                     </div>
                                 </div>
                             </div>
@@ -1625,17 +1626,17 @@
                     <div class="flex justify-between items-center mb-2">
                         <h3 class="text-white font-semibold">手牌</h3>
                         <div class="text-white/70 text-sm">
-                            <span v-if="currentPlayer">气: [[ currentPlayer.qi || 0 ]]</span>
+                            <span v-if="activePlayer">气: [[ activePlayer.qi || 0 ]]</span>
                             <span class="mx-2">|</span>
-                            <span v-if="currentPlayer">道行: [[ currentPlayer.dao_xing || 0 ]]</span>
+                            <span v-if="activePlayer">道行: [[ activePlayer.dao_xing || 0 ]]</span>
                             <span class="mx-2">|</span>
-                            <span v-if="currentPlayer">诚意: [[ currentPlayer.cheng_yi || 0 ]]</span>
+                            <span v-if="activePlayer">诚意: [[ activePlayer.cheng_yi || 0 ]]</span>
                         </div>
                     </div>
                     
                     <!-- 手牌显示 -->
                     <div class="flex space-x-2 overflow-x-auto pb-2">
-                        <div v-for="(card, index) in (currentPlayer?.hand || [])" :key="index"
+                        <div v-for="(card, index) in (activePlayer?.hand || [])" :key="index"
                              class="card-in-hand flex-shrink-0 bg-white/10 rounded-lg p-3 cursor-pointer hover:bg-white/20 transition-colors border-2 min-w-[200px]"
                              :class="{ 'border-yellow-400': selectedCard === index, 'border-white/30': selectedCard !== index }"
                              @click="selectCard(index)">
@@ -1656,7 +1657,7 @@
                         </div>
                         
                         <!-- 空手牌提示 -->
-                        <div v-if="!currentPlayer?.hand || currentPlayer.hand.length === 0" 
+                        <div v-if="!activePlayer?.hand || activePlayer.hand.length === 0"
                              class="text-white/50 text-center py-8 flex-1">
                             暂无手牌
                         </div>
@@ -2628,15 +2629,16 @@
                         { id: 303, name: '琴棋书画', type: '人和卡', category: '技能', element: '无', cost: 2, power: 3, description: '文人四艺，修身养性之道。', effect: '获得文化加成，诚意+2，道行+1', link: 'https://baike.baidu.com/item/琴棋书画' }
                     ],
                     tianJiBianGame: null, // TianJiBianGame实例
+                    myPlayerId: 'player_1', // Placeholder for the client's own player ID
                     gameState: {
                         game_id: 'test123',
-                        current_player: 'player_1',
+                        current_player_id: 'player_1',
                         turn: 1,
                         status: 'waiting',
                         season: '春',
-                        wuxing: '木'
+                        wuxing: '木',
+                        players: {}
                     },
-                    currentPlayer: null,
                     otherPlayers: [],
                     playerHand: [],
                     gameBoard: Array(64).fill(null).map(() => ({ card: null })),
@@ -2870,9 +2872,16 @@
                 };
             },
             computed: {
+                activePlayer() {
+                    if (!this.gameState || !this.gameState.players || !this.gameState.current_player_id) {
+                        return null;
+                    }
+                    // This needs to handle the case where the player is not yet in the state
+                    const player = Object.values(this.gameState.players).find(p => p.id === this.gameState.current_player_id);
+                    return player || null;
+                },
                 isMyTurn() {
-                    return this.gameState && this.currentPlayer && 
-                           this.gameState.current_player === this.currentPlayer.id;
+                    return this.activePlayer && this.activePlayer.id === this.myPlayerId;
                 },
                 filteredCodexCards() {
                     if (this.codexFilter === 'all') {
@@ -2925,12 +2934,41 @@
                 },
                 
                 initWebSocket(gameId) {
-                    // 这里应该初始化WebSocket连接
-                    // 由于简化，我们先模拟连接状态
-                    setTimeout(() => {
+                    const wsProtocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+                    const wsUrl = `${wsProtocol}//${window.location.host}/ws/${gameId}`;
+                    this.websocket = new WebSocket(wsUrl);
+
+                    this.websocket.onopen = () => {
                         this.connectionStatus.connected = true;
-                        console.log('WebSocket连接状态已更新');
-                    }, 500);
+                        console.log('WebSocket connection established');
+                        this.showFeedback('成功连接到游戏服务器', 'success');
+                    };
+
+                    this.websocket.onmessage = (event) => {
+                        const message = JSON.parse(event.data);
+                        console.log('Received message:', message);
+
+                        if (message.type === 'game_update' && message.game_state) {
+                            this.gameState = message.game_state;
+                            this.showFeedback('游戏状态已更新', 'info', 1500);
+                        } else if (message.type === 'player_joined') {
+                            this.gameState = message.game_state;
+                            this.showFeedback(`${message.player.name} 已加入游戏`, 'success');
+                        } else if (message.type === 'error') {
+                            this.showFeedback(`错误: ${message.detail}`, 'error');
+                        }
+                    };
+
+                    this.websocket.onclose = () => {
+                        this.connectionStatus.connected = false;
+                        console.log('WebSocket connection closed');
+                        this.showFeedback('与服务器断开连接', 'error');
+                    };
+
+                    this.websocket.onerror = (error) => {
+                        console.error('WebSocket error:', error);
+                        this.showFeedback('连接出现错误', 'error');
+                    };
                 },
                 
                 loadGameState(gameId) {

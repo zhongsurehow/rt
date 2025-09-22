@@ -254,17 +254,42 @@ class WebGameManager:
     def _serialize_game_state(self, game_state) -> Dict:
         """序列化游戏状态"""
         if isinstance(game_state, dict):
+            # Handle the simplified dict-based state
             return game_state
-        elif hasattr(game_state, '__dict__'):
-            return {
-                'players': getattr(game_state, 'players', []),
-                'board': getattr(game_state, 'board', []),
-                'current_player': getattr(game_state, 'current_player', 0),
-                'turn': getattr(game_state, 'turn', 1),
-                'phase': getattr(game_state, 'phase', 'action')
+
+        # Handle the real GameState object from the engine
+        if not hasattr(game_state, 'players'):
+             return {'error': '无法序列化游戏状态: players属性缺失'}
+
+        players_dict = {}
+        for player in game_state.players:
+            players_dict[player.player_id] = {
+                "id": player.player_id,
+                "name": player.name,
+                "qi": player.qi,
+                "dao_xing": player.dao_xing,
+                "cheng_yi": player.cheng_yi,
+                "yin": player.yin_yang_balance.yin_points,
+                "yang": player.yin_yang_balance.yang_points,
+                "hand": [card.dict() for card in player.hand],
+                "position": player.position.value,
+                "is_active": player.is_active,
+                # Add other necessary fields
             }
-        else:
-            return {'error': '无法序列化游戏状态'}
+
+        return {
+            'players': players_dict,
+            'board': {}, # Placeholder for board state
+            'current_player_id': game_state.current_player_id,
+            'turn': game_state.turn,
+            'phase': game_state.phase.value,
+            'season': '春', # Placeholder
+            'wuxing': '木', # Placeholder
+            'ganzhi': '甲子', # Placeholder
+            'jieqi': '立春', # Placeholder
+            'yin_yang_balance': 0, # Placeholder
+            'status': '进行中' # Placeholder
+        }
     
     async def add_connection(self, game_id: str, websocket: WebSocket):
         """添加WebSocket连接"""
