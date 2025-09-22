@@ -31,6 +31,7 @@ class Player(BaseModel):
     hand: List[Card] = Field(default_factory=list)
     is_bot: bool = False
     online: bool = True
+    position: int = 5
 
 class GameState(BaseModel):
     game_id: str

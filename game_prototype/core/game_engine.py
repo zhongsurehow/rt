@@ -27,8 +27,9 @@ from abc import ABC, abstractmethod
 from contextlib import contextmanager
 from enum import Enum, auto
 
+from game_prototype.models import GameState, Player
 from .interfaces import (
-    IGameState, IPlayer, IGameAction, IGameSystem, 
+    IGameAction, IGameSystem,
     IEventBus, IConfigManager, IGameFactory
 )
 from .base_types import (
@@ -136,12 +137,12 @@ class ActionProcessor:
     提供行动预处理、执行、后处理的完整流程。
     """
     
-    def __init__(self, game_state: IGameState, event_bus: IEventBus):
+    def __init__(self, game_state: GameState, event_bus: IEventBus):
         """
         初始化行动处理器
         
         Args:
-            game_state: 游戏状态接口
+            game_state: 游戏状态对象
             event_bus: 事件总线接口
         """
         self.game_state = game_state
@@ -170,10 +171,43 @@ class ActionProcessor:
             ActionType.MEDITATE: self._process_meditate_action,
             ActionType.DIVINATION: self._process_divination_action,
             ActionType.PLAY_CARD: self._process_play_card_action,
+            ActionType.END_TURN: self._process_end_turn_action,
             ActionType.TRANSFORM: self._process_transform_action,
             ActionType.SPECIAL: self._process_special_action,
         })
     
+    def _process_end_turn_action(self, action: IGameAction) -> ActionResult:
+        """处理结束回合行动"""
+        player_id = action.player_id
+        player = self.game_state.players.get(player_id)
+
+        if not player or self.game_state.current_player_id != player_id:
+            return ActionResult(success=False, message="现在不是你的回合")
+
+        # --- 地利 (Geography) Palace Effect ---
+        if player.position == 1: # Kan Palace (坎)
+            player.qi += 1
+            log_message = f"{player.name} 在坎宫结束回合，得水气滋养，恢复1点气。"
+        else:
+            log_message = f"{player.name} 结束了他的回合。"
+
+        self.game_state.logs.append({
+            "id": str(uuid.uuid4()), "timestamp": datetime.utcnow().isoformat() + "Z",
+            "player_name": player.name, "action": "END_TURN", "result": log_message
+        })
+
+        # --- Advance to next player ---
+        player_ids = list(self.game_state.players.keys())
+        current_index = player_ids.index(player_id)
+        next_index = (current_index + 1) % len(player_ids)
+        self.game_state.current_player_id = player_ids[next_index]
+
+        # Check if a full round has passed
+        if next_index == 0:
+            self.game_state.turn += 1
+
+        return ActionResult(success=True, message=log_message)
+
     def process_action(self, action: IGameAction) -> ActionResult:
         """
         处理游戏行动
@@ -381,6 +415,7 @@ class ActionProcessor:
 
         # Basic logic: place card on board, remove from hand
         self.game_state.board[position] = card_id
+        player.position = position
         player.hand.remove(card_to_play)
         self.game_state.discard_pile.append(card_id)
 
@@ -446,11 +481,11 @@ class GameSession:
         self.config = config
         self.created_at = time.time()
         self.last_activity = time.time()
-        self.players: Dict[PlayerId, IPlayer] = {}
+        self.players: Dict[PlayerId, Player] = {}
         self.statistics = GameStatistics()
         self._is_active = False
     
-    def add_player(self, player: IPlayer) -> bool:
+    def add_player(self, player: Player) -> bool:
         """
         添加玩家到会话
         
@@ -463,8 +498,8 @@ class GameSession:
         if len(self.players) >= self.config.max_players:
             return False
         
-        self.players[player.player_id] = player
-        self.statistics.player_actions[player.player_id] = 0
+        self.players[player.id] = player
+        self.statistics.player_actions[player.id] = 0
         self.last_activity = time.time()
         return True
     
@@ -601,8 +636,8 @@ class GameEngine:
         try:
             self.engine_state = EngineState.INITIALIZING
             
-            # 创建游戏状态
-            self.game_state = self.game_factory.create_game_state()
+            # 直接创建Pydantic GameState模型实例
+            self.game_state = GameState(game_id=str(uuid.uuid4()))
             
             # 创建行动处理器
             self.action_processor = ActionProcessor(self.game_state, self.event_bus)
@@ -612,7 +647,7 @@ class GameEngine:
             
             # 创建默认会话
             self.current_session = GameSession(
-                session_id=str(uuid.uuid4()),
+                session_id=self.game_state.game_id,
                 config=self.config
             )
             
@@ -649,12 +684,12 @@ class GameEngine:
             except Exception as e:
                 logger.error(f"系统 {system_type} 初始化失败: {e}")
     
-    def start_game(self, players: List[IPlayer]) -> bool:
+    def start_game(self, players: List[Player]) -> bool:
         """
         开始游戏
         
         Args:
-            players: 参与游戏的玩家列表
+            players: 参与游戏的玩家列表 (使用具体的Player模型)
             
         Returns:
             bool: 是否成功开始游戏
@@ -664,17 +699,20 @@ class GameEngine:
             return False
         
         try:
-            # 添加玩家到会话
+            # 添加玩家到会话和游戏状态
             for player in players:
                 if not self.current_session.add_player(player):
-                    logger.error(f"无法添加玩家 {player.player_id}")
+                    logger.error(f"无法添加玩家 {player.id}")
                     return False
-            
+                self.game_state.players[player.id] = player
+
+            # 设置初始玩家
+            if players:
+                self.game_state.current_player_id = players[0].id
+                self.game_state.status = "in_progress"
+
             # 激活会话
             self.current_session.activate()
-            
-            # 初始化游戏状态
-            self.game_state.initialize_game(players)
             
             # 启动系统
             for system_type in self.system_order:

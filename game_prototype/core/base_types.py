@@ -95,6 +95,7 @@ class ActionType(Enum):
     MEDITATE = "冥想"       # 冥想恢复资源
     DIVINATION = "占卜"     # 占卜获取信息
     PLAY_CARD = "出牌"      # 使用卡牌
+    END_TURN = "结束回合"    # 结束当前回合
     TRANSFORM = "变卦"      # 八卦变换
     SPECIAL = "特殊行动"    # 特殊技能或能力
     
@@ -466,156 +467,6 @@ class ActionResult:
             for resource in all_resources
         }
 
-@dataclass
-class GameState:
-    """
-    游戏状态数据类
-    
-    记录游戏的当前状态，包括阶段、回合、玩家等信息。
-    """
-    phase: GamePhase = GamePhase.SETUP
-    round_number: int = 1
-    current_player_id: Optional[str] = None
-    active_players: List[str] = field(default_factory=list)
-    game_id: str = field(default_factory=lambda: str(uuid.uuid4()))
-    start_time: datetime = field(default_factory=datetime.now)
-    last_update: datetime = field(default_factory=datetime.now)
-    metadata: Dict[str, Any] = field(default_factory=dict)
-    
-    def __post_init__(self) -> None:
-        """初始化后验证"""
-        if self.round_number < 1:
-            raise ValueError("回合数必须大于0")
-        
-        if not isinstance(self.active_players, list):
-            self.active_players = []
-    
-    def advance_round(self) -> None:
-        """推进到下一回合"""
-        self.round_number += 1
-        self.last_update = datetime.now()
-    
-    def set_phase(self, new_phase: GamePhase) -> None:
-        """设置游戏阶段"""
-        self.phase = new_phase
-        self.last_update = datetime.now()
-    
-    def add_player(self, player_id: str) -> None:
-        """添加玩家"""
-        if player_id not in self.active_players:
-            self.active_players.append(player_id)
-            self.last_update = datetime.now()
-    
-    def remove_player(self, player_id: str) -> None:
-        """移除玩家"""
-        if player_id in self.active_players:
-            self.active_players.remove(player_id)
-            if self.current_player_id == player_id:
-                self.current_player_id = None
-            self.last_update = datetime.now()
-    
-    @property
-    def player_count(self) -> int:
-        """获取玩家数量"""
-        return len(self.active_players)
-    
-    @property
-    def game_duration(self) -> float:
-        """获取游戏持续时间（秒）"""
-        return (datetime.now() - self.start_time).total_seconds()
-
-@dataclass
-class PlayerState:
-    """
-    玩家状态数据类
-    
-    记录单个玩家的状态信息，包括资源、位置、属性等。
-    """
-    player_id: str
-    player_type: PlayerType
-    position: Position = field(default_factory=lambda: Position(0, 0))
-    resources: Dict[ResourceType, int] = field(default_factory=dict)
-    cultivation_level: CultivationLevel = CultivationLevel.MORTAL
-    wuxing_affinity: Dict[WuxingElement, float] = field(default_factory=dict)
-    bagua_state: Optional[BaguaType] = None
-    yinyang_balance: float = 0.5  # 0.0=纯阴, 1.0=纯阳, 0.5=平衡
-    is_active: bool = True
-    last_action_time: datetime = field(default_factory=datetime.now)
-    metadata: Dict[str, Any] = field(default_factory=dict)
-    
-    def __post_init__(self) -> None:
-        """初始化后处理"""
-        # 初始化资源
-        if not self.resources:
-            self.resources = {resource: 0 for resource in ResourceType}
-        
-        # 初始化五行亲和度
-        if not self.wuxing_affinity:
-            self.wuxing_affinity = {element: 0.2 for element in WuxingElement}
-        
-        # 验证阴阳平衡值
-        if not 0.0 <= self.yinyang_balance <= 1.0:
-            raise ValueError("阴阳平衡值必须在0.0到1.0之间")
-    
-    def get_resource(self, resource_type: ResourceType) -> int:
-        """获取指定资源数量"""
-        return self.resources.get(resource_type, 0)
-    
-    def add_resource(self, resource_type: ResourceType, amount: int) -> None:
-        """增加资源"""
-        self.resources[resource_type] = self.get_resource(resource_type) + amount
-        self.last_action_time = datetime.now()
-    
-    def consume_resource(self, resource_type: ResourceType, amount: int) -> bool:
-        """
-        消耗资源
-        
-        Args:
-            resource_type: 资源类型
-            amount: 消耗数量
-            
-        Returns:
-            bool: 是否成功消耗
-        """
-        current_amount = self.get_resource(resource_type)
-        if current_amount >= amount:
-            self.resources[resource_type] = current_amount - amount
-            self.last_action_time = datetime.now()
-            return True
-        return False
-    
-    def can_afford(self, costs: Dict[ResourceType, int]) -> bool:
-        """检查是否能承担指定成本"""
-        return all(
-            self.get_resource(resource) >= amount
-            for resource, amount in costs.items()
-        )
-    
-    def move_to(self, new_position: Position) -> None:
-        """移动到新位置"""
-        self.position = new_position
-        self.last_action_time = datetime.now()
-    
-    def set_cultivation_level(self, level: CultivationLevel) -> None:
-        """设置修为等级"""
-        self.cultivation_level = level
-        self.last_action_time = datetime.now()
-    
-    def adjust_yinyang_balance(self, delta: float) -> None:
-        """调整阴阳平衡"""
-        self.yinyang_balance = max(0.0, min(1.0, self.yinyang_balance + delta))
-        self.last_action_time = datetime.now()
-    
-    @property
-    def dominant_yinyang(self) -> YinyangType:
-        """获取主导的阴阳类型"""
-        return YinyangType.YANG if self.yinyang_balance > 0.5 else YinyangType.YIN
-    
-    @property
-    def total_resources(self) -> int:
-        """获取总资源数量"""
-        return sum(self.resources.values())
-
 # ==================== 工厂函数 ====================
 
 def create_default_position() -> Position:
@@ -625,23 +476,6 @@ def create_default_position() -> Position:
 def create_empty_action_result() -> ActionResult:
     """创建空的行动结果"""
     return ActionResult(success=False, message="未执行任何行动")
-
-def create_default_game_state() -> GameState:
-    """创建默认游戏状态"""
-    return GameState()
-
-def create_player_state(player_id: str, player_type: PlayerType) -> PlayerState:
-    """
-    创建玩家状态
-    
-    Args:
-        player_id: 玩家ID
-        player_type: 玩家类型
-        
-    Returns:
-        PlayerState: 新的玩家状态
-    """
-    return PlayerState(player_id=player_id, player_type=player_type)
 
 # ==================== 类型别名 ====================
 
@@ -676,14 +510,10 @@ __all__ = [
     # 数据类
     'Position',
     'ActionResult',
-    'GameState',
-    'PlayerState',
     
     # 工厂函数
     'create_default_position',
     'create_empty_action_result',
-    'create_default_game_state',
-    'create_player_state',
     
     # 类型别名
     'ResourceDict',
