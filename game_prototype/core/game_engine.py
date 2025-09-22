@@ -184,12 +184,34 @@ class ActionProcessor:
         if not player or self.game_state.current_player_id != player_id:
             return ActionResult(success=False, message="现在不是你的回合")
 
-        # --- 地利 (Geography) Palace Effect ---
-        if player.position == 1: # Kan Palace (坎)
-            player.qi += 1
-            log_message = f"{player.name} 在坎宫结束回合，得水气滋养，恢复1点气。"
-        else:
-            log_message = f"{player.name} 结束了他的回合。"
+        # --- Reset Temporary Bonuses ---
+        player.temp_attack_bonus = 0
+        player.defense = 0
+
+        # --- 地利 (Geography) Palace Effects ---
+        pos = player.position
+        log_message = f"{player.name} 结束了他的回合。" # Default log message
+
+        if pos == 1: # Kan 坎 (Water)
+            player.qi += 2 # Boosted from 1 to 2 for more impact
+            log_message = f"{player.name} 在坎宫结束回合，得水气滋养，恢复2点气。"
+        elif pos == 2: # Kun 坤 (Earth)
+            player.defense += 1
+            log_message = f"{player.name} 在坤宫结束回合，受大地加护，获得1点防御。"
+        elif pos == 3: # Zhen 震 (Thunder)
+            player.temp_attack_bonus += 1
+            log_message = f"{player.name} 在震宫结束回合，身负雷霆之力，下次攻击+1。"
+        # Position 4 (Xun) will be for drawing cards, requires more logic.
+        # Position 5 is center, no effect.
+        elif pos == 6: # Qian 乾 (Heaven)
+            player.yang += 1
+            log_message = f"{player.name} 在乾宫结束回合，感悟天道，阳气+1。"
+        elif pos == 8: # Gen 艮 (Mountain)
+            player.defense += 2
+            log_message = f"{player.name} 在艮宫结束回合，如山峦般稳固，获得2点防御。"
+        elif pos == 9: # Li 离 (Fire)
+            player.dao += 1
+            log_message = f"{player.name} 在离宫结束回合，心火通明，道行+1。"
 
         self.game_state.logs.append({
             "id": str(uuid.uuid4()), "timestamp": datetime.utcnow().isoformat() + "Z",
@@ -205,6 +227,12 @@ class ActionProcessor:
         # Check if a full round has passed
         if next_index == 0:
             self.game_state.turn += 1
+            # --- 天时 (Timing) System: Cycle Five Elements ---
+            wuxing_cycle = ['木', '火', '土', '金', '水']
+            current_wuxing_index = wuxing_cycle.index(self.game_state.wuxing)
+            next_wuxing_index = (current_wuxing_index + 1) % len(wuxing_cycle)
+            self.game_state.wuxing = wuxing_cycle[next_wuxing_index]
+            log_message += f" 天时轮转，现在是【{self.game_state.wuxing}】的回合。"
 
         return ActionResult(success=True, message=log_message)
 
@@ -279,7 +307,7 @@ class ActionProcessor:
         )
         self.event_bus.publish(event)
 
-    def _apply_effects(self, player_id: PlayerId, card_effects: List[Dict[str, Any]]):
+    def _apply_effects(self, player_id: PlayerId, card_effects: List[Dict[str, Any]], card_element: str):
         """Applies a list of card effects to the game state."""
         source_player = self.game_state.players.get(player_id)
         if not source_player:
@@ -287,9 +315,13 @@ class ActionProcessor:
 
         for effect in card_effects:
             effect_type = effect.get("type")
-            target_type = effect.get("target", "self") # Default target is self
+            target_type = effect.get("target", "self")
             amount = effect.get("amount", 0)
             attribute = effect.get("attribute")
+
+            # --- 天时 (Timing) Bonus ---
+            if card_element == self.game_state.wuxing:
+                amount += 1 # Boost effect amount by 1
 
             targets = []
             if target_type == "self":
@@ -308,7 +340,10 @@ class ActionProcessor:
                     current_val = getattr(target_player, attribute)
                     setattr(target_player, attribute, current_val + amount)
                 elif effect_type == "DAMAGE":
-                    target_player.health -= amount
+                    # Calculate actual damage considering bonus and defense
+                    damage_dealt = (amount + source_player.temp_attack_bonus) - target_player.defense
+                    damage_dealt = max(0, damage_dealt) # Damage cannot be negative
+                    target_player.health -= damage_dealt
                 elif effect_type == "HEAL":
                     target_player.health += amount
     
@@ -421,7 +456,7 @@ class ActionProcessor:
 
         # Apply card effects
         if card_to_play.effects:
-            self._apply_effects(player.id, card_to_play.effects)
+            self._apply_effects(player.id, card_to_play.effects, card_to_play.element)
 
         # Log the action
         message = f"{player.name} 打出了 {card_to_play.name} 到位置 {position}"

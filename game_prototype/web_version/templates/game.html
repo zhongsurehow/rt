@@ -633,7 +633,7 @@
                 </div>
                 
                 <!-- 详细游戏状态显示 -->
-                <div class="grid grid-cols-8 gap-4 text-sm">
+                <div class="grid grid-cols-9 gap-4 text-sm">
                     <div class="text-center">
                         <div class="text-white/70 text-xs">当前回合</div>
                         <div class="text-white font-medium" id="current-round">[[ currentRound ]]</div>
@@ -647,7 +647,7 @@
                         <div class="text-green-400 font-medium" id="current-season">[[ getCurrentSeason() ]]</div>
                     </div>
                     <div class="text-center">
-                        <div class="text-white/70 text-xs">五行主导</div>
+                        <div class="text-white/70 text-xs">天时五行</div>
                         <div class="text-orange-400 font-medium" id="current-wuxing">[[ getCurrentWuxing() ]]</div>
                     </div>
                     <div class="text-center">
@@ -845,50 +845,50 @@
                     <!-- 后天八卦九宫格 -->
                     <div class="grid grid-cols-3 gap-3 h-full" :class="{'tutorial-highlight': tutorialStep === 2}">
                         <!-- Row 1: SE, S, SW -->
-                        <div class="jiugongge-position" @click="selectBoardPosition(4)" :class="{'selected-position': selectedPosition === 4}" title="巽 (Xùn) - 风 (Wind)">
+                        <div class="jiugongge-position" @click="selectBoardPosition(4)" :class="{'selected-position': selectedPosition === 4}" :title="getPalaceTooltip(4)">
                             <div class="bagua-symbol text-green-400">☴</div>
                             <div class="bagua-name">巽</div>
                             <div class="bagua-element">东南</div>
                         </div>
-                        <div class="jiugongge-position" @click="selectBoardPosition(9)" :class="{'selected-position': selectedPosition === 9}" title="离 (Lí) - 火 (Fire)">
+                        <div class="jiugongge-position" @click="selectBoardPosition(9)" :class="{'selected-position': selectedPosition === 9}" :title="getPalaceTooltip(9)">
                             <div class="bagua-symbol text-red-400">☲</div>
                             <div class="bagua-name">离</div>
                             <div class="bagua-element">南</div>
                         </div>
-                        <div class="jiugongge-position" @click="selectBoardPosition(2)" :class="{'selected-position': selectedPosition === 2}" title="坤 (Kūn) - 地 (Earth)">
+                        <div class="jiugongge-position" @click="selectBoardPosition(2)" :class="{'selected-position': selectedPosition === 2}" :title="getPalaceTooltip(2)">
                             <div class="bagua-symbol text-yellow-400">☷</div>
                             <div class="bagua-name">坤</div>
                             <div class="bagua-element">西南</div>
                         </div>
 
                         <!-- Row 2: E, Center, W -->
-                        <div class="jiugongge-position" @click="selectBoardPosition(3)" :class="{'selected-position': selectedPosition === 3}" title="震 (Zhèn) - 雷 (Thunder)">
+                        <div class="jiugongge-position" @click="selectBoardPosition(3)" :class="{'selected-position': selectedPosition === 3}" :title="getPalaceTooltip(3)">
                             <div class="bagua-symbol text-green-300">☳</div>
                             <div class="bagua-name">震</div>
                             <div class="bagua-element">东</div>
                         </div>
-                        <div class="jiugongge-center" title="太极 (Taiji) - Center">
+                        <div class="jiugongge-center" :title="getPalaceTooltip(5)">
                             <div class="taiji-symbol">☯</div>
                             <div class="center-text">中宫</div>
                         </div>
-                        <div class="jiugongge-position" @click="selectBoardPosition(7)" :class="{'selected-position': selectedPosition === 7}" title="兑 (Duì) - 泽 (Lake)">
+                        <div class="jiugongge-position" @click="selectBoardPosition(7)" :class="{'selected-position': selectedPosition === 7}" :title="getPalaceTooltip(7)">
                             <div class="bagua-symbol text-gray-300">☱</div>
                             <div class="bagua-name">兑</div>
                             <div class="bagua-element">西</div>
                         </div>
 
                         <!-- Row 3: NE, N, NW -->
-                        <div class="jiugongge-position" @click="selectBoardPosition(8)" :class="{'selected-position': selectedPosition === 8}" title="艮 (Gèn) - 山 (Mountain)">
+                        <div class="jiugongge-position" @click="selectBoardPosition(8)" :class="{'selected-position': selectedPosition === 8}" :title="getPalaceTooltip(8)">
                             <div class="bagua-symbol text-yellow-500">☶</div>
                             <div class="bagua-name">艮</div>
                             <div class="bagua-element">东北</div>
                         </div>
-                        <div class="jiugongge-position" @click="selectBoardPosition(1)" :class="{'selected-position': selectedPosition === 1}" title="坎 (Kǎn) - 水 (Water)">
+                        <div class="jiugongge-position" @click="selectBoardPosition(1)" :class="{'selected-position': selectedPosition === 1}" :title="getPalaceTooltip(1)">
                             <div class="bagua-symbol text-blue-400">☵</div>
                             <div class="bagua-name">坎</div>
                             <div class="bagua-element">北</div>
                         </div>
-                        <div class="jiugongge-position" @click="selectBoardPosition(6)" :class="{'selected-position': selectedPosition === 6}" title="乾 (Qián) - 天 (Heaven)">
+                        <div class="jiugongge-position" @click="selectBoardPosition(6)" :class="{'selected-position': selectedPosition === 6}" :title="getPalaceTooltip(6)">
                             <div class="bagua-symbol text-gray-200">☰</div>
                             <div class="bagua-name">乾</div>
                             <div class="bagua-element">西北</div>
@@ -1671,8 +1671,7 @@
                     return this.gameState?.season || 'N/A';
                 },
                 getCurrentWuxing() {
-                    // This is an example, assuming it comes from game state
-                    return this.gameState?.dominant_element || 'N/A';
+                    return this.gameState?.wuxing || 'N/A';
                 },
                 getCurrentGanzhi() {
                     return this.gameState?.ganzhi || 'N/A';
@@ -1692,6 +1691,19 @@
                     }
                     const card = this.allCards.find(c => c.id === cardId);
                     return card ? card.name : cardId;
+                },
+                getPalaceTooltip(position) {
+                    const tooltips = {
+                        1: "坎宫 (水): 在此结束回合，恢复2点气。",
+                        2: "坤宫 (地): 在此结束回合，获得1点防御。",
+                        3: "震宫 (雷): 在此结束回合，下次攻击+1。",
+                        4: "巽宫 (风): 在此结束回合，抽1张牌。", // Placeholder text
+                        6: "乾宫 (天): 在此结束回合，阳气+1。",
+                        7: "兑宫 (泽): 在此结束回合，诚意+1。", // Placeholder text
+                        8: "艮宫 (山): 在此结束回合，获得2点防御。",
+                        9: "离宫 (火): 在此结束回合，道行+1。",
+                    };
+                    return tooltips[position] || "中宫 - 无效果";
                 },
                 // Tutorial Methods
                 startTutorial() {

@@ -22,6 +22,8 @@ class Player(BaseModel):
     id: str
     name: str
     health: int = 20
+    defense: int = 0
+    temp_attack_bonus: int = 0
     qi: int = 100
     dao: int = 50
     sincerity: int = 50
