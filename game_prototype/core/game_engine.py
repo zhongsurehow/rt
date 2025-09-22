@@ -17,6 +17,7 @@
 import logging
 import time
 import uuid
+from datetime import datetime
 from typing import (
     Dict, List, Optional, Any, Type, Set, Callable, 
     Union, Tuple, Protocol, TypeVar, Generic
@@ -243,6 +244,39 @@ class ActionProcessor:
             }
         )
         self.event_bus.publish(event)
+
+    def _apply_effects(self, player_id: PlayerId, card_effects: List[Dict[str, Any]]):
+        """Applies a list of card effects to the game state."""
+        source_player = self.game_state.players.get(player_id)
+        if not source_player:
+            return
+
+        for effect in card_effects:
+            effect_type = effect.get("type")
+            target_type = effect.get("target", "self") # Default target is self
+            amount = effect.get("amount", 0)
+            attribute = effect.get("attribute")
+
+            targets = []
+            if target_type == "self":
+                targets.append(source_player)
+            elif target_type == "opponent":
+                opponents = [p for p_id, p in self.game_state.players.items() if p_id != player_id]
+                if opponents:
+                    targets.append(opponents[0]) # Simplified: picks the first opponent
+            elif target_type == "all_opponents":
+                targets.extend([p for p_id, p in self.game_state.players.items() if p_id != player_id])
+            elif target_type == "all_allies":
+                targets.append(source_player) # Simplified: no teams yet
+
+            for target_player in targets:
+                if effect_type == "MODIFY_ATTRIBUTE" and attribute and hasattr(target_player, attribute):
+                    current_val = getattr(target_player, attribute)
+                    setattr(target_player, attribute, current_val + amount)
+                elif effect_type == "DAMAGE":
+                    target_player.health -= amount
+                elif effect_type == "HEAL":
+                    target_player.health += amount
     
     # 具体行动验证方法
     def _validate_move_action(self, action: IGameAction) -> bool:
@@ -302,9 +336,28 @@ class ActionProcessor:
         return ActionResult(success=True, message="防御成功", action_type=ActionType.DEFEND)
     
     def _process_meditate_action(self, action: IGameAction) -> ActionResult:
-        """处理冥想行动"""
-        # 实现冥想处理逻辑
-        return ActionResult(success=True, message="冥想成功", action_type=ActionType.MEDITATE)
+        """处理冥想行动 (调息)"""
+        player_id = action.player_id
+        # The game state used by the engine seems different from the Pydantic model.
+        # Let's try to get the player object. The web app uses a dict of players.
+        player = self.game_state.players.get(player_id)
+
+        if not player:
+            return ActionResult(success=False, message=f"玩家 {player_id} 不存在")
+
+        player.qi += 3
+
+        log_entry = {
+            "id": str(uuid.uuid4()),
+            "timestamp": datetime.utcnow().isoformat() + "Z",
+            "player_name": player.name,
+            "action": "MEDITATE",
+            "data": {},
+            "result": "恢复了3点气"
+        }
+        self.game_state.logs.append(log_entry)
+
+        return ActionResult(success=True, message="调息成功，恢复3点气。", action_type=ActionType.MEDITATE)
     
     def _process_divination_action(self, action: IGameAction) -> ActionResult:
         """处理占卜行动"""
@@ -313,27 +366,53 @@ class ActionProcessor:
     
     def _process_play_card_action(self, action: IGameAction) -> ActionResult:
         """处理出牌行动"""
-        player = self.game_state.get_player_info(action.player_id)
+        player = self.game_state.players.get(action.player_id)
         card_id = action.data.get("card_id")
         position = action.data.get("position")
 
         if not player or not card_id or position is None:
             return ActionResult(success=False, message="无效的出牌行动数据")
 
-        # Basic logic: place card on board, remove from hand
-        # This will be expanded with actual game rules
-        self.game_state.board[position] = card_id
+        # Find card in hand
+        card_to_play = next((c for c in player.hand if c.id == card_id), None)
 
-        # Find and remove card from hand (this is simplified)
-        card_to_remove = next((c for c in player.hand if c.id == card_id), None)
-        if card_to_remove:
-            player.hand.remove(card_to_remove)
-            self.game_state.discard_pile.append(card_id)
-            message = f"{player.name} 打出了 {card_to_remove.name} 到位置 {position}"
-            self.game_state.game_log.append(message)
-            return ActionResult(success=True, message=message, action_type=ActionType.PLAY_CARD)
-        else:
+        if not card_to_play:
             return ActionResult(success=False, message="玩家手上没有这张牌", action_type=ActionType.PLAY_CARD)
+
+        # Basic logic: place card on board, remove from hand
+        self.game_state.board[position] = card_id
+        player.hand.remove(card_to_play)
+        self.game_state.discard_pile.append(card_id)
+
+        # Apply card effects
+        if card_to_play.effects:
+            self._apply_effects(player.id, card_to_play.effects)
+
+        # Log the action
+        message = f"{player.name} 打出了 {card_to_play.name} 到位置 {position}"
+        log_entry = {
+            "id": str(uuid.uuid4()),
+            "timestamp": datetime.utcnow().isoformat() + "Z",
+            "player_name": player.name,
+            "action": "PLAY_CARD",
+            "data": {"card_id": card_id, "position": position},
+            "result": message
+        }
+        self.game_state.logs.append(log_entry)
+
+        # Check for victory condition
+        for p in list(self.game_state.players.values()):
+            if p.health <= 0:
+                # A player is defeated
+                self.game_state.status = "finished"
+                living_players = [winner for winner in self.game_state.players.values() if winner.health > 0]
+                if len(living_players) == 1:
+                    self.game_state.winner = living_players[0].name
+                    win_message = f"玩家 {p.name} 被击败！胜利者是 {self.game_state.winner}！"
+                    self.game_state.logs.append({"id": str(uuid.uuid4()), "timestamp": datetime.utcnow().isoformat() + "Z", "message": win_message, "type": "game_end"})
+                break # End check after first defeat
+
+        return ActionResult(success=True, message=message, action_type=ActionType.PLAY_CARD)
     
     def _process_transform_action(self, action: IGameAction) -> ActionResult:
         """处理变换行动"""

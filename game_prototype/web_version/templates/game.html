@@ -12,113 +12,10 @@
     <style>
         /* 融合三个文件的优秀设计元素 */
         
-        /* 太极图中心设计 - 参考tianjibian_game_map.html */
-        .taiji-center {
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            width: 120px;
-            height: 120px;
-            border-radius: 50%;
-            background: linear-gradient(90deg, #000 0%, #000 50%, #fff 50%, #fff 100%);
-            box-shadow: 0 0 30px rgba(255, 215, 0, 0.5);
-            border: 3px solid rgba(255, 215, 0, 0.8);
-            animation: taijRotate 120s linear infinite;
-            z-index: 10;
-        }
-
-        .taiji-center::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 25%;
-            width: 50%;
-            height: 50%;
-            background: #000;
-            border-radius: 0 60px 60px 0;
-            transform-origin: 0 100%;
-        }
-
-        .taiji-center::after {
-            content: '';
-            position: absolute;
-            bottom: 0;
-            right: 25%;
-            width: 50%;
-            height: 50%;
-            background: #fff;
-            border-radius: 60px 0 0 60px;
-            transform-origin: 100% 0;
-        }
-
-        @keyframes taijRotate {
-            from { transform: translate(-50%, -50%) rotate(0deg); }
-            to { transform: translate(-50%, -50%) rotate(360deg); }
-        }
-
-        /* 八卦位置设计 - 参考tianjibian_complete_game.html */
-        .bagua-position {
-            position: absolute;
-            width: 80px;
-            height: 80px;
-            border-radius: 50%;
-            background: linear-gradient(135deg, rgba(255,255,255,0.9), rgba(248,250,252,0.7));
-            border: 2px solid rgba(255, 215, 0, 0.6);
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
-        }
-
-        .bagua-position:hover {
-            transform: scale(1.1);
-            box-shadow: 0 6px 25px rgba(255, 215, 0, 0.4);
-            background: linear-gradient(135deg, rgba(255,215,0,0.9), rgba(255,193,7,0.7));
-        }
-
-        .bagua-symbol {
-            font-size: 20px;
-            color: #333;
-            margin-bottom: 2px;
-        }
-        
-        .bagua-name {
-            font-size: 12px;
-            color: #333;
-            font-weight: bold;
-            margin-bottom: 1px;
-        }
-        
-        .bagua-element {
-            font-size: 10px;
-            color: #666;
-        }
-        
-        /* 九宫格样式 */
-        .jiugongge-board {
-            position: relative;
-            width: 500px;
-            height: 500px;
-            margin: 20px auto;
-        }
-        
-        .jiugongge-grid {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            grid-template-rows: repeat(3, 1fr);
-            gap: 10px;
-            width: 100%;
-            height: 100%;
-            padding: 20px;
-        }
-        
+        /* 新的九宫格样式 */
         .jiugongge-position {
-            background: linear-gradient(135deg, rgba(255,255,255,0.9), rgba(248,250,252,0.7));
-            border: 2px solid rgba(255, 215, 0, 0.6);
+            background: rgba(255, 255, 255, 0.05);
+            border: 2px solid rgba(255, 255, 255, 0.2);
             border-radius: 15px;
             display: flex;
             flex-direction: column;
@@ -127,62 +24,58 @@
             cursor: pointer;
             transition: all 0.3s ease;
             box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+            color: #fff;
         }
         
         .jiugongge-position:hover {
             transform: scale(1.05);
             box-shadow: 0 6px 25px rgba(255, 215, 0, 0.4);
-            background: linear-gradient(135deg, rgba(255,215,0,0.9), rgba(255,193,7,0.7));
+            background: rgba(255, 215, 0, 0.1);
+            border-color: rgba(255, 215, 0, 0.6);
         }
-        
+
         .jiugongge-center {
-            background: radial-gradient(circle, rgba(255,255,255,0.9) 0%, rgba(255,215,0,0.3) 100%);
-            border: 3px solid #ffd700;
+            background: rgba(0, 0, 0, 0.2);
+            border: 2px solid rgba(255, 215, 0, 0.4);
             border-radius: 50%;
             display: flex;
             flex-direction: column;
             align-items: center;
             justify-content: center;
-            box-shadow: 0 0 30px rgba(255, 215, 0, 0.5);
+            box-shadow: 0 0 20px rgba(255, 215, 0, 0.3);
+            color: #fff;
+        }
+
+        .bagua-symbol {
+            font-size: 3rem; /* 48px */
+            line-height: 1;
+            margin-bottom: 0.5rem;
         }
         
+        .bagua-name {
+            font-size: 1.125rem; /* 18px */
+            font-weight: bold;
+        }
+
+        .bagua-element {
+            font-size: 0.875rem; /* 14px */
+            color: rgba(255, 255, 255, 0.7);
+        }
+
         .taiji-symbol {
-            font-size: 32px;
-            color: #333;
-            margin-bottom: 5px;
+            font-size: 4rem; /* 64px */
+            animation: taijRotate 120s linear infinite;
         }
-        
+
+        @keyframes taijRotate {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+
         .center-text {
-            font-size: 14px;
-            color: #333;
+            font-size: 1rem; /* 16px */
             font-weight: bold;
-        }
-
-        /* 圆形游戏板 - 参考tianjibian_game_map.html */
-        .game-board {
-            position: relative;
-            width: 500px;
-            height: 500px;
-            border-radius: 50%;
-            background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, rgba(0,0,0,0.3) 100%);
-            border: 3px solid rgba(255, 215, 0, 0.5);
-            margin: 20px auto;
-            box-shadow: 0 0 50px rgba(255, 215, 0, 0.3);
-        }
-
-        /* 季节指示器 - 参考tianjibian_game_map.html */
-        .season-indicator {
-            position: absolute;
-            top: -40px;
-            left: 50%;
-            transform: translateX(-50%);
-            background: linear-gradient(135deg, rgba(255,255,255,0.9), rgba(248,250,252,0.7));
-            padding: 8px 16px;
-            border-radius: 20px;
-            border: 2px solid rgba(255, 215, 0, 0.6);
-            font-weight: bold;
-            color: #333;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+            color: rgba(255, 255, 255, 0.9);
         }
 
         /* 动画效果 - 参考tianjibian_game_simulation.html */
@@ -700,6 +593,15 @@
         .codex-card .card-type { font-size: 12px; color: #ccc; margin-top: 4px; }
         .codex-card .card-desc { font-size: 13px; margin-top: 8px; flex-grow: 1; }
         .codex-card .card-cost-power { font-size: 12px; margin-top: 8px; color: #88aaff; }
+
+        /* Tutorial Highlight */
+        .tutorial-highlight {
+            box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.7), 0 0 20px 10px rgba(59, 130, 246, 0.5);
+            border-radius: 12px; /* A bit larger to be more visible */
+            transition: all 0.3s ease-in-out;
+            position: relative;
+            z-index: 51; /* Higher than the overlay backdrop */
+        }
     </style>
 </head>
 <body class="bg-gradient-to-br from-indigo-900 via-purple-900 to-pink-800 min-h-screen">
@@ -793,7 +695,7 @@
                         </div>
                         
                         <!-- 属性值 -->
-                        <div class="space-y-3">
+                        <div class="space-y-3" :class="{'tutorial-highlight': tutorialStep === 4}">
                             <div>
                                 <div class="flex justify-between text-sm mb-1">
                                     <span class="text-white/70">气</span>
@@ -891,58 +793,16 @@
                     </div>
                 </div>
 
-                <!-- 四人演示控制面板 -->
+                <!-- 新的教学功能入口 -->
                 <div class="mt-6">
-                    <h3 class="text-white font-semibold mb-4">四人演示</h3>
+                    <h3 class="text-white font-semibold mb-4">游戏教学</h3>
                     <div class="bg-white/10 rounded-lg p-4 space-y-3">
-                        <!-- 演示状态 -->
-                        <div class="text-center">
-                            <div class="text-white/70 text-sm mb-2">演示状态</div>
-                            <div class="text-white font-medium">
-                                [[ demoRunning ? '运行中' : '已停止' ]]
-                            </div>
-                        </div>
-                        
-                        <!-- 控制按钮 -->
-                        <div class="flex gap-2">
-                            <button @click="startFourPlayerDemo" 
-                                    :disabled="demoRunning"
-                                    class="flex-1 px-3 py-2 bg-green-500 text-white rounded text-sm hover:bg-green-600 disabled:opacity-50">
-                                开始演示
-                            </button>
-                            <button @click="pauseGame" 
-                                    :disabled="!demoRunning"
-                                    class="flex-1 px-3 py-2 bg-red-500 text-white rounded text-sm hover:bg-red-600 disabled:opacity-50">
-                                停止演示
-                            </button>
-                        </div>
-                        
-                        <!-- 演示速度 -->
-                        <div>
-                            <div class="text-white/70 text-sm mb-2">演示速度</div>
-                            <select v-model="demoSpeed" class="w-full px-2 py-1 bg-white/20 text-white rounded text-sm">
-                                <option value="slow">慢速 (3秒)</option>
-                                <option value="normal">正常 (2秒)</option>
-                                <option value="fast">快速 (1秒)</option>
-                            </select>
-                        </div>
-                        
-                        <!-- 自动播放 -->
-                        <div class="flex items-center justify-between">
-                            <span class="text-white/70 text-sm">自动播放</span>
-                            <button @click="autoPlay = !autoPlay" 
-                                    :class="autoPlay ? 'bg-green-500' : 'bg-gray-500'"
-                                    class="px-3 py-1 text-white rounded text-sm">
-                                [[ autoPlay ? '开启' : '关闭' ]]
-                            </button>
-                        </div>
-                        
-                        <!-- 当前回合信息 -->
-                        <div class="text-center pt-2 border-t border-white/20">
-                            <div class="text-white/70 text-xs">
-                                回合: [[ currentTurn ]] | 季节: [[ currentSeason ]]
-                            </div>
-                        </div>
+                        <p class="text-white/70 text-sm">
+                            不熟悉游戏规则？点击下方按钮开始互动教学。
+                        </p>
+                        <button @click="startTutorial" class="w-full bg-blue-500 text-white py-2 rounded-lg hover:bg-blue-600 transition-colors">
+                            <i class="fas fa-graduation-cap mr-2"></i>开始教学
+                        </button>
                     </div>
                 </div>
 
@@ -978,281 +838,64 @@
             </div>
 
             <!-- 中央游戏区域 -->
-            <div class="flex-1 flex flex-col">
-                <!-- 棋盘区域 - 融合三个文件的优秀设计 -->
-                <div class="flex-1 p-6">
-                    <div class="bg-white/10 backdrop-blur-md rounded-2xl p-6 h-full">
-                        <div class="flex justify-between items-center mb-4">
-                            <h3 class="text-white font-semibold text-center flex-1">天机变棋盘</h3>
-                            <div class="flex gap-2">
-                                <button @click="toggleBoardView" class="px-3 py-1 bg-blue-500 text-white rounded text-sm hover:bg-blue-600">
-                                    [[ boardView === 'circle' ? '九宫格' : '圆形' ]]
-                                </button>
-                                <button @click="isSimulating ? stopSimulation() : startSimulation()" 
-                        :class="isSimulating ? 'px-3 py-1 bg-red-500 text-white rounded text-sm hover:bg-red-600' : 'px-3 py-1 bg-green-500 text-white rounded text-sm hover:bg-green-600'">
-                    [[ isSimulating ? '停止模拟' : '开始模拟' ]]
-                </button>
-                            </div>
+            <div class="flex-1 flex flex-col items-center justify-center p-6">
+                <div class="bg-white/10 backdrop-blur-md rounded-2xl p-6 shadow-2xl w-full max-w-3xl aspect-square">
+                    <h3 class="text-white font-semibold text-center mb-4 text-xl">天机变 - 九宫格棋盘</h3>
+
+                    <!-- 后天八卦九宫格 -->
+                    <div class="grid grid-cols-3 gap-3 h-full" :class="{'tutorial-highlight': tutorialStep === 2}">
+                        <!-- Row 1: SE, S, SW -->
+                        <div class="jiugongge-position" @click="selectBoardPosition(4)" :class="{'selected-position': selectedPosition === 4}" title="巽 (Xùn) - 风 (Wind)">
+                            <div class="bagua-symbol text-green-400">☴</div>
+                            <div class="bagua-name">巽</div>
+                            <div class="bagua-element">东南</div>
                         </div>
-                        
-                        <!-- 圆形游戏板 -->
-                        <div class="game-board mx-auto" v-show="boardView === 'circle'">
-                        
-                        <!-- 九宫格游戏板 -->
-                        <div class="jiugongge-board mx-auto" v-show="boardView === 'jiugongge'">
-                            <!-- 季节指示器 -->
-                            <div class="season-indicator">
-                                <span v-if="gameState">[[ gameState.season || '春' ]]季</span>
-                                <span v-else>春季</span>
-                            </div>
-                            
-                            <!-- 卡牌游戏九宫格棋盘 -->
-                            <div class="card-game-board grid grid-cols-3 gap-2 w-96 h-96 mx-auto mb-6">
-                                <div v-for="(cell, index) in gameBoard" :key="index" 
-                                     class="board-cell border-2 border-white/30 rounded-lg p-2 cursor-pointer hover:border-yellow-400 transition-colors"
-                                     :class="{ 'border-yellow-400': selectedPosition === index, 'bg-white/10': cell.card }"
-                                     @click="selectBoardPosition(index)">
-                                    <div v-if="cell.card" class="card-on-board text-center">
-                                        <div class="text-white font-bold text-sm">[[ cell.card.name ]]</div>
-                                        <div class="text-white/70 text-xs">[[ cell.card.type ]]</div>
-                                        <div class="text-yellow-400 text-xs">玩家[[ cell.player ]]</div>
-                                    </div>
-                                    <div v-else class="empty-cell h-full flex items-center justify-center">
-                                        <div class="text-white/30 text-xs">空位</div>
-                                    </div>
-                                </div>
-                            </div>
-                            
-                            <!-- 太极图中心 -->
-                            <div class="taiji-center pulse-effect"></div>
-                            
-                            <!-- 八卦位置 -->
-                            <!-- 乾 (上) -->
-                            <div class="bagua-position" style="top: 20px; left: 50%; transform: translateX(-50%);"
-                                 @click="selectBaguaPosition('qian')"
-                                 :class="selectedBagua === 'qian' ? 'pulse-effect' : ''"
-                                 title="乾卦 - 天">
-                                <div class="bagua-symbol">☰</div>
-                                <div class="bagua-name">乾</div>
-                                <div class="bagua-element">天</div>
-                                <div v-for="player in getPlayersAtPosition('qian')" :key="player.id"
-                                     class="player-avatar"
-                                     :class="{ 'current-player-position': isCurrentPlayer(player) }"
-                                     :style="getPlayerAvatarStyle(player)"
-                                     :title="player.name">
-                                    [[ player.name.charAt(0) ]]
-                                </div>
-                            </div>
-                            
-                            <!-- 兑 (右上) -->
-                            <div class="bagua-position" style="top: 80px; right: 80px;"
-                                 @click="selectBaguaPosition('dui')"
-                                 :class="selectedBagua === 'dui' ? 'pulse-effect' : ''"
-                                 title="兑卦 - 泽">
-                                <div class="bagua-symbol">☱</div>
-                                <div class="bagua-name">兑</div>
-                                <div class="bagua-element">泽</div>
-                                <div v-for="player in getPlayersAtPosition('dui')" :key="player.id"
-                                     class="player-avatar"
-                                     :class="{ 'current-player-position': isCurrentPlayer(player) }"
-                                     :style="getPlayerAvatarStyle(player)"
-                                     :title="player.name">
-                                    [[ player.name.charAt(0) ]]
-                                </div>
-                            </div>
-                            
-                            <!-- 离 (右) -->
-                            <div class="bagua-position" style="top: 50%; right: 20px; transform: translateY(-50%);"
-                                 @click="selectBaguaPosition('li')"
-                                 :class="selectedBagua === 'li' ? 'pulse-effect' : ''"
-                                 title="离卦 - 火">
-                                <div class="bagua-symbol">☲</div>
-                                <div class="bagua-name">离</div>
-                                <div class="bagua-element">火</div>
-                                <div v-for="player in getPlayersAtPosition('li')" :key="player.id"
-                                     class="player-avatar"
-                                     :class="{ 'current-player-position': isCurrentPlayer(player) }"
-                                     :style="getPlayerAvatarStyle(player)"
-                                     :title="player.name">
-                                    [[ player.name.charAt(0) ]]
-                                </div>
-                            </div>
-                            
-                            <!-- 震 (右下) -->
-                            <div class="bagua-position" style="bottom: 80px; right: 80px;"
-                                 @click="selectBaguaPosition('zhen')"
-                                 :class="selectedBagua === 'zhen' ? 'pulse-effect' : ''"
-                                 title="震卦 - 雷">
-                                <div class="bagua-symbol">☳</div>
-                                <div class="bagua-name">震</div>
-                                <div class="bagua-element">雷</div>
-                                <div v-for="player in getPlayersAtPosition('zhen')" :key="player.id"
-                                     class="player-avatar"
-                                     :class="{ 'current-player-position': isCurrentPlayer(player) }"
-                                     :style="getPlayerAvatarStyle(player)"
-                                     :title="player.name">
-                                    [[ player.name.charAt(0) ]]
-                                </div>
-                            </div>
-                            
-                            <!-- 巽 (下) -->
-                            <div class="bagua-position" style="bottom: 20px; left: 50%; transform: translateX(-50%);"
-                                 @click="selectBaguaPosition('xun')"
-                                 :class="selectedBagua === 'xun' ? 'pulse-effect' : ''"
-                                 title="巽卦 - 风">
-                                <div class="bagua-symbol">☴</div>
-                                <div class="bagua-name">巽</div>
-                                <div class="bagua-element">风</div>
-                                <div v-for="player in getPlayersAtPosition('xun')" :key="player.id"
-                                     class="player-avatar"
-                                     :class="{ 'current-player-position': isCurrentPlayer(player) }"
-                                     :style="getPlayerAvatarStyle(player)"
-                                     :title="player.name">
-                                    [[ player.name.charAt(0) ]]
-                                </div>
-                            </div>
-                            
-                            <!-- 坎 (左下) -->
-                            <div class="bagua-position" style="bottom: 80px; left: 80px;"
-                                 @click="selectBaguaPosition('kan')"
-                                 :class="selectedBagua === 'kan' ? 'pulse-effect' : ''"
-                                 title="坎卦 - 水">
-                                <div class="bagua-symbol">☵</div>
-                                <div class="bagua-name">坎</div>
-                                <div class="bagua-element">水</div>
-                                <div v-for="player in getPlayersAtPosition('kan')" :key="player.id"
-                                     class="player-avatar"
-                                     :class="{ 'current-player-position': isCurrentPlayer(player) }"
-                                     :style="getPlayerAvatarStyle(player)"
-                                     :title="player.name">
-                                    [[ player.name.charAt(0) ]]
-                                </div>
-                            </div>
-                            
-                            <!-- 艮 (左) -->
-                            <div class="bagua-position" style="top: 50%; left: 20px; transform: translateY(-50%);"
-                                 @click="selectBaguaPosition('gen')"
-                                 :class="selectedBagua === 'gen' ? 'pulse-effect' : ''"
-                                 title="艮卦 - 山">
-                                <div class="bagua-symbol">☶</div>
-                                <div class="bagua-name">艮</div>
-                                <div class="bagua-element">山</div>
-                                <div v-for="player in getPlayersAtPosition('gen')" :key="player.id"
-                                     class="player-avatar"
-                                     :class="{ 'current-player-position': isCurrentPlayer(player) }"
-                                     :style="getPlayerAvatarStyle(player)"
-                                     :title="player.name">
-                                    [[ player.name.charAt(0) ]]
-                                </div>
-                            </div>
-                            
-                            <!-- 坤 (左上) -->
-                            <div class="bagua-position" style="top: 80px; left: 80px;"
-                                 @click="selectBaguaPosition('kun')"
-                                 :class="selectedBagua === 'kun' ? 'pulse-effect' : ''"
-                                 title="坤卦 - 地">
-                                <div class="bagua-symbol">☷</div>
-                                <div class="bagua-name">坤</div>
-                                <div class="bagua-element">地</div>
-                                <div v-for="player in getPlayersAtPosition('kun')" :key="player.id"
-                                     class="player-avatar"
-                                     :class="{ 'current-player-position': isCurrentPlayer(player) }"
-                                     :style="getPlayerAvatarStyle(player)"
-                                     :title="player.name">
-                                    [[ player.name.charAt(0) ]]
-                                </div>
-                            </div>
+                        <div class="jiugongge-position" @click="selectBoardPosition(9)" :class="{'selected-position': selectedPosition === 9}" title="离 (Lí) - 火 (Fire)">
+                            <div class="bagua-symbol text-red-400">☲</div>
+                            <div class="bagua-name">离</div>
+                            <div class="bagua-element">南</div>
                         </div>
-                        
-                        <!-- 九宫格布局 -->
-                        <div class="jiugongge-grid">
-                            <!-- 第一行：巽(东南) 离(南) 坤(西南) -->
-                            <div class="jiugongge-position" @click="selectBaguaPosition('xun')" 
-                                 :class="selectedBagua === 'xun' ? 'pulse-effect' : ''" title="巽卦 - 风 - 东南">
-                                <div class="bagua-symbol">☴</div>
-                                <div class="bagua-name">巽</div>
-                                <div class="bagua-element">风</div>
-                            </div>
-                            <div class="jiugongge-position" @click="selectBaguaPosition('li')" 
-                                 :class="selectedBagua === 'li' ? 'pulse-effect' : ''" title="离卦 - 火 - 南">
-                                <div class="bagua-symbol">☲</div>
-                                <div class="bagua-name">离</div>
-                                <div class="bagua-element">火</div>
-                            </div>
-                            <div class="jiugongge-position" @click="selectBaguaPosition('kun')" 
-                                 :class="selectedBagua === 'kun' ? 'pulse-effect' : ''" title="坤卦 - 地 - 西南">
-                                <div class="bagua-symbol">☷</div>
-                                <div class="bagua-name">坤</div>
-                                <div class="bagua-element">地</div>
-                            </div>
-                            
-                            <!-- 第二行：震(东) 中心 兑(西) -->
-                            <div class="jiugongge-position" @click="selectBaguaPosition('zhen')" 
-                                 :class="selectedBagua === 'zhen' ? 'pulse-effect' : ''" title="震卦 - 雷 - 东">
-                                <div class="bagua-symbol">☳</div>
-                                <div class="bagua-name">震</div>
-                                <div class="bagua-element">雷</div>
-                            </div>
-                            <div class="jiugongge-center" title="太极中心">
-                                <div class="taiji-symbol">☯</div>
-                                <div class="center-text">太极</div>
-                            </div>
-                            <div class="jiugongge-position" @click="selectBaguaPosition('dui')" 
-                                 :class="selectedBagua === 'dui' ? 'pulse-effect' : ''" title="兑卦 - 泽 - 西">
-                                <div class="bagua-symbol">☱</div>
-                                <div class="bagua-name">兑</div>
-                                <div class="bagua-element">泽</div>
-                            </div>
-                            
-                            <!-- 第三行：艮(东北) 坎(北) 乾(西北) -->
-                            <div class="jiugongge-position" @click="selectBaguaPosition('gen')" 
-                                 :class="selectedBagua === 'gen' ? 'pulse-effect' : ''" title="艮卦 - 山 - 东北">
-                                <div class="bagua-symbol">☶</div>
-                                <div class="bagua-name">艮</div>
-                                <div class="bagua-element">山</div>
-                            </div>
-                            <div class="jiugongge-position" @click="selectBaguaPosition('kan')" 
-                                 :class="selectedBagua === 'kan' ? 'pulse-effect' : ''" title="坎卦 - 水 - 北">
-                                <div class="bagua-symbol">☵</div>
-                                <div class="bagua-name">坎</div>
-                                <div class="bagua-element">水</div>
-                            </div>
-                            <div class="jiugongge-position" @click="selectBaguaPosition('qian')" 
-                                 :class="selectedBagua === 'qian' ? 'pulse-effect' : ''" title="乾卦 - 天 - 西北">
-                                <div class="bagua-symbol">☰</div>
-                                <div class="bagua-name">乾</div>
-                                <div class="bagua-element">天</div>
-                            </div>
+                        <div class="jiugongge-position" @click="selectBoardPosition(2)" :class="{'selected-position': selectedPosition === 2}" title="坤 (Kūn) - 地 (Earth)">
+                            <div class="bagua-symbol text-yellow-400">☷</div>
+                            <div class="bagua-name">坤</div>
+                            <div class="bagua-element">西南</div>
                         </div>
+
+                        <!-- Row 2: E, Center, W -->
+                        <div class="jiugongge-position" @click="selectBoardPosition(3)" :class="{'selected-position': selectedPosition === 3}" title="震 (Zhèn) - 雷 (Thunder)">
+                            <div class="bagua-symbol text-green-300">☳</div>
+                            <div class="bagua-name">震</div>
+                            <div class="bagua-element">东</div>
                         </div>
-                        
-                        <!-- 游戏状态信息 -->
-                        <div class="mt-6 text-center">
-                            <div class="text-white/70 text-sm space-y-2">
-                                <div v-if="gameState && gameState.current_player">
-                                    当前回合: <span class="text-yellow-400">[[ getCurrentPlayerName() ]]</span>
-                                </div>
-                                <div v-if="gameState" class="flex justify-center space-x-6">
-                                    <div class="flex items-center space-x-1">
-                                        <span class="text-blue-300">☯</span>
-                                        <span>阴气: <span class="text-blue-400">[[ gameState.yin || 0 ]]</span></span>
-                                    </div>
-                                    <div class="flex items-center space-x-1">
-                                        <span class="text-red-300">☯</span>
-                                        <span>阳气: <span class="text-red-400">[[ gameState.yang || 0 ]]</span></span>
-                                    </div>
-                                    <div class="flex items-center space-x-1">
-                                        <span class="text-green-300">⚡</span>
-                                        <span>气力: <span class="text-green-400">[[ gameState.qi || 0 ]]</span></span>
-                                    </div>
-                                </div>
-                                <div v-if="selectedBagua" class="text-yellow-300">
-                                    当前位置: <span class="text-yellow-400">[[ getBaguaName(selectedBagua) ]]</span>
-                                </div>
-                            </div>
+                        <div class="jiugongge-center" title="太极 (Taiji) - Center">
+                            <div class="taiji-symbol">☯</div>
+                            <div class="center-text">中宫</div>
+                        </div>
+                        <div class="jiugongge-position" @click="selectBoardPosition(7)" :class="{'selected-position': selectedPosition === 7}" title="兑 (Duì) - 泽 (Lake)">
+                            <div class="bagua-symbol text-gray-300">☱</div>
+                            <div class="bagua-name">兑</div>
+                            <div class="bagua-element">西</div>
+                        </div>
+
+                        <!-- Row 3: NE, N, NW -->
+                        <div class="jiugongge-position" @click="selectBoardPosition(8)" :class="{'selected-position': selectedPosition === 8}" title="艮 (Gèn) - 山 (Mountain)">
+                            <div class="bagua-symbol text-yellow-500">☶</div>
+                            <div class="bagua-name">艮</div>
+                            <div class="bagua-element">东北</div>
+                        </div>
+                        <div class="jiugongge-position" @click="selectBoardPosition(1)" :class="{'selected-position': selectedPosition === 1}" title="坎 (Kǎn) - 水 (Water)">
+                            <div class="bagua-symbol text-blue-400">☵</div>
+                            <div class="bagua-name">坎</div>
+                            <div class="bagua-element">北</div>
+                        </div>
+                        <div class="jiugongge-position" @click="selectBoardPosition(6)" :class="{'selected-position': selectedPosition === 6}" title="乾 (Qián) - 天 (Heaven)">
+                            <div class="bagua-symbol text-gray-200">☰</div>
+                            <div class="bagua-name">乾</div>
+                            <div class="bagua-element">西北</div>
                         </div>
                     </div>
                 </div>
+            </div>
 
                 <!-- 手牌区域 -->
                 <div class="p-6 pt-0">
@@ -1263,7 +906,7 @@
                                 <span v-if="playerHand">[[ playerHand.length ]] 张卡牌</span>
                             </div>
                         </div>
-                        <div class="flex space-x-4 overflow-x-auto pb-2">
+                        <div class="flex space-x-4 overflow-x-auto pb-2" :class="{'tutorial-highlight': tutorialStep === 3}">
                             <div v-for="(card, index) in playerHand" :key="card.id"
                                  @click="selectCard(card, index)"
                                  :class="['flex-shrink-0 w-40 h-56 bg-gradient-to-br from-blue-500 to-purple-600 rounded-lg p-3 cursor-pointer transition-all hover:scale-105 card-draw-animation',
@@ -1300,64 +943,6 @@
 
             <!-- 右侧操作面板 -->
             <div class="w-80 bg-black/20 backdrop-blur-md border-l border-white/10 p-6">
-                <!-- 四人自动模拟控制 -->
-                <div class="mb-6">
-                    <h3 class="text-white font-semibold mb-4">🎮 四人自动模拟</h3>
-                    <div class="space-y-3">
-                        <button @click="startFourPlayerDemo" 
-                                :disabled="autoPlay"
-                                class="w-full bg-gradient-to-r from-purple-500 to-pink-500 text-white font-semibold py-3 px-4 rounded-lg hover:from-purple-600 hover:to-pink-600 transition-all disabled:opacity-50 disabled:cursor-not-allowed transform hover:scale-105">
-                            <i class="fas fa-users mr-2"></i>
-                            <span v-if="!autoPlay">🚀 开始四人自动对战</span>
-                            <span v-else>⏸️ 对战进行中...</span>
-                        </button>
-                        <button @click="stopAutoPlay" 
-                                :disabled="!autoPlay"
-                                class="w-full bg-gradient-to-r from-red-500 to-red-600 text-white font-semibold py-3 px-4 rounded-lg hover:from-red-600 hover:to-red-700 transition-all disabled:opacity-50 disabled:cursor-not-allowed transform hover:scale-105">
-                            <i class="fas fa-stop mr-2"></i>
-                            ⏹️ 停止自动对战
-                        </button>
-                        
-                        <!-- 自动对战状态显示 -->
-                        <div v-if="autoPlay" class="bg-white/10 rounded-lg p-4 border border-purple-400/30">
-                            <div class="flex items-center justify-center mb-3">
-                                <span class="text-purple-300 mr-2 pulse-effect">🔄</span>
-                                <span class="text-white font-medium">自动对战进行中</span>
-                            </div>
-                            <div class="space-y-2 text-sm">
-                                <div class="flex justify-between">
-                                    <span class="text-white/70">回合:</span>
-                                    <span class="text-yellow-400 font-semibold">[[ currentRound ]]</span>
-                                </div>
-                                <div class="flex justify-between">
-                                    <span class="text-white/70">当前玩家:</span>
-                                    <span class="text-green-400 font-semibold">[[ getCurrentPlayerName() ]]</span>
-                                </div>
-                            </div>
-                            <div class="mt-3">
-                                <div class="w-full bg-white/20 rounded-full h-2">
-                                    <div class="bg-gradient-to-r from-purple-400 to-pink-400 h-2 rounded-full transition-all duration-500" 
-                                         :style="{ width: getProgressPercentage() + '%' }"></div>
-                                </div>
-                                <div class="text-center text-white/60 text-xs mt-1">对战进度</div>
-                            </div>
-                        </div>
-
-                        <!-- AI角色预览 -->
-                        <div v-if="!autoPlay && fourPlayerDemoData.players.length > 0" class="bg-white/5 rounded-lg p-4 border border-blue-400/20">
-                            <h5 class="text-white/80 text-sm font-medium mb-3 text-center">🤖 AI角色预览</h5>
-                            <div class="grid grid-cols-2 gap-2">
-                                <div v-for="player in fourPlayerDemoData.players" :key="player.id" 
-                                     class="bg-white/10 rounded-lg p-2 text-center border border-white/10 hover:border-white/30 transition-all">
-                                    <div class="text-lg mb-1">[[ player.personality.symbol ]]</div>
-                                    <div class="text-white text-xs font-medium">[[ player.name ]]</div>
-                                    <div class="text-white/60 text-xs">[[ player.position ]]卦</div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
                 <!-- 卡牌图鉴 -->
                 <div class="mb-6">
                     <h3 class="text-white font-semibold mb-4">卡牌图鉴</h3>
@@ -1390,13 +975,15 @@
                     <div class="space-y-3">
                         <button @click="playSelectedCard" 
                                 :disabled="!selectedCard || !selectedPosition || !isMyTurn || autoPlay"
-                                class="w-full bg-gradient-to-r from-green-500 to-blue-500 text-white font-semibold py-3 px-4 rounded-lg hover:from-green-600 hover:to-blue-600 transition-all disabled:opacity-50 disabled:cursor-not-allowed">
+                                class="w-full bg-gradient-to-r from-green-500 to-blue-500 text-white font-semibold py-3 px-4 rounded-lg hover:from-green-600 hover:to-blue-600 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                                :class="{'tutorial-highlight': tutorialStep === 5}">
                             <i class="fas fa-play mr-2"></i>
                             出牌
                         </button>
                         <button @click="endTurn" 
                                 :disabled="!isMyTurn || autoPlay"
-                                class="w-full bg-gradient-to-r from-orange-500 to-red-500 text-white font-semibold py-3 px-4 rounded-lg hover:from-orange-600 hover:to-red-600 transition-all disabled:opacity-50 disabled:cursor-not-allowed">
+                                class="w-full bg-gradient-to-r from-orange-500 to-red-500 text-white font-semibold py-3 px-4 rounded-lg hover:from-orange-600 hover:to-red-600 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                                :class="{'tutorial-highlight': tutorialStep === 6}">
                             <i class="fas fa-forward mr-2"></i>
                             结束回合
                         </button>
@@ -1610,6 +1197,19 @@
                             </div>
                         </div>
                     </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Tutorial Overlay -->
+        <div v-if="tutorialActive" class="fixed inset-0 bg-black/70 z-50 flex items-center justify-center p-8" @click.self="exitTutorial">
+            <div class="bg-gray-800 text-white rounded-lg shadow-xl p-6 max-w-lg text-center">
+                <h3 class="text-2xl font-bold text-yellow-400 mb-4">游戏教学：第 [[ tutorialStep ]] 步</h3>
+                <p class="mb-6 text-lg">[[ tutorialMessages[tutorialStep - 1] ]]</p>
+                <div class="flex justify-center space-x-4">
+                    <button @click="exitTutorial" class="px-4 py-2 bg-red-600 hover:bg-red-700 rounded-lg transition-colors">退出教学</button>
+                    <button v-if="tutorialStep < tutorialMessages.length" @click="nextTutorialStep" class="px-4 py-2 bg-blue-600 hover:bg-blue-700 rounded-lg transition-colors">下一步</button>
+                    <button v-else @click="exitTutorial" class="px-4 py-2 bg-green-600 hover:bg-green-700 rounded-lg transition-colors">完成</button>
                 </div>
             </div>
         </div>
@@ -1829,7 +1429,19 @@
                     chatMessages: [],
                     newMessage: '',
                     gameLogs: [],
-                    playerActionRecords: [],
+
+                    // Tutorial State
+                    tutorialActive: false,
+                    tutorialStep: 0,
+                    tutorialMessages: [
+                        "欢迎来到天机变教学！这是一个融合了易经智慧的策略游戏。",
+                        "这是九宫格棋盘，游戏的核心区域。你需要在这里打出卡牌。",
+                        "这是你的手牌区域。点击卡牌可以选中它。",
+                        "打出卡牌需要消耗‘气’。请注意你的资源。",
+                        "现在，请尝试选择一张手牌，然后点击棋盘上的一个位置，最后点击‘出牌’按钮。",
+                        "干得好！你已经学会了基本操作。点击‘结束回合’来完成你的回合。",
+                        "恭喜你完成教学！现在你可以自由探索了。"
+                    ]
                 };
             },
             computed: {
@@ -2080,6 +1692,22 @@
                     }
                     const card = this.allCards.find(c => c.id === cardId);
                     return card ? card.name : cardId;
+                },
+                // Tutorial Methods
+                startTutorial() {
+                    this.tutorialActive = true;
+                    this.tutorialStep = 1;
+                },
+                nextTutorialStep() {
+                    if (this.tutorialStep < this.tutorialMessages.length) {
+                        this.tutorialStep++;
+                    } else {
+                        this.exitTutorial();
+                    }
+                },
+                exitTutorial() {
+                    this.tutorialActive = false;
+                    this.tutorialStep = 0;
                 }
             }
         });

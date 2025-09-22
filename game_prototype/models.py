@@ -21,6 +21,7 @@ class Card(BaseModel):
 class Player(BaseModel):
     id: str
     name: str
+    health: int = 20
     qi: int = 100
     dao: int = 50
     sincerity: int = 50
@@ -45,3 +46,4 @@ class GameState(BaseModel):
     discard_pile: List[str] = Field(default_factory=list)
     logs: List[Dict[str, Any]] = Field(default_factory=list)
     status: str = "waiting_for_players"
+    winner: Optional[str] = None
