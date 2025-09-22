@@ -313,8 +313,27 @@ class ActionProcessor:
     
     def _process_play_card_action(self, action: IGameAction) -> ActionResult:
         """处理出牌行动"""
-        # 实现出牌处理逻辑
-        return ActionResult(success=True, message="出牌成功", action_type=ActionType.PLAY_CARD)
+        player = self.game_state.get_player_info(action.player_id)
+        card_id = action.data.get("card_id")
+        position = action.data.get("position")
+
+        if not player or not card_id or position is None:
+            return ActionResult(success=False, message="无效的出牌行动数据")
+
+        # Basic logic: place card on board, remove from hand
+        # This will be expanded with actual game rules
+        self.game_state.board[position] = card_id
+
+        # Find and remove card from hand (this is simplified)
+        card_to_remove = next((c for c in player.hand if c.id == card_id), None)
+        if card_to_remove:
+            player.hand.remove(card_to_remove)
+            self.game_state.discard_pile.append(card_id)
+            message = f"{player.name} 打出了 {card_to_remove.name} 到位置 {position}"
+            self.game_state.game_log.append(message)
+            return ActionResult(success=True, message=message, action_type=ActionType.PLAY_CARD)
+        else:
+            return ActionResult(success=False, message="玩家手上没有这张牌", action_type=ActionType.PLAY_CARD)
     
     def _process_transform_action(self, action: IGameAction) -> ActionResult:
         """处理变换行动"""
